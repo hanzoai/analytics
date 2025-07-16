@@ -72,7 +72,7 @@ async function checkV1Tables() {
 
     if (record.length > 0) {
       error(
-        'Umami v1 tables detected. For how to upgrade from v1 to v2 go to https://umami.is/docs/migrate-v1-v2.',
+        'Analytics v1 tables detected. For how to upgrade from v1 to v2 go to https://hanzo.ai/docs/migrate-v1-v2.',
       );
       process.exit(1);
     }

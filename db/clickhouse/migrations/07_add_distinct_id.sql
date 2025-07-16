@@ -1,13 +1,13 @@
 -- add tag column
-ALTER TABLE umami.website_event ADD COLUMN "distinct_id" String AFTER "tag";
-ALTER TABLE umami.website_event_stats_hourly ADD COLUMN "distinct_id" String AFTER "tag";
-ALTER TABLE umami.session_data ADD COLUMN "distinct_id" String AFTER "data_type";
+ALTER TABLE analytics.website_event ADD COLUMN "distinct_id" String AFTER "tag";
+ALTER TABLE analytics.website_event_stats_hourly ADD COLUMN "distinct_id" String AFTER "tag";
+ALTER TABLE analytics.session_data ADD COLUMN "distinct_id" String AFTER "data_type";
 
 -- update materialized view
-DROP TABLE umami.website_event_stats_hourly_mv;
+DROP TABLE analytics.website_event_stats_hourly_mv;
 
-CREATE MATERIALIZED VIEW umami.website_event_stats_hourly_mv
-TO umami.website_event_stats_hourly
+CREATE MATERIALIZED VIEW analytics.website_event_stats_hourly_mv
+TO analytics.website_event_stats_hourly
 AS
 SELECT
     website_id,
@@ -85,7 +85,7 @@ FROM (SELECT
     arrayFilter(x -> x != '', groupArray(tag)) tag,
     distinct_id,
     toStartOfHour(created_at) timestamp
-FROM umami.website_event
+FROM analytics.website_event
 GROUP BY website_id,
     session_id,
     visit_id,

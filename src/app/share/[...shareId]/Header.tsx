@@ -10,11 +10,11 @@ export function Header() {
   return (
     <header className={styles.header}>
       <div>
-        <Link href="https://umami.is" target="_blank" className={styles.title}>
+        <Link href="https://hanzo.ai" target="_blank" className={styles.title}>
           <Icon size="lg">
             <Icons.Logo />
           </Icon>
-          <Text>umami</Text>
+          <Text>analytics</Text>
         </Link>
       </div>
       <div className={styles.buttons}>

@@ -18,7 +18,7 @@ export const CLICKHOUSE_DATE_FORMATS = {
   year: '%Y-01-01',
 };
 
-const log = debug('umami:clickhouse');
+const log = debug('analytics:clickhouse');
 
 let clickhouse: ClickHouseClient;
 const enabled = Boolean(process.env.CLICKHOUSE_URL);

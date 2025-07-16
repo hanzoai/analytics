@@ -1820,7 +1820,7 @@
   "message.new-version-available": [
     {
       "type": 0,
-      "value": "Une nouvelle version d'Umami "
+      "value": "Une nouvelle version d'Analytics "
     },
     {
       "type": 1,

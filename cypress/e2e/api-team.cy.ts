@@ -5,7 +5,7 @@ describe('Team API tests', () => {
   let userId;
 
   before(() => {
-    cy.login(Cypress.env('umami_user'), Cypress.env('umami_password'));
+    cy.login(Cypress.env('analytics_user'), Cypress.env('analytics_password'));
     cy.fixture('users').then(data => {
       const userCreate = data.userCreate;
       cy.request({
@@ -98,7 +98,7 @@ describe('Team API tests', () => {
   it('Get a user belonging to a team.', () => {
     cy.request({
       method: 'GET',
-      url: `/api/teams/${teamId}/users/${Cypress.env('umami_user_id')}`,
+      url: `/api/teams/${teamId}/users/${Cypress.env('analytics_user_id')}`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),

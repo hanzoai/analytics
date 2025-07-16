@@ -2,7 +2,7 @@ const os = require('os');
 const isCI = require('is-ci');
 const pkg = require('../package.json');
 
-const url = 'https://api.umami.is/v1/telemetry';
+const url = 'https://api.hanzo.ai/v1/telemetry';
 
 async function sendTelemetry(type) {
   const { default: isDocker } = await import('is-docker');
