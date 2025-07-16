@@ -1660,7 +1660,7 @@
   "message.new-version-available": [
     {
       "type": 0,
-      "value": "Eine neue Version von Umami ist verfügbar: "
+      "value": "Eine neue Version von Analytics ist verfügbar: "
     },
     {
       "type": 1,

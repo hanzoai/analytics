@@ -2,7 +2,7 @@ describe('User API tests', () => {
   Cypress.session.clearAllSavedSessions();
 
   before(() => {
-    cy.login(Cypress.env('umami_user'), Cypress.env('umami_password'));
+    cy.login(Cypress.env('analytics_user'), Cypress.env('analytics_password'));
   });
 
   let userId;

@@ -4,7 +4,7 @@ import { Kafka, Producer, RecordMetadata, SASLOptions, logLevel } from 'kafkajs'
 import { KAFKA, KAFKA_PRODUCER } from '@/lib/db';
 import * as tls from 'tls';
 
-const log = debug('umami:kafka');
+const log = debug('analytics:kafka');
 const CONNECT_TIMEOUT = 5000;
 const SEND_TIMEOUT = 3000;
 const ACKS = 1;
@@ -33,7 +33,7 @@ function getClient() {
       : {};
 
   const client: Kafka = new Kafka({
-    clientId: 'umami',
+    clientId: 'analytics',
     brokers: brokers,
     connectionTimeout: CONNECT_TIMEOUT,
     logLevel: logLevel.ERROR,

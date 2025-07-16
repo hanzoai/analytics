@@ -1,13 +1,13 @@
 ---
 version: '3'
 services:
-  umami:
+  analytics:
     build: ../
-    #image: ghcr.io/umami-software/umami:postgresql-latest
+    #image: ghcr.io/hanzoai/analytics:postgresql-latest
     ports:
       - '3000:3000'
     environment:
-      DATABASE_URL: postgresql://umami:umami@db:5432/umami
+      DATABASE_URL: postgresql://analytics:analytics@db:5432/analytics
       DATABASE_TYPE: postgresql
       APP_SECRET: replace-me-with-a-random-string
     depends_on:
@@ -22,11 +22,11 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: umami
-      POSTGRES_USER: umami
-      POSTGRES_PASSWORD: umami
+      POSTGRES_DB: analytics
+      POSTGRES_USER: analytics
+      POSTGRES_PASSWORD: analytics
     volumes:
-      - umami-db-data:/var/lib/postgresql/data
+      - analytics-db-data:/var/lib/postgresql/data
     restart: always
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
@@ -36,12 +36,12 @@ services:
   cypress:
     image: 'cypress/included:13.6.0'
     depends_on:
-      - umami
+      - analytics
       - db
     environment:
-      - CYPRESS_baseUrl=http://umami:3000
-      - CYPRESS_umami_user=admin
-      - CYPRESS_umami_password=umami
+      - CYPRESS_baseUrl=http://analytics:3000
+      - CYPRESS_analytics_user=admin
+      - CYPRESS_analytics_password=analytics
     volumes:
       - ./tsconfig.json:/tsconfig.json
       - ../cypress.config.ts:/cypress.config.ts
@@ -49,4 +49,4 @@ services:
       - ../node_modules/:/node_modules
       - ../src/lib/crypto.ts:/src/lib/crypto.ts
 volumes:
-  umami-db-data:
+  analytics-db-data:

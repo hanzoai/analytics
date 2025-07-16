@@ -1,13 +1,13 @@
 {
-  "name": "umami",
+  "name": "analytics",
   "version": "2.18.1",
   "description": "A modern, privacy-focused alternative to Google Analytics.",
-  "author": "Umami Software, Inc. <hello@umami.is>",
+  "author": "Hanzo Industries, Inc. <hello@hanzo.ai>",
   "license": "MIT",
-  "homepage": "https://umami.is",
+  "homepage": "https://hanzo.ai",
   "repository": {
     "type": "git",
-    "url": "https://github.com/umami-software/umami.git"
+    "url": "https://github.com/hanzoai/analytics.git"
   },
   "scripts": {
     "dev": "next dev",
@@ -76,7 +76,7 @@
     "@prisma/extension-read-replicas": "^0.4.1",
     "@react-spring/web": "^9.7.3",
     "@tanstack/react-query": "^5.28.6",
-    "@umami/redis-client": "^0.26.0",
+    "@hanzo/analytics/redis-client": "^0.26.0",
     "bcryptjs": "^2.4.3",
     "chalk": "^4.1.1",
     "chart.js": "^4.4.9",

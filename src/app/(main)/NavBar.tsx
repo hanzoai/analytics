@@ -77,14 +77,14 @@ export function NavBar() {
   const handleTeamChange = (teamId: string) => {
     const url = teamId ? `/teams/${teamId}` : '/';
     if (!cloudMode) {
-      setItem('umami.team', { id: teamId });
+      setItem('analytics.team', { id: teamId });
     }
     router.push(cloudMode ? `${process.env.cloudUrl}${url}` : url);
   };
 
   useEffect(() => {
     if (!cloudMode) {
-      const teamIdLocal = getItem('umami.team')?.id;
+      const teamIdLocal = getItem('analytics.team')?.id;
 
       if (teamIdLocal && teamIdLocal !== teamId) {
         router.push(
@@ -100,7 +100,7 @@ export function NavBar() {
         <Icon size="lg">
           <Icons.Logo />
         </Icon>
-        <Text>umami</Text>
+        <Text>analytics</Text>
       </div>
       <div className={styles.links}>
         {links.map(({ url, label }) => {

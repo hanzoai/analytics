@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
     // Cache check
     let cache: { websiteId: string; sessionId: string; visitId: string; iat: number } | null = null;
-    const cacheHeader = request.headers.get('x-umami-cache');
+    const cacheHeader = request.headers.get('x-analytics-cache');
 
     if (cacheHeader) {
       const result = await parseToken(cacheHeader, secret());

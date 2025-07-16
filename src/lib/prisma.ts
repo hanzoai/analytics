@@ -9,7 +9,7 @@ import { maxDate } from './date';
 import { QueryFilters, QueryOptions, PageParams } from './types';
 import { filtersToArray } from './params';
 
-const log = debug('umami:prisma');
+const log = debug('analytics:prisma');
 
 const PRISMA = 'prisma';
 const PRISMA_LOG_OPTIONS = {
