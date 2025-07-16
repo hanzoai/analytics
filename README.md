@@ -2,7 +2,7 @@
   <img src="https://content.hanzo.ai/website/images/analytics-logo.png" alt="Analytics Logo" width="100">
 </p>
 
-<h1 align="center">Analytics</h1>
+<h1 align="center">Hanzo Analytics</h1>
 
 <p align="center">
   <i>Analytics is a simple, fast, privacy-focused alternative to Google Analytics.</i>
@@ -28,6 +28,27 @@
 ## 🚀 Getting Started
 
 A detailed getting started guide can be found at [hanzo.ai/docs](https://hanzo.ai/docs/).
+
+---
+
+## 🛡️ Anti-Ad-Blocker Technology
+
+Analytics employs a sophisticated, multi-layered approach to prevent ad blockers from disrupting data collection. This ensures that you get the most accurate and complete picture of your website's traffic.
+
+### How It Works
+
+1.  **Encrypted Tracker Script**: The tracker script is not served as plain JavaScript. Instead, it's encrypted and delivered as a binary file (`tracker.bin`). This makes it impossible for ad blockers to analyze the script's contents and block it based on known patterns.
+
+2.  **WASM-Based Decryption**: A small, efficient WebAssembly module (`decrypt.wasm`) is used to decrypt the tracker script in the browser's memory. This decryption logic is compiled into a compact and efficient binary format, making it difficult to reverse-engineer.
+
+3.  **Dynamic Loading**: A lightweight loader script is responsible for fetching the encrypted tracker and the WASM decryptor. It then uses the WASM module to decrypt and execute the tracker. This means that the full tracker code is never exposed in a way that's easy to inspect or block.
+
+4.  **Obfuscated API**: The tracker's API is obfuscated to avoid detection. Instead of using a common and easily blockable function name like `track()`, it uses a generic and non-descript API. This makes it much harder for ad blockers to identify and block the tracker based on its global footprint.
+
+5.  **Encrypted Payloads**: All data sent from the tracker to the server is encrypted. This prevents ad blockers from inspecting the request payloads and blocking them based on their contents.
+
+This multi-layered approach makes it significantly harder for ad blockers and other privacy tools to detect and block the tracker, while still providing a simple and consistent way for you to trigger events.
+
 
 ---
 

@@ -1,0 +1,19 @@
+{
+  "name": "analytics-docs",
+  "version": "1.0.0",
+  "description": "Analytics documentation website.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hanzoai/docs.git"
+  },
+  "author": "Hanzo Industries, Inc. <hello@hanzo.ai>",
+  "license": "MIT",
+  "main": "index.js",
+  "dependencies": {
+    "mintlify": "^4.0.218",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}

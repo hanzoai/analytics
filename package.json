@@ -12,7 +12,8 @@
   "scripts": {
     "dev": "next dev",
     "dev-turbo": "next dev -p 3001 --turbopack",
-    "build": "npm-run-all check-env build-db check-db build-tracker build-geo build-app",
+    "build": "npm-run-all check-env build-db check-db build-tracker build-obfuscated-tracker build-geo build-app",
+    "build-obfuscated-tracker": "node scripts/build-obfuscated-tracker.js",
     "start": "next start",
     "build-docker": "npm-run-all build-db build-tracker build-geo build-app",
     "start-docker": "npm-run-all check-db update-tracker set-routes-manifest start-server",
@@ -71,12 +72,12 @@
     "@dicebear/collection": "^9.2.1",
     "@dicebear/core": "^9.2.1",
     "@fontsource/inter": "^4.5.15",
+    "@hanzo/redis-client": "file:./packages/redis-client",
     "@hello-pangea/dnd": "^17.0.0",
     "@prisma/client": "6.7.0",
     "@prisma/extension-read-replicas": "^0.4.1",
     "@react-spring/web": "^9.7.3",
     "@tanstack/react-query": "^5.28.6",
-    "@hanzo/analytics/redis-client": "^0.26.0",
     "bcryptjs": "^2.4.3",
     "chalk": "^4.1.1",
     "chart.js": "^4.4.9",
@@ -142,6 +143,7 @@
     "@types/react-window": "^1.8.8",
     "@typescript-eslint/eslint-plugin": "^6.7.3",
     "@typescript-eslint/parser": "^6.7.3",
+    "binaryen": "^123.0.0",
     "cross-env": "^7.0.3",
     "cypress": "^13.6.6",
     "esbuild": "^0.25.0",
@@ -156,6 +158,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "extract-react-intl-messages": "^4.1.1",
     "husky": "^8.0.3",
+    "javy": "^0.1.2",
     "jest": "^29.7.0",
     "lint-staged": "^14.0.1",
     "postcss": "^8.4.31",
@@ -178,6 +181,7 @@
     "tar": "^6.1.2",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.1",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "wabt": "^1.0.37"
   }
 }
