@@ -1,4 +1,4 @@
-import { REDIS, AnalyticsRedisClient } from '@hanzo/analytics/redis-client';
+import { REDIS, AnalyticsRedisClient } from '@hanzo/redis-client';
 
 const enabled = !!process.env.REDIS_URL;
 
