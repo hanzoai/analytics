@@ -1,5 +1,5 @@
 name: '🐛 Bug Report'
-description: Create a bug report for Umami.
+description: Create a bug report for Analytics.
 body:
   - type: textarea
     attributes:
@@ -14,7 +14,7 @@ body:
       options:
         - PostgreSQL
         - MySQL
-        - Umami Cloud
+        - Analytics Cloud
     validations:
       required: true
   - type: textarea
@@ -24,7 +24,7 @@ body:
       render: shell
   - type: input
     attributes:
-      label: Which Umami version are you using? (if relevant)
+      label: Which Analytics version are you using? (if relevant)
       description: 'For example: 2.18.0, 2.15.1, 1.39.0, etc'
   - type: input
     attributes:

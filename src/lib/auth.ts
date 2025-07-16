@@ -9,7 +9,7 @@ import { ensureArray } from '@/lib/utils';
 import { getTeamUser, getUser, getWebsite } from '@/queries';
 import { Auth } from './types';
 
-const log = debug('umami:auth');
+const log = debug('analytics:auth');
 const cloudMode = process.env.CLOUD_MODE;
 const SALT_ROUNDS = 10;
 

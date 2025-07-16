@@ -1,11 +1,11 @@
 ---
 services:
-  umami:
-    image: ghcr.io/umami-software/umami:postgresql-latest
+  analytics:
+    image: ghcr.io/hanzoai/analytics:postgresql-latest
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgresql://umami:umami@db:5432/umami
+      DATABASE_URL: postgresql://analytics:analytics@db:5432/analytics
       DATABASE_TYPE: postgresql
       APP_SECRET: replace-me-with-a-random-string
     depends_on:
@@ -21,11 +21,11 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: umami
-      POSTGRES_USER: umami
-      POSTGRES_PASSWORD: umami
+      POSTGRES_DB: analytics
+      POSTGRES_USER: analytics
+      POSTGRES_PASSWORD: analytics
     volumes:
-      - umami-db-data:/var/lib/postgresql/data
+      - analytics-db-data:/var/lib/postgresql/data
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
@@ -33,4 +33,4 @@ services:
       timeout: 5s
       retries: 5
 volumes:
-  umami-db-data:
+  analytics-db-data:

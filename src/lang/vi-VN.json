@@ -250,7 +250,7 @@
   "message.incorrect-username-password": "Sai tên đăng nhập/mật khẩu.",
   "message.invalid-domain": "Tên miền không hợp lệ",
   "message.min-password-length": "Minimum length of {n} characters",
-  "message.new-version-available": "A new version of Umami {version} is available!",
+  "message.new-version-available": "A new version of Analytics {version} is available!",
   "message.no-data-available": "Không có dữ liệu.",
   "message.no-event-data": "No event data is available.",
   "message.no-match-password": "Mật khẩu không đồng nhất",
