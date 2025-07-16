@@ -218,23 +218,18 @@ export default {
       issuer: /\.(js|ts)x?$/,
       use: ['@svgr/webpack'],
     });
+    // In development, we want to enable the tracker for testing purposes.
+    if (process.env.NODE_ENV === 'development') {
+      config.experimental.injectScripts = true;
+    }
+
     return config;
   },
   async headers() {
     return headers;
   },
   async rewrites() {
-    return [
-      ...rewrites,
-      {
-        source: '/telemetry.js',
-        destination: '/api/scripts/telemetry',
-      },
-      {
-        source: '/teams/:teamId/:path((?!settings).*)*',
-        destination: '/:path*',
-      },
-    ];
+    return [];
   },
   async redirects() {
     return [...redirects];
