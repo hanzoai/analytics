@@ -2,7 +2,7 @@
   "name": "@hanzo/analytics/components",
   "version": "0.1.0",
   "description": "Analytics React components.",
-  "author": "Mike Cao <mike@mikecao.com>",
+  "author": "Hanzo Industries, Inc. <hello@hanzo.ai>",
   "license": "MIT",
   "type": "module",
   "main": "./index.js",
