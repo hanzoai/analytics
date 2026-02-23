@@ -43,3 +43,8 @@ yarn-error.log*
 
 *.dev.yml
 
+
+# AI assistant symlinks (local only, keep LLM.md tracked)
+AGENTS.md
+GEMINI.md
+QWEN.md
