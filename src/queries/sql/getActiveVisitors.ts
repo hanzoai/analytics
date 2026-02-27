@@ -1,6 +1,6 @@
 import { subMinutes } from 'date-fns';
-import clickhouse from '@/lib/clickhouse';
-import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
+import datastore from '@/lib/datastore';
+import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 
 const FUNCTION_NAME = 'getActiveVisitors';
@@ -8,7 +8,7 @@ const FUNCTION_NAME = 'getActiveVisitors';
 export async function getActiveVisitors(...args: [websiteId: string]) {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [CLICKHOUSE]: () => clickhouseQuery(...args),
+    [DATASTORE]: () => datastoreQuery(...args),
   });
 }
 
@@ -30,8 +30,8 @@ async function relationalQuery(websiteId: string) {
   return result?.[0] ?? null;
 }
 
-async function clickhouseQuery(websiteId: string): Promise<{ x: number }> {
-  const { rawQuery } = clickhouse;
+async function datastoreQuery(websiteId: string): Promise<{ x: number }> {
+  const { rawQuery } = datastore;
   const startDate = subMinutes(new Date(), 5);
 
   const result = await rawQuery(

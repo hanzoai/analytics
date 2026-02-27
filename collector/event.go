@@ -3,7 +3,7 @@ package collector
 
 import "time"
 
-// RawEvent is the unified event format written to ClickHouse.
+// RawEvent is the unified event format written to the datastore.
 type RawEvent struct {
 	// Core identifiers
 	DistinctID string `json:"distinct_id"`

@@ -1,12 +1,12 @@
 import { type ClickHouseClient, createClient } from '@clickhouse/client';
 import { formatInTimeZone } from 'date-fns-tz';
 import debug from 'debug';
-import { CLICKHOUSE } from '@/lib/db';
+import { DATASTORE } from '@/lib/db';
 import { DEFAULT_PAGE_SIZE, FILTER_COLUMNS, OPERATORS } from './constants';
 import { filtersObjectToArray } from './params';
 import type { QueryFilters, QueryOptions } from './types';
 
-export const CLICKHOUSE_DATE_FORMATS = {
+export const DATASTORE_DATE_FORMATS = {
   utc: '%Y-%m-%dT%H:%i:%SZ',
   second: '%Y-%m-%d %H:%i:%S',
   minute: '%Y-%m-%d %H:%i:00',
@@ -16,10 +16,10 @@ export const CLICKHOUSE_DATE_FORMATS = {
   year: '%Y-01-01',
 };
 
-const log = debug('hanzo:analytics:clickhouse');
+const log = debug('hanzo:analytics:datastore');
 
-let clickhouse: ClickHouseClient;
-const enabled = Boolean(process.env.CLICKHOUSE_URL);
+let datastore: ClickHouseClient;
+const enabled = Boolean(process.env.DATASTORE_URL);
 
 function getClient() {
   const {
@@ -29,7 +29,7 @@ function getClient() {
     protocol,
     username = 'default',
     password,
-  } = new URL(process.env.CLICKHOUSE_URL);
+  } = new URL(process.env.DATASTORE_URL);
 
   const client = createClient({
     url: `${protocol}//${hostname}:${port}`,
@@ -39,10 +39,10 @@ function getClient() {
   });
 
   if (process.env.NODE_ENV !== 'production') {
-    globalThis[CLICKHOUSE] = client;
+    globalThis[DATASTORE] = client;
   }
 
-  log('Clickhouse initialized');
+  log('Datastore initialized');
 
   return client;
 }
@@ -53,10 +53,10 @@ function getUTCString(date?: Date | string | number) {
 
 function getDateStringSQL(data: any, unit: string = 'utc', timezone?: string) {
   if (timezone) {
-    return `formatDateTime(${data}, '${CLICKHOUSE_DATE_FORMATS[unit]}', '${timezone}')`;
+    return `formatDateTime(${data}, '${DATASTORE_DATE_FORMATS[unit]}', '${timezone}')`;
   }
 
-  return `formatDateTime(${data}, '${CLICKHOUSE_DATE_FORMATS[unit]}')`;
+  return `formatDateTime(${data}, '${DATASTORE_DATE_FORMATS[unit]}')`;
 }
 
 function getDateSQL(field: string, unit: string, timezone?: string) {
@@ -215,7 +215,7 @@ async function rawQuery<T = unknown>(
 
   await connect();
 
-  const resultSet = await clickhouse.query({
+  const resultSet = await datastore.query({
     query: query,
     query_params: params,
     format: 'JSONEachRow',
@@ -231,7 +231,7 @@ async function rawQuery<T = unknown>(
 async function insert(table: string, values: any[]) {
   await connect();
 
-  return clickhouse.insert({ table, values, format: 'JSONEachRow' });
+  return datastore.insert({ table, values, format: 'JSONEachRow' });
 }
 
 async function findUnique(data: any[]) {
@@ -247,16 +247,16 @@ async function findFirst(data: any[]) {
 }
 
 async function connect() {
-  if (enabled && !clickhouse) {
-    clickhouse = process.env.CLICKHOUSE_URL && (globalThis[CLICKHOUSE] || getClient());
+  if (enabled && !datastore) {
+    datastore = process.env.DATASTORE_URL && (globalThis[DATASTORE] || getClient());
   }
 
-  return clickhouse;
+  return datastore;
 }
 
 export default {
   enabled,
-  client: clickhouse,
+  client: datastore,
   log,
   connect,
   getDateStringSQL,

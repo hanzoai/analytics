@@ -1,6 +1,6 @@
 package writer
 
-// Schema contains ClickHouse table definitions for unified analytics.
+// Schema contains datastore table definitions for unified analytics.
 const Schema = `
 CREATE TABLE IF NOT EXISTS commerce.events (
     event_id UUID DEFAULT generateUUIDv4(),
