@@ -1,6 +1,6 @@
-import clickhouse from '@/lib/clickhouse';
 import { EVENT_TYPE } from '@/lib/constants';
-import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
+import datastore from '@/lib/datastore';
+import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 import type { QueryFilters } from '@/lib/types';
 
@@ -29,7 +29,7 @@ export async function getAttribution(
 ) {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [CLICKHOUSE]: () => clickhouseQuery(...args),
+    [DATASTORE]: () => datastoreQuery(...args),
   });
 }
 
@@ -259,13 +259,13 @@ async function relationalQuery(
   };
 }
 
-async function clickhouseQuery(
+async function datastoreQuery(
   websiteId: string,
   parameters: AttributionParameters,
   filters: QueryFilters,
 ): Promise<AttributionResult> {
   const { model, type, currency } = parameters;
-  const { rawQuery, parseFilters } = clickhouse;
+  const { rawQuery, parseFilters } = datastore;
   const eventType = type === 'path' ? EVENT_TYPE.pageView : EVENT_TYPE.customEvent;
   const column = type === 'path' ? 'url_path' : 'event_name';
   const { filterQuery, cohortQuery, queryParams } = parseFilters({

@@ -23,5 +23,5 @@ if (!process.env.SKIP_DB_CHECK && !process.env.DATABASE_TYPE) {
 }
 
 if (process.env.CLOUD_URL) {
-  checkMissing(['CLOUD_URL', 'CLICKHOUSE_URL', 'REDIS_URL']);
+  checkMissing(['CLOUD_URL', 'DATASTORE_URL', 'REDIS_URL']);
 }

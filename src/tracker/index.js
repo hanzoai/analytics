@@ -31,6 +31,16 @@
   const credentials = attr(`${_data}fetch-credentials`) || 'omit';
   const astEnabled = attr(`${_data}ast`) !== _false;
 
+  // Third-party analytics provider keys (unified tracking)
+  const gaId = attr(`${_data}ga-id`);
+  const fbPixelId = attr(`${_data}fb-pixel-id`);
+  const ttPixelId = attr(`${_data}tt-pixel-id`);
+  const gtmId = attr(`${_data}gtm-id`);
+  const linkedinId = attr(`${_data}linkedin-id`);
+  const pinterestId = attr(`${_data}pinterest-id`);
+  const snapPixelId = attr(`${_data}snap-pixel-id`);
+  const plausibleDomain = attr(`${_data}plausible-domain`);
+
   const domains = domain.split(',').map(n => n.trim());
   const host =
     hostUrl || '__COLLECT_API_HOST__' || currentScript.src.split('/').slice(0, -1).join('/');
@@ -41,6 +51,188 @@
   const eventNameAttribute = `${_data}hanzo-event`;
   const eventNameAttributeLegacy = `${_data}umami-event`;
   const delayDuration = 300;
+
+  /* Third-party provider initialization */
+
+  const initProviders = () => {
+    // Google Analytics (gtag.js)
+    if (gaId) {
+      const gs = document.createElement('script');
+      gs.async = true;
+      gs.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+      document.head.appendChild(gs);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = (...args) => {
+        window.dataLayer.push(args);
+      };
+      window.gtag('js', new Date());
+      window.gtag('config', gaId, { send_page_view: false });
+    }
+
+    // Google Tag Manager
+    if (gtmId) {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+      const gs = document.createElement('script');
+      gs.async = true;
+      gs.src = `https://www.googletagmanager.com/gtm.js?id=${gtmId}`;
+      document.head.appendChild(gs);
+    }
+
+    // Facebook Pixel
+    if (fbPixelId) {
+      if (!window.fbq) {
+        const q = [];
+        window.fbq = (...args) => {
+          q.push(args);
+        };
+        window.fbq.q = q;
+      }
+      window.fbq.version = '2.0';
+      window.fbq('init', fbPixelId);
+      const fs = document.createElement('script');
+      fs.async = true;
+      fs.src = 'https://connect.facebook.net/en_US/fbevents.js';
+      document.head.appendChild(fs);
+    }
+
+    // TikTok Pixel
+    if (ttPixelId) {
+      window.ttq = window.ttq || { _i: {}, _o: {}, _w: {}, _s: {} };
+      window.ttq.methods = [
+        'page',
+        'track',
+        'identify',
+        'instances',
+        'debug',
+        'on',
+        'off',
+        'once',
+        'ready',
+        'alias',
+        'group',
+        'enableCookie',
+        'disableCookie',
+      ];
+      window.ttq.setAndDefer = (t, e) => {
+        t[e] = (...args) => {
+          t._q.push([e, args]);
+        };
+      };
+      window.ttq._q = [];
+      window.ttq.methods.forEach(e => {
+        window.ttq.setAndDefer(window.ttq, e);
+      });
+      window.ttq.instance = t => {
+        if (!window.ttq._i[t]) {
+          window.ttq._i[t] = { _q: [] };
+        }
+        return window.ttq._i[t];
+      };
+      window.ttq.load = e => {
+        const s = document.createElement('script');
+        s.async = true;
+        s.src = `https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=${e}`;
+        document.head.appendChild(s);
+      };
+      window.ttq.load(ttPixelId);
+      window.ttq.page();
+    }
+
+    // LinkedIn Insight Tag
+    if (linkedinId) {
+      window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+      window._linkedin_data_partner_ids.push(linkedinId);
+      const ls = document.createElement('script');
+      ls.async = true;
+      ls.src = 'https://snap.licdn.com/li.lms-analytics/insight.min.js';
+      document.head.appendChild(ls);
+    }
+
+    // Pinterest Tag
+    if (pinterestId) {
+      if (!window.pintrk) {
+        const q = [];
+        window.pintrk = (...args) => {
+          q.push(args);
+        };
+        window.pintrk.q = q;
+      }
+      const ps = document.createElement('script');
+      ps.async = true;
+      ps.src = 'https://s.pinimg.com/ct/core.js';
+      document.head.appendChild(ps);
+      window.pintrk('load', pinterestId);
+      window.pintrk('page');
+    }
+
+    // Snapchat Pixel
+    if (snapPixelId) {
+      if (!window.snaptr) {
+        const q = [];
+        window.snaptr = (...args) => {
+          q.push(args);
+        };
+        window.snaptr.q = q;
+      }
+      const ss = document.createElement('script');
+      ss.async = true;
+      ss.src = 'https://sc-static.net/scevent.min.js';
+      document.head.appendChild(ss);
+      window.snaptr('init', snapPixelId);
+      window.snaptr('track', 'PAGE_VIEW');
+    }
+  };
+
+  /* Forward events to third-party providers */
+
+  const forwardPageView = (url, title) => {
+    if (gaId && window.gtag) {
+      window.gtag('event', 'page_view', { page_location: url, page_title: title });
+    }
+    if (fbPixelId && window.fbq) {
+      window.fbq('track', 'PageView');
+    }
+    if (plausibleDomain) {
+      try {
+        navigator.sendBeacon?.(
+          'https://plausible.io/api/event',
+          JSON.stringify({ n: 'pageview', u: url, d: plausibleDomain, r: referrer }),
+        );
+      } catch {}
+    }
+  };
+
+  const forwardEvent = (name, data) => {
+    if (gaId && window.gtag) {
+      window.gtag('event', name, data || {});
+    }
+    if (fbPixelId && window.fbq) {
+      window.fbq('trackCustom', name, data || {});
+    }
+    if (ttPixelId && window.ttq) {
+      window.ttq.track(name, data || {});
+    }
+    if (pinterestId && window.pintrk) {
+      window.pintrk('track', 'custom', { event_name: name, ...(data || {}) });
+    }
+    if (snapPixelId && window.snaptr) {
+      window.snaptr('track', name, data || {});
+    }
+    if (plausibleDomain) {
+      try {
+        navigator.sendBeacon?.(
+          'https://plausible.io/api/event',
+          JSON.stringify({
+            n: name,
+            u: location.href,
+            d: plausibleDomain,
+            p: data ? JSON.stringify(data) : undefined,
+          }),
+        );
+      } catch {}
+    }
+  };
 
   /* Helper functions */
 
@@ -319,6 +511,15 @@
 
     if (!payload) return;
 
+    // Forward to third-party providers
+    if (type === 'event') {
+      if (payload.name) {
+        forwardEvent(payload.name, payload.data);
+      } else {
+        forwardPageView(payload.url, payload.title);
+      }
+    }
+
     try {
       const res = await fetch(endpoint, {
         keepalive: true,
@@ -345,6 +546,7 @@
   const init = () => {
     if (!initialized) {
       initialized = true;
+      initProviders();
       track();
       handlePathChanges();
       handleClicks();

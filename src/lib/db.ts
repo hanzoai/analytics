@@ -1,6 +1,6 @@
 export const PRISMA = 'prisma';
 export const POSTGRESQL = 'postgresql';
-export const CLICKHOUSE = 'clickhouse';
+export const DATASTORE = 'datastore';
 export const KAFKA = 'kafka';
 export const KAFKA_PRODUCER = 'kafka-producer';
 
@@ -20,12 +20,12 @@ export function getDatabaseType(url = process.env.DATABASE_URL) {
 }
 
 export async function runQuery(queries: any) {
-  if (process.env.CLICKHOUSE_URL) {
+  if (process.env.DATASTORE_URL) {
     if (queries[KAFKA]) {
       return queries[KAFKA]();
     }
 
-    return queries[CLICKHOUSE]();
+    return queries[DATASTORE]();
   }
 
   const db = getDatabaseType();

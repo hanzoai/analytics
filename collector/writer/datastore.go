@@ -7,13 +7,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ClickHouse/clickhouse-go/v2"
+	// hanzoai/datastore uses the ClickHouse wire protocol; this driver is
+	// protocol-compatible and used only for its connection/query interface.
+	ds "github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 
 	collector "github.com/hanzoai/analytics/collector"
 )
 
-// Config configures the ClickHouse writer.
+// Config configures the datastore writer.
 type Config struct {
 	DSN           string
 	BatchSize     int
@@ -32,7 +34,7 @@ func DefaultConfig() *Config {
 	}
 }
 
-// Writer writes events to ClickHouse.
+// Writer writes events to the datastore.
 type Writer struct {
 	conn    driver.Conn
 	config  *Config
@@ -42,24 +44,24 @@ type Writer struct {
 	mu      sync.RWMutex
 }
 
-// New creates a new ClickHouse writer.
+// New creates a new datastore writer.
 func New(config *Config) (*Writer, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
 
-	opts, err := clickhouse.ParseDSN(config.DSN)
+	opts, err := ds.ParseDSN(config.DSN)
 	if err != nil {
-		return nil, fmt.Errorf("invalid ClickHouse DSN: %w", err)
+		return nil, fmt.Errorf("invalid datastore DSN: %w", err)
 	}
 
-	conn, err := clickhouse.Open(opts)
+	conn, err := ds.Open(opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to ClickHouse: %w", err)
+		return nil, fmt.Errorf("failed to connect to datastore: %w", err)
 	}
 
 	if err := conn.Ping(context.Background()); err != nil {
-		return nil, fmt.Errorf("ClickHouse ping failed: %w", err)
+		return nil, fmt.Errorf("datastore ping failed: %w", err)
 	}
 
 	w := &Writer{

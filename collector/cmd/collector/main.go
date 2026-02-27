@@ -17,14 +17,14 @@ import (
 
 func main() {
 	addr := getEnv("COLLECTOR_ADDR", ":8091")
-	dsn := getEnv("CLICKHOUSE_DSN", os.Getenv("DATASTORE_URL"))
+	dsn := getEnv("DATASTORE_URL", os.Getenv("DATASTORE_DSN"))
 
 	if dsn == "" {
-		fmt.Fprintln(os.Stderr, "CLICKHOUSE_DSN or DATASTORE_URL required")
+		fmt.Fprintln(os.Stderr, "DATASTORE_URL or DATASTORE_DSN required")
 		os.Exit(1)
 	}
 
-	// Initialize ClickHouse writer
+	// Initialize datastore writer
 	w, err := writer.New(&writer.Config{
 		DSN:           dsn,
 		BatchSize:     500,
@@ -33,7 +33,7 @@ func main() {
 		BufferSize:    10000,
 	})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ClickHouse: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Datastore: %v\n", err)
 		os.Exit(1)
 	}
 
