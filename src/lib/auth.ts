@@ -7,7 +7,7 @@ import redis from '@/lib/redis';
 import { ensureArray } from '@/lib/utils';
 import { getUser } from '@/queries/prisma/user';
 
-const log = debug('umami:auth');
+const log = debug('hanzo:analytics:auth');
 
 export function getBearerToken(request: Request) {
   const auth = request.headers.get('authorization');
