@@ -10,11 +10,11 @@ describe('Login tests', () => {
     },
     () => {
       cy.getDataTest('input-username').find('input').as('inputUsername').click();
-      cy.get('@inputUsername').type(Cypress.env('umami_user'), { delay: 0 });
+      cy.get('@inputUsername').type(Cypress.env('admin_user'), { delay: 0 });
       cy.get('@inputUsername').click();
       cy.getDataTest('input-password')
         .find('input')
-        .type(Cypress.env('umami_password'), { delay: 0 });
+        .type(Cypress.env('admin_password'), { delay: 0 });
       cy.getDataTest('button-submit').click();
       cy.url().should('eq', Cypress.config().baseUrl + '/dashboard');
       cy.logout();
@@ -27,7 +27,7 @@ describe('Login tests', () => {
 
     cy.getDataTest('input-username').find('input').as('inputUsername');
     cy.get('@inputUsername').click();
-    cy.get('@inputUsername').type(Cypress.env('umami_user'), { delay: 0 });
+    cy.get('@inputUsername').type(Cypress.env('admin_user'), { delay: 0 });
     cy.get('@inputUsername').click();
     cy.getDataTest('input-password').find('input').type('wrongpassword', { delay: 0 });
     cy.getDataTest('button-submit').click();
