@@ -42,6 +42,8 @@ jobs:
 
       - name: Log into Docker Hub
         if: github.repository == 'hanzoai/analytics'
+        continue-on-error: true
+        id: docker-login
         uses: docker/login-action@v3
         with:
           registry: docker.io
@@ -116,7 +118,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build and push to Docker Hub
-        if: github.repository == 'hanzoai/analytics'
+        if: steps.docker-login.outcome == 'success'
         uses: docker/build-push-action@v5
         with:
           context: .
