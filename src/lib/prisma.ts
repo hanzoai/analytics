@@ -6,7 +6,7 @@ import { DEFAULT_PAGE_SIZE, FILTER_COLUMNS, OPERATORS, SESSION_COLUMNS } from '.
 import { filtersObjectToArray } from './params';
 import type { Operator, QueryFilters, QueryOptions } from './types';
 
-const log = debug('umami:prisma');
+const log = debug('hanzo:analytics:prisma');
 
 const PRISMA = 'prisma';
 

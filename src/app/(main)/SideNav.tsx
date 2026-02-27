@@ -15,6 +15,7 @@ import { LanguageButton } from '@/components/input/LanguageButton';
 import { NavButton } from '@/components/input/NavButton';
 import { PanelButton } from '@/components/input/PanelButton';
 import { Logo } from '@/components/svg';
+import { branding } from '@/lib/branding';
 
 export function SideNav(props: SidebarProps) {
   const { formatMessage, labels } = useMessages();
@@ -52,7 +53,7 @@ export function SideNav(props: SidebarProps) {
     <Sidebar {...props} isCollapsed={isCollapsed || hasNav} backgroundColor>
       <SidebarSection onClick={() => setIsCollapsed(false)}>
         <SidebarHeader
-          label="umami"
+          label={branding.name}
           icon={isCollapsed && !hasNav ? <PanelLeft /> : <Logo />}
           style={{ maxHeight: 40 }}
         >

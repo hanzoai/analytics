@@ -11,7 +11,7 @@ import { getItem, setItem } from '@/lib/storage';
 import { EventProperties } from './EventProperties';
 import { EventsDataTable } from './EventsDataTable';
 
-const KEY_NAME = 'umami.events.tab';
+const KEY_NAME = 'hanzo.analytics.events.tab';
 
 export function EventsPage({ websiteId }) {
   const [tab, setTab] = useState(getItem(KEY_NAME) || 'chart');
