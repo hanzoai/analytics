@@ -1,12 +1,12 @@
-import clickhouse from '@/lib/clickhouse';
 import { DEFAULT_RESET_DATE } from '@/lib/constants';
-import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
+import datastore from '@/lib/datastore';
+import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 
 export async function getWebsiteDateRange(...args: [websiteId: string]) {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [CLICKHOUSE]: () => clickhouseQuery(...args),
+    [DATASTORE]: () => datastoreQuery(...args),
   });
 }
 
@@ -32,8 +32,8 @@ async function relationalQuery(websiteId: string) {
   return result[0] ?? null;
 }
 
-async function clickhouseQuery(websiteId: string) {
-  const { rawQuery, parseFilters } = clickhouse;
+async function datastoreQuery(websiteId: string) {
+  const { rawQuery, parseFilters } = datastore;
   const { queryParams } = parseFilters({
     startDate: new Date(DEFAULT_RESET_DATE),
     websiteId,

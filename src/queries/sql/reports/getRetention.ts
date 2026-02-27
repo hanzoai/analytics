@@ -1,5 +1,5 @@
-import clickhouse from '@/lib/clickhouse';
-import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
+import datastore from '@/lib/datastore';
+import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 import type { QueryFilters } from '@/lib/types';
 
@@ -22,7 +22,7 @@ export async function getRetention(
 ) {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [CLICKHOUSE]: () => clickhouseQuery(...args),
+    [DATASTORE]: () => datastoreQuery(...args),
   });
 }
 
@@ -100,13 +100,13 @@ async function relationalQuery(
   );
 }
 
-async function clickhouseQuery(
+async function datastoreQuery(
   websiteId: string,
   parameters: RetentionParameters,
   filters: QueryFilters,
 ): Promise<RetentionResult[]> {
   const { startDate, endDate, timezone } = parameters;
-  const { getDateSQL, rawQuery, parseFilters } = clickhouse;
+  const { getDateSQL, rawQuery, parseFilters } = datastore;
   const unit = 'day';
 
   const { filterQuery, cohortQuery, queryParams } = parseFilters({
