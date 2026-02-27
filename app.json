@@ -1,9 +1,9 @@
 {
-  "name": "Umami",
-  "description": "Umami is a simple, fast, website analytics alternative to Google Analytics.",
+  "name": "Hanzo Analytics",
+  "description": "Privacy-focused web analytics for the Hanzo ecosystem.",
   "keywords": ["analytics", "charts", "statistics", "web-analytics"],
-  "website": "https://umami.is",
-  "repository": "https://github.com/umami-software/umami",
+  "website": "https://analytics.hanzo.ai",
+  "repository": "https://github.com/hanzoai/analytics",
   "addons": ["heroku-postgresql"],
   "env": {
     "APP_SECRET": {

@@ -1,13 +1,13 @@
 {
-  "name": "umami",
+  "name": "@hanzo/analytics",
   "version": "3.0.3",
-  "description": "A modern, privacy-focused alternative to Google Analytics.",
-  "author": "Umami Software, Inc. <hello@umami.is>",
+  "description": "Privacy-focused web analytics for the Hanzo ecosystem.",
+  "author": "Hanzo AI, Inc. <eng@hanzo.ai>",
   "license": "MIT",
-  "homepage": "https://umami.is",
+  "homepage": "https://analytics.hanzo.ai",
   "repository": {
     "type": "git",
-    "url": "https://github.com/umami-software/umami.git"
+    "url": "https://github.com/hanzoai/analytics.git"
   },
   "type": "module",
   "scripts": {
@@ -108,6 +108,7 @@
     "papaparse": "^5.5.3",
     "pg": "^8.16.3",
     "prisma": "^6.18.0",
+    "prop-types": "^15.8.1",
     "pure-rand": "^7.0.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",

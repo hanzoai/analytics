@@ -41,9 +41,11 @@ export default function ({ children }) {
   );
 }
 
+const appName = process.env.NEXT_PUBLIC_APP_NAME || 'Analytics';
+
 export const metadata: Metadata = {
   title: {
-    template: '%s | Umami',
-    default: 'Umami',
+    template: `%s | ${appName}`,
+    default: appName,
   },
 };

@@ -3,7 +3,7 @@ export type TrackedProperties = {
    * Hostname of server
    *
    * @description extracted from `window.location.hostname`
-   * @example 'analytics.umami.is'
+   * @example 'analytics.hanzo.ai'
    */
   hostname: string;
 
@@ -19,7 +19,7 @@ export type TrackedProperties = {
    * Page referrer
    *
    * @description extracted from `window.navigator.language`
-   * @example 'https://analytics.umami.is/docs/getting-started'
+   * @example 'https://analytics.hanzo.ai/docs/getting-started'
    */
   referrer: string;
 
@@ -35,7 +35,7 @@ export type TrackedProperties = {
    * Page title
    *
    * @description extracted from `document.querySelector('head > title')`
-   * @example 'umami'
+   * @example 'Analytics'
    */
   title: string;
 
@@ -81,13 +81,13 @@ export type CustomEventFunction = (
   props: PageViewProperties,
 ) => EventProperties | PageViewProperties;
 
-export type UmamiTracker = {
+export type AnalyticsTracker = {
   track: {
     /**
      * Track a page view
      *
      * @example ```
-     * umami.track();
+     * hanzo.track();
      * ```
      */
     (): Promise<string>;
@@ -98,7 +98,7 @@ export type UmamiTracker = {
      * NOTE: event names will be truncated past 50 characters
      *
      * @example ```
-     * umami.track('signup-button');
+     * hanzo.track('signup-button');
      * ```
      */
     (eventName: string): Promise<string>;
@@ -108,21 +108,8 @@ export type UmamiTracker = {
      *
      * NOTE: event names will be truncated past 50 characters
      *
-     * When tracking events, the default properties are included in the payload. This is equivalent to running:
-     *
-     * ```js
-     * umami.track(props => ({
-     *   ...props,
-     *   name: 'signup-button',
-     *   data: {
-     *     name: 'newsletter',
-     *     id: 123
-     *   }
-     * }));
-     * ```
-     *
      * @example ```
-     * umami.track('signup-button', { name: 'newsletter', id: 123 });
+     * hanzo.track('signup-button', { name: 'newsletter', id: 123 });
      * ```
      */
     (eventName: string, obj: EventData): Promise<string>;
@@ -131,7 +118,7 @@ export type UmamiTracker = {
      * Tracks a page view with custom properties
      *
      * @example ```
-     * umami.track({ website: 'e676c9b4-11e4-4ef1-a4d7-87001773e9f2', url: '/home', title: 'Home page' });
+     * hanzo.track({ website: 'e676c9b4-11e4-4ef1-a4d7-87001773e9f2', url: '/home', title: 'Home page' });
      * ```
      */
     (properties: PageViewProperties): Promise<string>;
@@ -141,13 +128,18 @@ export type UmamiTracker = {
      * If you don't specify any `name` and/or `data`, it will be treated as a page view
      *
      * @example ```
-     * umami.track((props) => ({ ...props, url: path }));
+     * hanzo.track((props) => ({ ...props, url: path }));
      * ```
      */
     (eventFunction: CustomEventFunction): Promise<string>;
   };
 };
 
+/** @deprecated Use AnalyticsTracker instead */
+export type UmamiTracker = AnalyticsTracker;
+
 export interface Window {
-  umami: UmamiTracker;
+  hanzo: AnalyticsTracker;
+  /** @deprecated Use window.hanzo instead */
+  umami: AnalyticsTracker;
 }

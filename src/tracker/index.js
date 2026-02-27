@@ -29,14 +29,17 @@
   const excludeHash = attr(`${_data}exclude-hash`) === _true;
   const domain = attr(`${_data}domains`) || '';
   const credentials = attr(`${_data}fetch-credentials`) || 'omit';
+  const astEnabled = attr(`${_data}ast`) !== _false;
 
   const domains = domain.split(',').map(n => n.trim());
   const host =
     hostUrl || '__COLLECT_API_HOST__' || currentScript.src.split('/').slice(0, -1).join('/');
   const endpoint = `${host.replace(/\/$/, '')}__COLLECT_API_ENDPOINT__`;
   const screen = `${width}x${height}`;
-  const eventRegex = /data-umami-event-([\w-_]+)/;
-  const eventNameAttribute = `${_data}umami-event`;
+  // Support both data-hanzo-event and data-umami-event
+  const eventRegex = /data-(?:hanzo|umami)-event-([\w-_]+)/;
+  const eventNameAttribute = `${_data}hanzo-event`;
+  const eventNameAttributeLegacy = `${_data}umami-event`;
   const delayDuration = 300;
 
   /* Helper functions */
@@ -70,6 +73,106 @@
     return dnt === 1 || dnt === '1' || dnt === 'yes';
   };
 
+  /* AST / Structured Data Collection */
+
+  const collectAST = () => {
+    if (!astEnabled) return;
+
+    const ast = {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      head: {
+        title: document.title,
+        description: document.querySelector('meta[name="description"]')?.content || '',
+      },
+      sections: [],
+      url: currentUrl,
+    };
+
+    // Collect JSON-LD structured data from the page
+    const jsonld = document.querySelectorAll('script[type="application/ld+json"]');
+    if (jsonld.length) {
+      ast.structured = [];
+      jsonld.forEach(el => {
+        try {
+          ast.structured.push(JSON.parse(el.textContent));
+        } catch {}
+      });
+    }
+
+    // Collect semantic sections
+    const sections = document.querySelectorAll(
+      'section, [data-section], main, article, aside, nav, header, footer',
+    );
+    sections.forEach(section => {
+      const s = {
+        name: section.getAttribute('data-section') || section.getAttribute('aria-label') || '',
+        type: section.tagName.toLowerCase(),
+        id: section.id || '',
+        content: [],
+      };
+
+      // Sample key interactive elements within the section
+      const elements = section.querySelectorAll(
+        'a[href], button, input, [data-hanzo-event], [data-umami-event]',
+      );
+      elements.forEach(el => {
+        if (s.content.length >= 20) return; // cap per section
+        s.content.push({
+          type: el.tagName.toLowerCase(),
+          text: (el.textContent || '').trim().substring(0, 100),
+          href: el.href || '',
+        });
+      });
+
+      if (s.name || s.id || s.content.length > 0) {
+        ast.sections.push(s);
+      }
+    });
+
+    // Send AST data
+    if (ast.sections.length > 0 || (ast.structured && ast.structured.length > 0)) {
+      sendAST(ast);
+    }
+  };
+
+  const sendAST = async payload => {
+    if (trackingDisabled()) return;
+    try {
+      await fetch(`${host.replace(/\/$/, '')}/api/ast`, {
+        keepalive: true,
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' },
+        credentials,
+      });
+    } catch {}
+  };
+
+  /* Element interaction tracking */
+
+  const trackElement = async (el, eventName) => {
+    if (trackingDisabled()) return;
+    try {
+      await fetch(`${host.replace(/\/$/, '')}/api/element`, {
+        keepalive: true,
+        method: 'POST',
+        body: JSON.stringify({
+          website,
+          url: currentUrl,
+          elementId: el.id || '',
+          elementType: el.tagName.toLowerCase(),
+          elementSelector: el.className ? `.${el.className.split(' ')[0]}` : '',
+          elementText: (el.textContent || '').trim().substring(0, 200),
+          elementHref: el.href || '',
+          event: eventName || '',
+        }),
+        headers: { 'Content-Type': 'application/json' },
+        credentials,
+      });
+    } catch {}
+  };
+
   /* Event handlers */
 
   const handlePush = (_state, _title, url) => {
@@ -79,7 +182,10 @@
     currentUrl = normalize(new URL(url, location.href).toString());
 
     if (currentUrl !== currentRef) {
-      setTimeout(track, delayDuration);
+      setTimeout(() => {
+        track();
+        collectAST();
+      }, delayDuration);
     }
   };
 
@@ -97,8 +203,9 @@
   };
 
   const handleClicks = () => {
-    const trackElement = async el => {
-      const eventName = el.getAttribute(eventNameAttribute);
+    const trackEventElement = async el => {
+      const eventName =
+        el.getAttribute(eventNameAttribute) || el.getAttribute(eventNameAttributeLegacy);
       if (eventName) {
         const eventData = {};
 
@@ -107,19 +214,26 @@
           if (match) eventData[match[1]] = el.getAttribute(name);
         });
 
+        // Also send element-level tracking for AST
+        trackElement(el, eventName);
+
         return track(eventName, eventData);
       }
     };
     const onClick = async e => {
       const el = e.target;
       const parentElement = el.closest('a,button');
-      if (!parentElement) return trackElement(el);
+      if (!parentElement) return trackEventElement(el);
 
       const { href, target } = parentElement;
-      if (!parentElement.getAttribute(eventNameAttribute)) return;
+      if (
+        !parentElement.getAttribute(eventNameAttribute) &&
+        !parentElement.getAttribute(eventNameAttributeLegacy)
+      )
+        return;
 
       if (parentElement.tagName === 'BUTTON') {
-        return trackElement(parentElement);
+        return trackEventElement(parentElement);
       }
       if (parentElement.tagName === 'A' && href) {
         const external =
@@ -129,7 +243,7 @@
           e.metaKey ||
           (e.button && e.button === 1);
         if (!external) e.preventDefault();
-        return trackElement(parentElement).then(() => {
+        return trackEventElement(parentElement).then(() => {
           if (!external) {
             (target === '_top' ? top.location : location).href = href;
           }
@@ -139,11 +253,57 @@
     document.addEventListener('click', onClick, true);
   };
 
+  /* Section visibility tracking */
+
+  const handleSections = () => {
+    if (!astEnabled || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const section = entry.target;
+          if (section._tracked) return;
+          section._tracked = true;
+
+          const name =
+            section.getAttribute('data-section') ||
+            section.getAttribute('aria-label') ||
+            section.id ||
+            '';
+          if (!name) return;
+
+          fetch(`${host.replace(/\/$/, '')}/api/section`, {
+            keepalive: true,
+            method: 'POST',
+            body: JSON.stringify({
+              website,
+              url: currentUrl,
+              sectionName: name,
+              sectionType: section.tagName.toLowerCase(),
+              sectionId: section.id || '',
+            }),
+            headers: { 'Content-Type': 'application/json' },
+            credentials,
+          }).catch(() => {});
+        });
+      },
+      { threshold: 0.5 },
+    );
+
+    document
+      .querySelectorAll('section[data-section], [data-section], section[aria-label]')
+      .forEach(el => {
+        observer.observe(el);
+      });
+  };
+
   /* Tracking functions */
 
   const trackingDisabled = () =>
     disabled ||
     !website ||
+    localStorage?.getItem('hanzo.analytics.disabled') ||
     localStorage?.getItem('umami.disabled') ||
     (domain && !domains.includes(hostname)) ||
     (dnt && hasDoNotTrack());
@@ -166,7 +326,7 @@
         body: JSON.stringify({ type, payload }),
         headers: {
           'Content-Type': 'application/json',
-          ...(typeof cache !== 'undefined' && { 'x-umami-cache': cache }),
+          ...(typeof cache !== 'undefined' && { 'x-hanzo-cache': cache }),
         },
         credentials,
       });
@@ -188,6 +348,9 @@
       track();
       handlePathChanges();
       handleClicks();
+      // Collect AST after page is ready
+      setTimeout(collectAST, 100);
+      setTimeout(handleSections, 500);
     }
   };
 
@@ -215,12 +378,11 @@
 
   /* Start */
 
-  if (!window.umami) {
-    window.umami = {
-      track,
-      identify,
-    };
-  }
+  const tracker = { track, identify };
+
+  // Expose as both window.hanzo and window.umami (backwards compat)
+  if (!window.hanzo) window.hanzo = tracker;
+  if (!window.umami) window.umami = tracker;
 
   let currentUrl = normalize(href);
   let currentRef = normalize(referrer.startsWith(origin) ? '' : referrer);

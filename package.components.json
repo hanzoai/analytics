@@ -1,8 +1,8 @@
 {
-  "name": "@umami/components",
+  "name": "@hanzo/analytics-components",
   "version": "0.130.0",
-  "description": "Umami React components.",
-  "author": "Mike Cao <mike@mikecao.com>",
+  "description": "Hanzo Analytics React components.",
+  "author": "Hanzo AI, Inc. <eng@hanzo.ai>",
   "license": "MIT",
   "type": "module",
   "main": "./index.js",
