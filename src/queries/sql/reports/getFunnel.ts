@@ -1,5 +1,5 @@
-import clickhouse from '@/lib/clickhouse';
-import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
+import datastore from '@/lib/datastore';
+import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 import type { QueryFilters } from '@/lib/types';
 
@@ -21,7 +21,7 @@ export async function getFunnel(
 ) {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [CLICKHOUSE]: () => clickhouseQuery(...args),
+    [DATASTORE]: () => datastoreQuery(...args),
   });
 }
 
@@ -121,7 +121,7 @@ async function relationalQuery(
   ).then(formatResults(steps));
 }
 
-async function clickhouseQuery(
+async function datastoreQuery(
   websiteId: string,
   parameters: FunnelParameters,
   filters: QueryFilters,
@@ -133,7 +133,7 @@ async function clickhouseQuery(
   }[]
 > {
   const { startDate, endDate, window, steps } = parameters;
-  const { rawQuery, parseFilters } = clickhouse;
+  const { rawQuery, parseFilters } = datastore;
   const { levelOneQuery, levelQuery, sumQuery, stepFilterQuery, params } = getFunnelQuery(
     steps,
     window,

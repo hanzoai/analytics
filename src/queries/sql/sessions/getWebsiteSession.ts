@@ -1,5 +1,5 @@
-import clickhouse from '@/lib/clickhouse';
-import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
+import datastore from '@/lib/datastore';
+import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 
 const FUNCTION_NAME = 'getWebsiteSession';
@@ -7,7 +7,7 @@ const FUNCTION_NAME = 'getWebsiteSession';
 export async function getWebsiteSession(...args: [websiteId: string, sessionId: string]) {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [CLICKHOUSE]: () => clickhouseQuery(...args),
+    [DATASTORE]: () => datastoreQuery(...args),
   });
 }
 
@@ -62,8 +62,8 @@ async function relationalQuery(websiteId: string, sessionId: string) {
   ).then(result => result?.[0]);
 }
 
-async function clickhouseQuery(websiteId: string, sessionId: string) {
-  const { rawQuery, getDateStringSQL } = clickhouse;
+async function datastoreQuery(websiteId: string, sessionId: string) {
+  const { rawQuery, getDateStringSQL } = datastore;
 
   return rawQuery(
     `

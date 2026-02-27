@@ -1,6 +1,6 @@
-import clickhouse from '@/lib/clickhouse';
 import { FILTER_COLUMNS, GROUPED_DOMAINS, SESSION_COLUMNS } from '@/lib/constants';
-import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
+import datastore from '@/lib/datastore';
+import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 import type { QueryFilters } from '@/lib/types';
 
@@ -26,7 +26,7 @@ export async function getPageviewExpandedMetrics(
 ) {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [CLICKHOUSE]: () => clickhouseQuery(...args),
+    [DATASTORE]: () => datastoreQuery(...args),
   });
 }
 
@@ -114,14 +114,14 @@ async function relationalQuery(
   );
 }
 
-async function clickhouseQuery(
+async function datastoreQuery(
   websiteId: string,
   parameters: PageviewExpandedMetricsParameters,
   filters: QueryFilters,
 ): Promise<{ x: string; y: number }[]> {
   const { type, limit = 500, offset = 0 } = parameters;
   let column = FILTER_COLUMNS[type] || type;
-  const { rawQuery, parseFilters } = clickhouse;
+  const { rawQuery, parseFilters } = datastore;
   const { filterQuery, cohortQuery, queryParams } = parseFilters({
     ...filters,
     websiteId,
@@ -133,7 +133,7 @@ async function clickhouseQuery(
   if (column === 'referrer_domain') {
     excludeDomain = `and referrer_domain != hostname and referrer_domain != ''`;
     if (type === 'domain') {
-      column = toClickHouseGroupedReferrer(GROUPED_DOMAINS);
+      column = toDatastoreGroupedReferrer(GROUPED_DOMAINS);
     }
   }
 
@@ -190,7 +190,7 @@ async function clickhouseQuery(
   );
 }
 
-export function toClickHouseGroupedReferrer(
+export function toDatastoreGroupedReferrer(
   domains: any[],
   column: string = 'referrer_domain',
 ): string {

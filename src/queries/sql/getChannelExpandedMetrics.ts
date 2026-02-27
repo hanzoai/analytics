@@ -1,4 +1,3 @@
-import clickhouse from '@/lib/clickhouse';
 import {
   EMAIL_DOMAINS,
   PAID_AD_PARAMS,
@@ -7,7 +6,8 @@ import {
   SOCIAL_DOMAINS,
   VIDEO_DOMAINS,
 } from '@/lib/constants';
-import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
+import datastore from '@/lib/datastore';
+import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 import type { QueryFilters } from '@/lib/types';
 
@@ -32,7 +32,7 @@ export async function getChannelExpandedMetrics(
 ): Promise<ChannelExpandedMetricsData[]> {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [CLICKHOUSE]: () => clickhouseQuery(...args),
+    [DATASTORE]: () => datastoreQuery(...args),
   });
 }
 
@@ -114,11 +114,11 @@ async function relationalQuery(
   ).then(results => results.map(item => ({ ...item, y: Number(item.y) })));
 }
 
-async function clickhouseQuery(
+async function datastoreQuery(
   websiteId: string,
   filters: QueryFilters,
 ): Promise<ChannelExpandedMetricsData[]> {
-  const { rawQuery, parseFilters } = clickhouse;
+  const { rawQuery, parseFilters } = datastore;
   const { queryParams, filterQuery, cohortQuery } = parseFilters({
     ...filters,
     websiteId,
@@ -137,25 +137,25 @@ async function clickhouseQuery(
       select case when multiSearchAny(utm_medium, ['cp', 'ppc', 'retargeting', 'paid']) != 0 then 'paid' else 'organic' end prefix,
           case
           when referrer_domain = '' and url_query = '' then 'direct'
-          when multiSearchAny(url_query, [${toClickHouseStringArray(
+          when multiSearchAny(url_query, [${toDatastoreStringArray(
             PAID_AD_PARAMS,
           )}]) != 0 then 'paidAds'
           when multiSearchAny(utm_medium, ['referral', 'app','link']) != 0 then 'referral'
           when position(utm_medium, 'affiliate') > 0 then 'affiliate'
           when position(utm_medium, 'sms') > 0 or position(utm_source, 'sms') > 0 then 'sms'
-          when multiSearchAny(referrer_domain, [${toClickHouseStringArray(
+          when multiSearchAny(referrer_domain, [${toDatastoreStringArray(
             SEARCH_DOMAINS,
           )}]) != 0 or position(utm_medium, 'organic') > 0 then concat(prefix, 'Search')
-          when multiSearchAny(referrer_domain, [${toClickHouseStringArray(
+          when multiSearchAny(referrer_domain, [${toDatastoreStringArray(
             SOCIAL_DOMAINS,
           )}]) != 0 then concat(prefix, 'Social')
-          when multiSearchAny(referrer_domain, [${toClickHouseStringArray(
+          when multiSearchAny(referrer_domain, [${toDatastoreStringArray(
             EMAIL_DOMAINS,
           )}]) != 0 or position(utm_medium, 'mail') > 0 then 'email'
-          when multiSearchAny(referrer_domain, [${toClickHouseStringArray(
+          when multiSearchAny(referrer_domain, [${toDatastoreStringArray(
             SHOPPING_DOMAINS,
           )}]) != 0 or position(utm_medium, 'shop') > 0 then concat(prefix, 'Shopping')
-          when multiSearchAny(referrer_domain, [${toClickHouseStringArray(
+          when multiSearchAny(referrer_domain, [${toDatastoreStringArray(
             VIDEO_DOMAINS,
           )}]) != 0 or position(utm_medium, 'video') > 0 then concat(prefix, 'Video')
           else '' end AS name,
@@ -181,7 +181,7 @@ async function clickhouseQuery(
   );
 }
 
-function toClickHouseStringArray(arr: string[]): string {
+function toDatastoreStringArray(arr: string[]): string {
   return arr.map(p => `'${p.replace(/'/g, "\\'")}'`).join(', ');
 }
 

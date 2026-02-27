@@ -2,9 +2,9 @@ import { startOfHour, startOfMonth } from 'date-fns';
 import { isbot } from 'isbot';
 import { serializeError } from 'serialize-error';
 import { z } from 'zod';
-import clickhouse from '@/lib/clickhouse';
 import { COLLECTION_TYPE, EVENT_TYPE } from '@/lib/constants';
 import { hash, secret, uuid } from '@/lib/crypto';
+import datastore from '@/lib/datastore';
 import { getClientInfo, hasBlockedIp } from '@/lib/detect';
 import { createToken, parseToken } from '@/lib/jwt';
 import { fetchWebsite } from '@/lib/load';
@@ -136,7 +136,7 @@ export async function POST(request: Request) {
     const sessionId = id ? uuid(sourceId, id) : uuid(sourceId, ip, userAgent, sessionSalt);
 
     // Create a session if not found
-    if (!clickhouse.enabled && !cache?.sessionId) {
+    if (!datastore.enabled && !cache?.sessionId) {
       await createSession({
         id: sessionId,
         websiteId: sourceId,
