@@ -1,3 +1,5 @@
+import ipaddr from 'ipaddr.js';
+
 export const IP_ADDRESS_HEADERS = [
   'true-client-ip', // CDN
   'cf-connecting-ip', // Cloudflare
@@ -39,6 +41,31 @@ export function getIpAddress(headers: Headers) {
   }
 
   return ip;
+}
+
+/**
+ * Anonymize an IP address for GDPR compliance.
+ * IPv4: zeroes the last octet (1.2.3.4 → 1.2.3.0)
+ * IPv6: keeps top 48 bits, zeroes the rest
+ * Controlled by ANONYMIZE_IPS env var (default: true).
+ */
+export function anonymizeIp(ip: string): string {
+  if (!ip || process.env.ANONYMIZE_IPS === 'false') return ip;
+
+  try {
+    const addr = ipaddr.parse(stripPort(ip));
+    if (addr.kind() === 'ipv4') {
+      const bytes = addr.toByteArray();
+      bytes[3] = 0;
+      return ipaddr.fromByteArray(bytes).toString();
+    }
+    // IPv6: keep first 48 bits, zero the rest
+    const bytes = addr.toByteArray();
+    for (let i = 6; i < 16; i++) bytes[i] = 0;
+    return ipaddr.fromByteArray(bytes).toString();
+  } catch {
+    return ip;
+  }
 }
 
 export function stripPort(ip: string) {
