@@ -1,4 +1,4 @@
-import { Column, DataColumn, DataTable, Text } from '@umami/react-zen';
+import { Column, DataColumn, DataTable, Text } from '@hanzo/react-zen';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { useFields, useFormat, useMessages, useResultQuery } from '@/components/hooks';
 import { formatShortTime } from '@/lib/format';

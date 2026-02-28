@@ -8,7 +8,7 @@ import {
   Text,
   Tooltip,
   TooltipTrigger,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { SegmentEditForm } from '@/app/(main)/websites/[websiteId]/segments/SegmentEditForm';
 import {
   useFilters,

@@ -7,7 +7,7 @@ import {
   Label,
   Loading,
   TextField,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { useMessages, useUpdateQuery, useWebsiteSegmentQuery } from '@/components/hooks';
 import { FieldFilters } from '@/components/input/FieldFilters';
 import { messages } from '@/components/messages';

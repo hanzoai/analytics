@@ -9,7 +9,7 @@ import {
   Icon,
   PasswordField,
   TextField,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useMessages, useUpdateQuery } from '@/components/hooks';

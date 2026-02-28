@@ -1,4 +1,4 @@
-import { Row, Text } from '@umami/react-zen';
+import { Row, Text } from '@hanzo/react-zen';
 import { branding } from '@/lib/branding';
 import { CURRENT_VERSION, HOMEPAGE_URL } from '@/lib/constants';
 

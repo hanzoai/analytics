@@ -1,4 +1,4 @@
-import { Grid, type GridProps } from '@umami/react-zen';
+import { Grid, type GridProps } from '@hanzo/react-zen';
 import type { ReactNode } from 'react';
 
 export interface MetricsBarProps extends GridProps {

@@ -1,4 +1,4 @@
-import { Button, ListItem, Row, Select } from '@umami/react-zen';
+import { Button, ListItem, Row, Select } from '@hanzo/react-zen';
 import { useState } from 'react';
 import { useLocale, useMessages } from '@/components/hooks';
 import { DEFAULT_LOCALE } from '@/lib/constants';

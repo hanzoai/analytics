@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogTrigger, Icon, Modal, Text, useToast } from '@umami/react-zen';
+import { Button, Dialog, DialogTrigger, Icon, Modal, Text, useToast } from '@hanzo/react-zen';
 import { useMessages, useModified } from '@/components/hooks';
 import { Plus } from '@/components/icons';
 import { messages } from '@/components/messages';

@@ -35,10 +35,10 @@ type ForwardClient struct {
 	mu         sync.RWMutex
 }
 
-// Aliases for backwards compatibility.
-type UmamiConfig = ForwardConfig
-type UmamiEvent = ForwardEvent
-type UmamiClient = ForwardClient
+// Aliases for backwards compatibility (deprecated).
+type AnalyticsConfig = ForwardConfig
+type AnalyticsEvent = ForwardEvent
+type AnalyticsClientAlias = ForwardClient
 
 // NewForwardClient creates a new analytics forwarding client.
 func NewForwardClient(config *ForwardConfig) *ForwardClient {
@@ -63,8 +63,8 @@ func NewForwardClient(config *ForwardConfig) *ForwardClient {
 	return c
 }
 
-// NewUmamiClient is an alias for NewForwardClient (backwards compatibility).
-var NewUmamiClient = NewForwardClient
+// NewAnalyticsClient is an alias for NewForwardClient.
+var NewAnalyticsClient = NewForwardClient
 
 // TrackPageView sends a page view.
 func (c *ForwardClient) TrackPageView(url, title, referrer, hostname, language, screen string) error {

@@ -8,7 +8,7 @@ import {
   TabPanel,
   Tabs,
   TextField,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { X } from 'lucide-react';
 import { Avatar } from '@/components/common/Avatar';
 import { LoadingPanel } from '@/components/common/LoadingPanel';

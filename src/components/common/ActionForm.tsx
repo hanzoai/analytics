@@ -1,4 +1,4 @@
-import { Column, Row, Text } from '@umami/react-zen';
+import { Column, Row, Text } from '@hanzo/react-zen';
 
 export function ActionForm({ label, description, children }) {
   return (

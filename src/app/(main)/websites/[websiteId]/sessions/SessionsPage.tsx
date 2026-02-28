@@ -1,5 +1,5 @@
 'use client';
-import { Column, Tab, TabList, TabPanel, Tabs } from '@umami/react-zen';
+import { Column, Tab, TabList, TabPanel, Tabs } from '@hanzo/react-zen';
 import { type Key, useState } from 'react';
 import { SessionModal } from '@/app/(main)/websites/[websiteId]/sessions/SessionModal';
 import { WebsiteControls } from '@/app/(main)/websites/[websiteId]/WebsiteControls';

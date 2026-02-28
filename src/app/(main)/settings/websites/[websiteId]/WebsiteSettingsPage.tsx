@@ -1,5 +1,5 @@
 'use client';
-import { Column } from '@umami/react-zen';
+import { Column } from '@hanzo/react-zen';
 import { WebsiteSettings } from '@/app/(main)/websites/[websiteId]/settings/WebsiteSettings';
 import { WebsiteSettingsHeader } from '@/app/(main)/websites/[websiteId]/settings/WebsiteSettingsHeader';
 import { WebsiteProvider } from '@/app/(main)/websites/WebsiteProvider';

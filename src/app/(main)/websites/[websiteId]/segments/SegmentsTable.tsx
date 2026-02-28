@@ -1,4 +1,4 @@
-import { DataColumn, DataTable, type DataTableProps, Row } from '@umami/react-zen';
+import { DataColumn, DataTable, type DataTableProps, Row } from '@hanzo/react-zen';
 import Link from 'next/link';
 import { SegmentDeleteButton } from '@/app/(main)/websites/[websiteId]/segments/SegmentDeleteButton';
 import { SegmentEditButton } from '@/app/(main)/websites/[websiteId]/segments/SegmentEditButton';

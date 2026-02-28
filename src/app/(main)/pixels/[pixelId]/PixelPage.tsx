@@ -1,5 +1,5 @@
 'use client';
-import { Column, Grid } from '@umami/react-zen';
+import { Column, Grid } from '@hanzo/react-zen';
 import { PixelControls } from '@/app/(main)/pixels/[pixelId]/PixelControls';
 import { PixelHeader } from '@/app/(main)/pixels/[pixelId]/PixelHeader';
 import { PixelMetricsBar } from '@/app/(main)/pixels/[pixelId]/PixelMetricsBar';

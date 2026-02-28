@@ -1,4 +1,4 @@
-import { Row, StatusLight, Text } from '@umami/react-zen';
+import { Row, StatusLight, Text } from '@hanzo/react-zen';
 import type { LegendItem } from 'chart.js/auto';
 import { colord } from 'colord';
 
