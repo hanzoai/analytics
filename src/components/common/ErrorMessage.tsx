@@ -1,4 +1,4 @@
-import { Icon, Row, Text } from '@umami/react-zen';
+import { Icon, Row, Text } from '@hanzo/react-zen';
 import { useMessages } from '@/components/hooks';
 import { AlertTriangle } from '@/components/icons';
 

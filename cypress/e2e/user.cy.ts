@@ -3,7 +3,7 @@ describe('User tests', () => {
 
   beforeEach(() => {
     cy.login(Cypress.env('admin_user'), Cypress.env('admin_password'));
-    cy.visit('/settings/users');
+    cy.visit('/admin/users');
   });
 
   it('Add a User', () => {
@@ -17,8 +17,7 @@ describe('User tests', () => {
     cy.getDataTest('dropdown-role').click();
     cy.getDataTest('dropdown-item-user').click();
     cy.getDataTest('button-submit').click();
-    cy.get('td[label="Username"]').should('contain.text', 'Test-user');
-    cy.get('td[label="Role"]').should('contain.text', 'User');
+    cy.contains('table tbody tr', 'Test-user').should('contain.text', 'User');
   });
 
   it('Edit a User role and password', () => {
@@ -35,7 +34,7 @@ describe('User tests', () => {
     cy.getDataTest('dropdown-item-viewOnly').click();
     cy.getDataTest('button-submit').click();
 
-    cy.visit('/settings/users');
+    cy.visit('/admin/users');
     cy.get('table tbody tr')
       .contains('td', /Test-user/i)
       .parent()
@@ -48,7 +47,7 @@ describe('User tests', () => {
     cy.get('@inputUsername').click();
     cy.getDataTest('input-password').find('input').type('newPassword', { delay: 0 });
     cy.getDataTest('button-submit').click();
-    cy.url().should('eq', Cypress.config().baseUrl + '/dashboard');
+    cy.url().should('include', '/websites');
   });
 
   it('Delete a user', () => {
@@ -60,6 +59,6 @@ describe('User tests', () => {
         cy.getDataTest('button-delete').click(); // Clicks the button inside the row
       });
     cy.contains(/Are you sure you want to delete Test-user?/i).should('be.visible');
-    cy.getDataTest('button-confirm').click();
+    cy.get('[role="dialog"]').contains('button', 'Delete').click();
   });
 });

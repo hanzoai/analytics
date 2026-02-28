@@ -10,7 +10,7 @@ import {
   MenuTrigger,
   Popover,
   Row,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { endOfDay, subMonths } from 'date-fns';
 import type { Key } from 'react';
 import { Empty } from '@/components/common/Empty';

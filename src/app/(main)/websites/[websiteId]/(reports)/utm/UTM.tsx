@@ -1,4 +1,4 @@
-import { Column, Grid, Heading, Text } from '@umami/react-zen';
+import { Column, Grid, Heading, Text } from '@hanzo/react-zen';
 import { PieChart } from '@/components/charts/PieChart';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { Panel } from '@/components/common/Panel';

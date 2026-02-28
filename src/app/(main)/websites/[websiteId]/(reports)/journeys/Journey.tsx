@@ -1,4 +1,4 @@
-import { Column, Focusable, Icon, Row, Text, Tooltip, TooltipTrigger } from '@umami/react-zen';
+import { Column, Focusable, Icon, Row, Text, Tooltip, TooltipTrigger } from '@hanzo/react-zen';
 import classNames from 'classnames';
 import { useMemo, useState } from 'react';
 import { firstBy } from 'thenby';

@@ -1,5 +1,5 @@
-name: '🐛 Bug Report'
-description: Create a bug report for Umami.
+name: 'Bug Report'
+description: Create a bug report for Hanzo Analytics.
 body:
   - type: textarea
     attributes:
@@ -14,7 +14,7 @@ body:
       options:
         - PostgreSQL
         - MySQL
-        - Umami Cloud
+        - Hanzo Cloud
     validations:
       required: true
   - type: textarea
@@ -24,8 +24,8 @@ body:
       render: shell
   - type: input
     attributes:
-      label: Which Umami version are you using? (if relevant)
-      description: 'For example: 2.18.0, 2.15.1, 1.39.0, etc'
+      label: Which version are you using? (if relevant)
+      description: 'For example: 3.0.4, 3.0.3, etc'
   - type: input
     attributes:
       label: Which browser are you using? (if relevant)

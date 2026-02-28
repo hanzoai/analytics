@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogTrigger, Modal } from '@umami/react-zen';
+import { Button, Dialog, DialogTrigger, Modal } from '@hanzo/react-zen';
 import { useRouter } from 'next/navigation';
 import { ActionForm } from '@/components/common/ActionForm';
 import { useMessages, useModified } from '@/components/hooks';

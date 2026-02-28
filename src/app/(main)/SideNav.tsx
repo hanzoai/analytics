@@ -6,7 +6,7 @@ import {
   type SidebarProps,
   SidebarSection,
   ThemeButton,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import Link from 'next/link';
 import type { Key } from 'react';
 import { useGlobalState, useMessages, useNavigation } from '@/components/hooks';

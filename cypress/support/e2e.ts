@@ -1,14 +1,13 @@
 /// <reference types="cypress" />
-import { uuid } from '../../src/lib/crypto';
+import { v4 as uuid } from 'uuid';
 
 Cypress.Commands.add('getDataTest', (value: string) => {
   return cy.get(`[data-test=${value}]`);
 });
 
 Cypress.Commands.add('logout', () => {
-  cy.getDataTest('button-profile').click();
-  cy.getDataTest('item-logout').click();
-  cy.url().should('eq', Cypress.config().baseUrl + '/login');
+  cy.visit('/logout');
+  cy.url().should('include', '/login');
 });
 
 Cypress.Commands.add('login', (username: string, password: string) => {

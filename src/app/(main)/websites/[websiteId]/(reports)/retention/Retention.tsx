@@ -1,4 +1,4 @@
-import { Column, Grid, Icon, Row, Text } from '@umami/react-zen';
+import { Column, Grid, Icon, Row, Text } from '@hanzo/react-zen';
 import type { ReactNode } from 'react';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { Panel } from '@/components/common/Panel';
