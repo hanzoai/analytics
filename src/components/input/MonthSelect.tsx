@@ -1,4 +1,4 @@
-import { ListItem, Row, Select } from '@umami/react-zen';
+import { ListItem, Row, Select } from '@hanzo/react-zen';
 import { useLocale } from '@/components/hooks';
 import { formatDate } from '@/lib/date';
 

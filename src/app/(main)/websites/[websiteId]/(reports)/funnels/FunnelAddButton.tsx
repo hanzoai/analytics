@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogTrigger, Icon, Modal, Text } from '@umami/react-zen';
+import { Button, Dialog, DialogTrigger, Icon, Modal, Text } from '@hanzo/react-zen';
 import { useMessages } from '@/components/hooks';
 import { Plus } from '@/components/icons';
 import { FunnelEditForm } from './FunnelEditForm';

@@ -1,4 +1,4 @@
-import { Focusable, Grid, Row, Text, Tooltip, TooltipTrigger } from '@umami/react-zen';
+import { Focusable, Grid, Row, Text, Tooltip, TooltipTrigger } from '@hanzo/react-zen';
 import { addHours, format, startOfDay } from 'date-fns';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { useLocale, useMessages, useWeeklyTrafficQuery } from '@/components/hooks';

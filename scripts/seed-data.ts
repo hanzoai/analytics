@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 
 /**
- * Umami Sample Data Generator
+ * Analytics Sample Data Generator
  *
  * Generates realistic analytics data for local development and testing.
  * Creates two demo websites:
@@ -16,7 +16,7 @@
  *   npm run seed-data -- --verbose # Show detailed progress
  */
 
-import { seed, type SeedConfig } from './seed/index.js';
+import { type SeedConfig, seed } from './seed/index.js';
 
 function parseArgs(): SeedConfig {
   const args = process.argv.slice(2);
@@ -58,7 +58,7 @@ function parseArgs(): SeedConfig {
 
 function printHelp(): void {
   console.log(`
-Umami Sample Data Generator
+Analytics Sample Data Generator
 
 Generates realistic analytics data for local development and testing.
 
@@ -104,7 +104,7 @@ function checkEnvironment(): void {
 }
 
 async function main(): Promise<void> {
-  console.log('\nUmami Sample Data Generator\n');
+  console.log('\nAnalytics Sample Data Generator\n');
 
   checkEnvironment();
 

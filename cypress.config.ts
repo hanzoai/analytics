@@ -7,7 +7,7 @@ export default defineConfig({
   // default username / password on init
   env: {
     admin_user: 'admin',
-    admin_password: 'admin',
+    admin_password: 'analytics',
     admin_user_id: '41e2b680-648e-4b09-bcd7-3e2b10c06264',
   },
 });

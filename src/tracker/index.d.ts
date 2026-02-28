@@ -135,11 +135,6 @@ export type AnalyticsTracker = {
   };
 };
 
-/** @deprecated Use AnalyticsTracker instead */
-export type UmamiTracker = AnalyticsTracker;
-
 export interface Window {
   hanzo: AnalyticsTracker;
-  /** @deprecated Use window.hanzo instead */
-  umami: AnalyticsTracker;
 }

@@ -7,7 +7,7 @@ import {
   IconLabel,
   Row,
   TextField,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { useMessages, useTeam, useUpdateQuery } from '@/components/hooks';
 import { RefreshCw } from '@/components/icons';
 import { getRandomChars } from '@/lib/generate';

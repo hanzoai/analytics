@@ -1,4 +1,4 @@
-import { DataColumn, DataTable, type DataTableProps, Icon } from '@umami/react-zen';
+import { DataColumn, DataTable, type DataTableProps, Icon } from '@hanzo/react-zen';
 import type { ReactNode } from 'react';
 import { LinkButton } from '@/components/common/LinkButton';
 import { useMessages, useNavigation } from '@/components/hooks';
@@ -27,7 +27,11 @@ export function WebsitesTable({ showActions, renderLink, ...props }: WebsitesTab
             const websiteId = row.id;
 
             return (
-              <LinkButton href={renderUrl(`/websites/${websiteId}/settings`)} variant="quiet">
+              <LinkButton
+                href={renderUrl(`/websites/${websiteId}/settings`)}
+                variant="quiet"
+                data-test="link-button-edit"
+              >
                 <Icon>
                   <SquarePen />
                 </Icon>

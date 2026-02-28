@@ -1,4 +1,4 @@
-import { Row } from '@umami/react-zen';
+import { Row } from '@hanzo/react-zen';
 import { Favicon } from '@/components/common/Favicon';
 import { FilterLink } from '@/components/common/FilterLink';
 import { TypeIcon } from '@/components/common/TypeIcon';

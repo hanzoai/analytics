@@ -1,4 +1,4 @@
-import { Icon, LoadingButton, Tooltip, TooltipTrigger } from '@umami/react-zen';
+import { Icon, LoadingButton, Tooltip, TooltipTrigger } from '@hanzo/react-zen';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useApi, useMessages } from '@/components/hooks';

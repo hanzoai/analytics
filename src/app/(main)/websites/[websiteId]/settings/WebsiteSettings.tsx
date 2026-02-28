@@ -1,4 +1,4 @@
-import { Column } from '@umami/react-zen';
+import { Column } from '@hanzo/react-zen';
 import { Panel } from '@/components/common/Panel';
 import { useWebsite } from '@/components/hooks';
 import { WebsiteData } from './WebsiteData';

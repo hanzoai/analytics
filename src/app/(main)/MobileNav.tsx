@@ -1,4 +1,4 @@
-import { Grid, IconLabel, NavMenu, NavMenuItem, Row, Text } from '@umami/react-zen';
+import { Grid, IconLabel, NavMenu, NavMenuItem, Row, Text } from '@hanzo/react-zen';
 import Link from 'next/link';
 import { WebsiteNav } from '@/app/(main)/websites/[websiteId]/WebsiteNav';
 import { useMessages, useNavigation } from '@/components/hooks';

@@ -1,4 +1,4 @@
-import { Column, Text } from '@umami/react-zen';
+import { Column, Text } from '@hanzo/react-zen';
 import { SideMenu } from '@/components/common/SideMenu';
 import { useMessages, useNavigation } from '@/components/hooks';
 import {

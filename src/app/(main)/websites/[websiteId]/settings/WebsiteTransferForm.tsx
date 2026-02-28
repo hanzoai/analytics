@@ -8,7 +8,7 @@ import {
   Loading,
   Select,
   Text,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { type Key, useState } from 'react';
 import {
   useLoginQuery,

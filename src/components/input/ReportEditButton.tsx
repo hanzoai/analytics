@@ -9,7 +9,7 @@ import {
   Popover,
   Row,
   Text,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { type ReactNode, useState } from 'react';
 import { useMessages } from '@/components/hooks';
 import { useDeleteQuery } from '@/components/hooks/queries/useDeleteQuery';

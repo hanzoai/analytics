@@ -4,7 +4,7 @@ services:
   analytics:
     build: ../
     ports:
-      - '3000:3000'
+      - '3001:3000'
     environment:
       DATABASE_URL: postgresql://analytics:analytics@db:5432/analytics
       DATABASE_TYPE: postgresql
@@ -40,7 +40,7 @@ services:
     environment:
       - CYPRESS_baseUrl=http://analytics:3000
       - CYPRESS_admin_user=admin
-      - CYPRESS_admin_password=admin
+      - CYPRESS_admin_password=analytics
     volumes:
       - ./tsconfig.json:/tsconfig.json
       - ../cypress.config.ts:/cypress.config.ts

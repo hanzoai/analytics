@@ -1,4 +1,4 @@
-import { Column, Grid, Heading, ListItem, Row, Select } from '@umami/react-zen';
+import { Column, Grid, Heading, ListItem, Row, Select } from '@hanzo/react-zen';
 import { useState } from 'react';
 import { DateDisplay } from '@/components/common/DateDisplay';
 import { Panel } from '@/components/common/Panel';

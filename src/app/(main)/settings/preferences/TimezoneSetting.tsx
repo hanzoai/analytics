@@ -1,4 +1,4 @@
-import { Button, ListItem, Row, Select } from '@umami/react-zen';
+import { Button, ListItem, Row, Select } from '@hanzo/react-zen';
 import { useState } from 'react';
 import { useMessages, useTimezone } from '@/components/hooks';
 import { getTimezone } from '@/lib/date';

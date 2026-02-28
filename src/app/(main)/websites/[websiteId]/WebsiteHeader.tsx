@@ -1,4 +1,4 @@
-import { Icon, Row, Text } from '@umami/react-zen';
+import { Icon, Row, Text } from '@hanzo/react-zen';
 import { WebsiteShareForm } from '@/app/(main)/websites/[websiteId]/settings/WebsiteShareForm';
 import { Favicon } from '@/components/common/Favicon';
 import { LinkButton } from '@/components/common/LinkButton';

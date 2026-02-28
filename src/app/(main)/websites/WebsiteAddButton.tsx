@@ -1,4 +1,4 @@
-import { useToast } from '@umami/react-zen';
+import { useToast } from '@hanzo/react-zen';
 import { useMessages, useModified } from '@/components/hooks';
 import { Plus } from '@/components/icons';
 import { DialogButton } from '@/components/input/DialogButton';
@@ -21,6 +21,7 @@ export function WebsiteAddButton({ teamId, onSave }: { teamId: string; onSave?: 
       label={formatMessage(labels.addWebsite)}
       variant="primary"
       width="400px"
+      data-test="button-website-add"
     >
       {({ close }) => <WebsiteAddForm teamId={teamId} onSave={handleSave} onClose={close} />}
     </DialogButton>

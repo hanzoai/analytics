@@ -1,4 +1,4 @@
-import { Column, type ColumnProps, Loading } from '@umami/react-zen';
+import { Column, type ColumnProps, Loading } from '@hanzo/react-zen';
 import type { ReactNode } from 'react';
 import { Empty } from '@/components/common/Empty';
 import { ErrorMessage } from '@/components/common/ErrorMessage';

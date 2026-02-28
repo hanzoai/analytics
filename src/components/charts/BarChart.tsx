@@ -1,4 +1,4 @@
-import { useTheme } from '@umami/react-zen';
+import { useTheme } from '@hanzo/react-zen';
 import { useMemo, useState } from 'react';
 import { Chart, type ChartProps } from '@/components/charts/Chart';
 import { ChartTooltip } from '@/components/charts/ChartTooltip';

@@ -1,4 +1,4 @@
-import { Box, Button, Form, FormButtons, FormSubmitButton } from '@umami/react-zen';
+import { Box, Button, Form, FormButtons, FormSubmitButton } from '@hanzo/react-zen';
 import type { ReactNode } from 'react';
 import { useMessages } from '@/components/hooks';
 

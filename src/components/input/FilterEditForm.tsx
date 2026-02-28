@@ -1,4 +1,4 @@
-import { Button, Column, Row, Tab, TabList, TabPanel, Tabs } from '@umami/react-zen';
+import { Button, Column, Row, Tab, TabList, TabPanel, Tabs } from '@hanzo/react-zen';
 import { useState } from 'react';
 import { useFilters, useMessages, useMobile, useNavigation } from '@/components/hooks';
 import { FieldFilters } from '@/components/input/FieldFilters';

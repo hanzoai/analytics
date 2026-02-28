@@ -1,5 +1,5 @@
 'use client';
-import { AlertBanner, Column, type ColumnProps, Loading } from '@umami/react-zen';
+import { AlertBanner, Column, type ColumnProps, Loading } from '@hanzo/react-zen';
 import type { ReactNode } from 'react';
 import { useMessages } from '@/components/hooks';
 

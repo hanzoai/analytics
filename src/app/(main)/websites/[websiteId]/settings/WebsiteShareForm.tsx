@@ -9,7 +9,7 @@ import {
   Row,
   Switch,
   TextField,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { RefreshCcw } from 'lucide-react';
 import { useState } from 'react';
 import { useConfig, useMessages, useUpdateQuery } from '@/components/hooks';

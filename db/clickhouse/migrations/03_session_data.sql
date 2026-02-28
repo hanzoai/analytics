@@ -1,4 +1,4 @@
-CREATE TABLE umami.event_data_new
+CREATE TABLE analytics.event_data_new
 (
     website_id UUID,
     session_id UUID,
@@ -17,7 +17,7 @@ CREATE TABLE umami.event_data_new
         ORDER BY (website_id, event_id, data_key, created_at)
         SETTINGS index_granularity = 8192;
 
-INSERT INTO umami.event_data_new
+INSERT INTO analytics.event_data_new
 SELECT website_id,
     session_id,
     event_id,
@@ -30,9 +30,9 @@ SELECT website_id,
     data_type,
     created_at,
     NULL
-FROM umami.event_data;
+FROM analytics.event_data;
 
-CREATE TABLE umami.session_data
+CREATE TABLE analytics.session_data
 (
     website_id UUID,
     session_id UUID,
@@ -48,10 +48,10 @@ CREATE TABLE umami.session_data
         ORDER BY (website_id, session_id, data_key, created_at)
         SETTINGS index_granularity = 8192;
 
-RENAME TABLE umami.event_data TO umami.event_data_old;
-RENAME TABLE umami.event_data_new TO umami.event_data;
+RENAME TABLE analytics.event_data TO analytics.event_data_old;
+RENAME TABLE analytics.event_data_new TO analytics.event_data;
 
 /*
-DROP TABLE umami.event_data_old
+DROP TABLE analytics.event_data_old
  */
 

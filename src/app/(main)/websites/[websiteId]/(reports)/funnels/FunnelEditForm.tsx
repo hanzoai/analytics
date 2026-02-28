@@ -12,7 +12,7 @@ import {
   Row,
   Text,
   TextField,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { useMessages, useReportQuery, useUpdateQuery } from '@/components/hooks';
 import { Plus, X } from '@/components/icons';
 import { ActionSelect } from '@/components/input/ActionSelect';

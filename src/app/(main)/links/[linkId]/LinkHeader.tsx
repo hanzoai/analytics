@@ -1,4 +1,4 @@
-import { IconLabel } from '@umami/react-zen';
+import { IconLabel } from '@hanzo/react-zen';
 import { LinkButton } from '@/components/common/LinkButton';
 import { PageHeader } from '@/components/common/PageHeader';
 import { useLink, useMessages, useSlug } from '@/components/hooks';

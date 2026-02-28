@@ -1,4 +1,4 @@
-import { DataColumn, DataTable, Dialog, Icon, MenuItem, Modal, Row, Text } from '@umami/react-zen';
+import { DataColumn, DataTable, Dialog, Icon, MenuItem, Modal, Row, Text } from '@hanzo/react-zen';
 import Link from 'next/link';
 import { useState } from 'react';
 import { DateDistance } from '@/components/common/DateDistance';

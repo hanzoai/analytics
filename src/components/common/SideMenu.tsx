@@ -7,7 +7,7 @@ import {
   NavMenuItem,
   type NavMenuProps,
   Row,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import Link from 'next/link';
 
 interface SideMenuData {

@@ -7,7 +7,7 @@ import {
   MenuSeparator,
   MenuTrigger,
   Popover,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import type { Key } from 'react';
 import { useConfig, useLoginQuery, useMessages, useNavigation } from '@/components/hooks';
 import {

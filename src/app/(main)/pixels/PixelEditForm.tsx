@@ -9,7 +9,7 @@ import {
   Loading,
   Row,
   TextField,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { useEffect, useState } from 'react';
 import { useConfig, useMessages, usePixelQuery } from '@/components/hooks';
 import { useUpdateQuery } from '@/components/hooks/queries/useUpdateQuery';

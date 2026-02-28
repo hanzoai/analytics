@@ -46,10 +46,8 @@
     hostUrl || '__COLLECT_API_HOST__' || currentScript.src.split('/').slice(0, -1).join('/');
   const endpoint = `${host.replace(/\/$/, '')}__COLLECT_API_ENDPOINT__`;
   const screen = `${width}x${height}`;
-  // Support both data-hanzo-event and data-umami-event
-  const eventRegex = /data-(?:hanzo|umami)-event-([\w-_]+)/;
+  const eventRegex = /data-hanzo-event-([\w-_]+)/;
   const eventNameAttribute = `${_data}hanzo-event`;
-  const eventNameAttributeLegacy = `${_data}umami-event`;
   const delayDuration = 300;
 
   /* Third-party provider initialization */
@@ -305,9 +303,7 @@
       };
 
       // Sample key interactive elements within the section
-      const elements = section.querySelectorAll(
-        'a[href], button, input, [data-hanzo-event], [data-umami-event]',
-      );
+      const elements = section.querySelectorAll('a[href], button, input, [data-hanzo-event]');
       elements.forEach(el => {
         if (s.content.length >= 20) return; // cap per section
         s.content.push({
@@ -396,8 +392,7 @@
 
   const handleClicks = () => {
     const trackEventElement = async el => {
-      const eventName =
-        el.getAttribute(eventNameAttribute) || el.getAttribute(eventNameAttributeLegacy);
+      const eventName = el.getAttribute(eventNameAttribute);
       if (eventName) {
         const eventData = {};
 
@@ -418,11 +413,7 @@
       if (!parentElement) return trackEventElement(el);
 
       const { href, target } = parentElement;
-      if (
-        !parentElement.getAttribute(eventNameAttribute) &&
-        !parentElement.getAttribute(eventNameAttributeLegacy)
-      )
-        return;
+      if (!parentElement.getAttribute(eventNameAttribute)) return;
 
       if (parentElement.tagName === 'BUTTON') {
         return trackEventElement(parentElement);
@@ -496,7 +487,6 @@
     disabled ||
     !website ||
     localStorage?.getItem('hanzo.analytics.disabled') ||
-    localStorage?.getItem('umami.disabled') ||
     (domain && !domains.includes(hostname)) ||
     (dnt && hasDoNotTrack());
 
@@ -582,9 +572,7 @@
 
   const tracker = { track, identify };
 
-  // Expose as both window.hanzo and window.umami (backwards compat)
   if (!window.hanzo) window.hanzo = tracker;
-  if (!window.umami) window.umami = tracker;
 
   let currentUrl = normalize(href);
   let currentRef = normalize(referrer.startsWith(origin) ? '' : referrer);

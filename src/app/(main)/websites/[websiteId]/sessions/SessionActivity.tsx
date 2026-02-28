@@ -9,7 +9,7 @@ import {
   Row,
   StatusLight,
   Text,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { isSameDay } from 'date-fns';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { useMessages, useMobile, useSessionActivityQuery, useTimezone } from '@/components/hooks';

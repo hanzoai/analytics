@@ -9,7 +9,7 @@ import {
   Popover,
   Row,
   Text,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { Fragment } from 'react';
 import { useLoginQuery, useMessages, useNavigation } from '@/components/hooks';
 import { LockKeyhole, LogOut, UserCircle } from '@/components/icons';

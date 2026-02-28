@@ -1,5 +1,5 @@
 'use client';
-import { Grid } from '@umami/react-zen';
+import { Grid } from '@hanzo/react-zen';
 import { firstBy } from 'thenby';
 import { GridRow } from '@/components/common/GridRow';
 import { PageBody } from '@/components/common/PageBody';

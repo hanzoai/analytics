@@ -1,4 +1,4 @@
-import { Box, type BoxProps, Column } from '@umami/react-zen';
+import { Box, type BoxProps, Column } from '@hanzo/react-zen';
 import ChartJS, {
   type ChartData,
   type ChartOptions,

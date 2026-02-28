@@ -1,4 +1,4 @@
-import { Column, Heading } from '@umami/react-zen';
+import { Column, Heading } from '@hanzo/react-zen';
 
 export function Board({ boardId }: { boardId: string }) {
   return (

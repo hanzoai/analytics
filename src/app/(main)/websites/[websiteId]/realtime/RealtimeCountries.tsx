@@ -1,4 +1,4 @@
-import { IconLabel } from '@umami/react-zen';
+import { IconLabel } from '@hanzo/react-zen';
 import { useCallback } from 'react';
 import { TypeIcon } from '@/components/common/TypeIcon';
 import { useCountryNames, useLocale, useMessages } from '@/components/hooks';
