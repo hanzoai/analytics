@@ -45,9 +45,15 @@ export async function parseRequest(
 
 export async function getJsonBody(request: Request) {
   try {
-    return await request.clone().json();
+    // Try direct parse first (works in most Next.js environments)
+    return await request.json();
   } catch {
-    return undefined;
+    try {
+      // Fallback: clone and parse (needed in some edge/middleware contexts)
+      return await request.clone().json();
+    } catch {
+      return undefined;
+    }
   }
 }
 
