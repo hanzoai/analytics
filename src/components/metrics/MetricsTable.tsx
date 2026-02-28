@@ -1,4 +1,4 @@
-import { Grid, Icon, Row, Text } from '@umami/react-zen';
+import { Grid, Icon, Row, Text } from '@hanzo/react-zen';
 import { useEffect, useMemo } from 'react';
 import { LinkButton } from '@/components/common/LinkButton';
 import { LoadingPanel } from '@/components/common/LoadingPanel';

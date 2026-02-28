@@ -6,7 +6,7 @@ import {
   FormSubmitButton,
   ListItem,
   Select,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { useMessages, useUpdateQuery } from '@/components/hooks';
 import { ROLES } from '@/lib/constants';
 

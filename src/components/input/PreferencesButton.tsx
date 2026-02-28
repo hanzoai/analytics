@@ -1,4 +1,4 @@
-import { Button, Column, DialogTrigger, Icon, Label, Popover } from '@umami/react-zen';
+import { Button, Column, DialogTrigger, Icon, Label, Popover } from '@hanzo/react-zen';
 import { DateRangeSetting } from '@/app/(main)/settings/preferences/DateRangeSetting';
 import { TimezoneSetting } from '@/app/(main)/settings/preferences/TimezoneSetting';
 import { Panel } from '@/components/common/Panel';

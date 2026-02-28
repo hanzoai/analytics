@@ -1,5 +1,5 @@
+import { Column, Text } from '@hanzo/react-zen';
 import { useSpring } from '@react-spring/web';
-import { Column, Text } from '@umami/react-zen';
 import { AnimatedDiv } from '@/components/common/AnimatedDiv';
 import { ChangeLabel } from '@/components/metrics/ChangeLabel';
 import { formatNumber } from '@/lib/format';

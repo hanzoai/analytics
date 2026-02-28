@@ -1,5 +1,5 @@
 'use client';
-import { Column, Grid, Loading, Row } from '@umami/react-zen';
+import { Column, Grid, Loading, Row } from '@hanzo/react-zen';
 import Script from 'next/script';
 import { useEffect } from 'react';
 import { MobileNav } from '@/app/(main)/MobileNav';

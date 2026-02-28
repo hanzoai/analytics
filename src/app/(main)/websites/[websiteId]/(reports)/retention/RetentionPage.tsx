@@ -1,5 +1,5 @@
 'use client';
-import { Column } from '@umami/react-zen';
+import { Column } from '@hanzo/react-zen';
 import { endOfMonth, startOfMonth } from 'date-fns';
 import { WebsiteControls } from '@/app/(main)/websites/[websiteId]/WebsiteControls';
 import { useDateRange } from '@/components/hooks';

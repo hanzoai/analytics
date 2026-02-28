@@ -1,4 +1,4 @@
-import { Icon, LoadingButton, Text } from '@umami/react-zen';
+import { Icon, LoadingButton, Text } from '@hanzo/react-zen';
 import { useDeleteQuery, useMessages } from '@/components/hooks';
 import { X } from '@/components/icons';
 

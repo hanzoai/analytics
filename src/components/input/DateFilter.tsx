@@ -1,4 +1,4 @@
-import { Dialog, ListItem, ListSeparator, Modal, Select, type SelectProps } from '@umami/react-zen';
+import { Dialog, ListItem, ListSeparator, Modal, Select, type SelectProps } from '@hanzo/react-zen';
 import { endOfYear } from 'date-fns';
 import { Fragment, type Key, useState } from 'react';
 import { DateDisplay } from '@/components/common/DateDisplay';

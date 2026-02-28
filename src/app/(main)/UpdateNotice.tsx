@@ -1,4 +1,4 @@
-import { AlertBanner, Button, Column, Row } from '@umami/react-zen';
+import { AlertBanner, Button, Column, Row } from '@hanzo/react-zen';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { useMessages } from '@/components/hooks';

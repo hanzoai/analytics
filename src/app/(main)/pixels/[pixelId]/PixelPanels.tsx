@@ -1,4 +1,4 @@
-import { Grid, Heading, Tab, TabList, TabPanel, Tabs } from '@umami/react-zen';
+import { Grid, Heading, Tab, TabList, TabPanel, Tabs } from '@hanzo/react-zen';
 import { GridRow } from '@/components/common/GridRow';
 import { Panel } from '@/components/common/Panel';
 import { useMessages } from '@/components/hooks';

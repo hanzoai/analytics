@@ -1,4 +1,4 @@
-import { Column, Grid, Row, Text } from '@umami/react-zen';
+import { Column, Grid, Row, Text } from '@hanzo/react-zen';
 import classNames from 'classnames';
 import { colord } from 'colord';
 import { useCallback, useMemo, useState } from 'react';

@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogTrigger, Icon, Modal, Text } from '@umami/react-zen';
+import { Button, Dialog, DialogTrigger, Icon, Modal, Text } from '@hanzo/react-zen';
 import { useRouter } from 'next/navigation';
 import { useLoginQuery, useMessages, useModified } from '@/components/hooks';
 import { LogOut } from '@/components/icons';

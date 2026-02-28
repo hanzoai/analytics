@@ -1,4 +1,4 @@
-import { useToast } from '@umami/react-zen';
+import { useToast } from '@hanzo/react-zen';
 import type { ApiError } from '@/lib/types';
 import { useApi } from '../useApi';
 import { useModified } from '../useModified';

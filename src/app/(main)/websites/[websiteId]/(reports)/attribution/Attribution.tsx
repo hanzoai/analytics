@@ -1,4 +1,4 @@
-import { Column, Grid } from '@umami/react-zen';
+import { Column, Grid } from '@hanzo/react-zen';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { Panel } from '@/components/common/Panel';
 import { SectionHeader } from '@/components/common/SectionHeader';

@@ -1,4 +1,4 @@
-import { Column, Grid, Heading, Icon, Row, Text } from '@umami/react-zen';
+import { Column, Grid, Heading, Icon, Row, Text } from '@hanzo/react-zen';
 import type { ReactNode } from 'react';
 import { LinkButton } from './LinkButton';
 

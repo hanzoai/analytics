@@ -8,7 +8,7 @@ import {
   PasswordField,
   Select,
   TextField,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { useMessages, useUpdateQuery } from '@/components/hooks';
 import { ROLES } from '@/lib/constants';
 
@@ -46,7 +46,7 @@ export function UserAddForm({ onSave, onClose }) {
         name="role"
         rules={{ required: formatMessage(labels.required) }}
       >
-        <Select>
+        <Select data-test="dropdown-role">
           <ListItem id={ROLES.viewOnly} data-test="dropdown-item-viewOnly">
             {formatMessage(labels.viewOnly)}
           </ListItem>

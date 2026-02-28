@@ -7,7 +7,7 @@ import {
   Row,
   Tooltip,
   TooltipTrigger,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { useState } from 'react';
 import { useMessages } from '@/components/hooks';
 import { Maximize, X } from '@/components/icons';

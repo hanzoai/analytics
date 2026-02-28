@@ -1,4 +1,4 @@
-import { Column, Heading, IconLabel, Row, SearchField, Text } from '@umami/react-zen';
+import { Column, Heading, IconLabel, Row, SearchField, Text } from '@hanzo/react-zen';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { FixedSizeList } from 'react-window';

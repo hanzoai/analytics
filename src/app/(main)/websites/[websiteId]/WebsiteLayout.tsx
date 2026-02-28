@@ -1,5 +1,5 @@
 'use client';
-import { Column, Grid } from '@umami/react-zen';
+import { Column, Grid } from '@hanzo/react-zen';
 import type { ReactNode } from 'react';
 import { WebsiteProvider } from '@/app/(main)/websites/WebsiteProvider';
 import { PageBody } from '@/components/common/PageBody';

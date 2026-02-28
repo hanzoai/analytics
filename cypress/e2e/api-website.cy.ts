@@ -1,4 +1,4 @@
-import { uuid } from '../../src/lib/crypto';
+import { v4 as uuid } from 'uuid';
 
 describe('Website API tests', () => {
   Cypress.session.clearAllSavedSessions();
@@ -157,10 +157,10 @@ describe('Website API tests', () => {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
       },
-      body: { shareId: 'ABCDEF' },
+      body: { shareId: 'ABCDEFGH' },
     }).then(response => {
       expect(response.status).to.eq(200);
-      expect(response.body).to.have.property('shareId', 'ABCDEF');
+      expect(response.body).to.have.property('shareId', 'ABCDEFGH');
     });
   });
 

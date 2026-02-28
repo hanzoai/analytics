@@ -1,4 +1,4 @@
-import { Column, type ColumnProps, FloatingTooltip, useTheme } from '@umami/react-zen';
+import { Column, type ColumnProps, FloatingTooltip, useTheme } from '@hanzo/react-zen';
 import { colord } from 'colord';
 import { useMemo, useState } from 'react';
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps';

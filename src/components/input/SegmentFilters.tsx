@@ -1,4 +1,4 @@
-import { IconLabel, List, ListItem } from '@umami/react-zen';
+import { IconLabel, List, ListItem } from '@hanzo/react-zen';
 import { Empty } from '@/components/common/Empty';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { useWebsiteSegmentsQuery } from '@/components/hooks';

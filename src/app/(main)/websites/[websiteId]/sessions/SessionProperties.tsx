@@ -1,4 +1,4 @@
-import { Column, Grid, ListItem, Select } from '@umami/react-zen';
+import { Column, Grid, ListItem, Select } from '@hanzo/react-zen';
 import { useMemo, useState } from 'react';
 import { PieChart } from '@/components/charts/PieChart';
 import { LoadingPanel } from '@/components/common/LoadingPanel';

@@ -1,4 +1,4 @@
-import { Box, Column, Label, Row, Text } from '@umami/react-zen';
+import { Box, Column, Label, Row, Text } from '@hanzo/react-zen';
 import { Empty } from '@/components/common/Empty';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { useSessionDataQuery } from '@/components/hooks';

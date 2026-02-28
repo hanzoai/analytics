@@ -1,9 +1,9 @@
 version: "3.8"
 
 services:
-  umami:
-    container_name: umami
-    image: ghcr.io/umami-software/umami:postgresql-latest
+  analytics:
+    container_name: analytics
+    image: ghcr.io/hanzoai/analytics:postgresql-latest
     ports:
       - "127.0.0.1:3000:3000"
     environment:
@@ -22,14 +22,14 @@ services:
       retries: 5
 
   db:
-    container_name: umami-db
+    container_name: analytics-db
     image: docker.io/library/postgres:15-alpine
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - umami-db-data:/var/lib/postgresql/data:Z
+      - analytics-db-data:/var/lib/postgresql/data:Z
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -38,4 +38,4 @@ services:
       retries: 5
 
 volumes:
-  umami-db-data:
+  analytics-db-data:

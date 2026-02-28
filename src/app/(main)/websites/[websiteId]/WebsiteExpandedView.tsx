@@ -1,4 +1,4 @@
-import { Column, Grid, Row } from '@umami/react-zen';
+import { Column, Grid, Row } from '@hanzo/react-zen';
 import { WebsiteExpandedMenu } from '@/app/(main)/websites/[websiteId]/WebsiteExpandedMenu';
 import { useMessages, useNavigation } from '@/components/hooks';
 import { MobileMenuButton } from '@/components/input/MobileMenuButton';

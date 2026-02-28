@@ -1,5 +1,5 @@
 'use client';
-import { Column, useTheme } from '@umami/react-zen';
+import { Column, useTheme } from '@hanzo/react-zen';
 import { useEffect } from 'react';
 import { WebsiteHeader } from '@/app/(main)/websites/[websiteId]/WebsiteHeader';
 import { WebsitePage } from '@/app/(main)/websites/[websiteId]/WebsitePage';

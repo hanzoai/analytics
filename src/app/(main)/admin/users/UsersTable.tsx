@@ -1,10 +1,10 @@
-import { DataColumn, DataTable, Icon, MenuItem, Modal, Row, Text } from '@umami/react-zen';
+import { Button, DataColumn, DataTable, Icon, Modal, Row } from '@hanzo/react-zen';
 import Link from 'next/link';
 import { useState } from 'react';
 import { DateDistance } from '@/components/common/DateDistance';
-import { useMessages } from '@/components/hooks';
+import { LinkButton } from '@/components/common/LinkButton';
+import { useLoginQuery, useMessages } from '@/components/hooks';
 import { Edit, Trash } from '@/components/icons';
-import { MenuButton } from '@/components/input/MenuButton';
 import { ROLES } from '@/lib/constants';
 import { UserDeleteForm } from './UserDeleteForm';
 
@@ -16,6 +16,7 @@ export function UsersTable({
   showActions?: boolean;
 }) {
   const { formatMessage, labels } = useMessages();
+  const { user: loginUser } = useLoginQuery();
   const [deleteUser, setDeleteUser] = useState(null);
 
   return (
@@ -41,30 +42,28 @@ export function UsersTable({
           <DataColumn id="action" align="end" width="100px">
             {(row: any) => {
               const { id } = row;
-
               return (
-                <MenuButton>
-                  <MenuItem href={`/admin/users/${id}`} data-test="link-button-edit">
-                    <Row alignItems="center" gap>
-                      <Icon>
-                        <Edit />
-                      </Icon>
-                      <Text>{formatMessage(labels.edit)}</Text>
-                    </Row>
-                  </MenuItem>
-                  <MenuItem
-                    id="delete"
-                    onAction={() => setDeleteUser(row)}
-                    data-test="link-button-delete"
+                <Row gap alignItems="center">
+                  <LinkButton
+                    href={`/admin/users/${id}`}
+                    variant="quiet"
+                    data-test="link-button-edit"
                   >
-                    <Row alignItems="center" gap>
-                      <Icon>
-                        <Trash />
-                      </Icon>
-                      <Text>{formatMessage(labels.delete)}</Text>
-                    </Row>
-                  </MenuItem>
-                </MenuButton>
+                    <Icon size="sm">
+                      <Edit />
+                    </Icon>
+                  </LinkButton>
+                  <Button
+                    variant="quiet"
+                    isDisabled={id === loginUser?.id}
+                    onPress={() => setDeleteUser(row)}
+                    data-test="button-delete"
+                  >
+                    <Icon size="sm">
+                      <Trash />
+                    </Icon>
+                  </Button>
+                </Row>
               );
             }}
           </DataColumn>
@@ -74,9 +73,7 @@ export function UsersTable({
         <UserDeleteForm
           userId={deleteUser?.id}
           username={deleteUser?.username}
-          onClose={() => {
-            setDeleteUser(null);
-          }}
+          onClose={() => setDeleteUser(null)}
         />
       </Modal>
     </>

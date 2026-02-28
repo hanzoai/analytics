@@ -1,4 +1,4 @@
-import { Button, Column, DataColumn, DataTable, Icon, Row, SearchField } from '@umami/react-zen';
+import { Button, Column, DataColumn, DataTable, Icon, Row, SearchField } from '@hanzo/react-zen';
 import { type ReactNode, useState } from 'react';
 import { LoadingPanel } from '@/components/common/LoadingPanel';
 import { useMessages, useWebsiteExpandedMetricsQuery } from '@/components/hooks';

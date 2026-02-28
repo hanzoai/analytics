@@ -1,5 +1,5 @@
+import { Column, Grid, Row, Text } from '@hanzo/react-zen';
 import { config, useSpring } from '@react-spring/web';
-import { Column, Grid, Row, Text } from '@umami/react-zen';
 import type { ReactNode } from 'react';
 import { FixedSizeList } from 'react-window';
 import { AnimatedDiv } from '@/components/common/AnimatedDiv';

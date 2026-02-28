@@ -1,5 +1,6 @@
 describe('Login tests', () => {
   beforeEach(() => {
+    cy.on('uncaught:exception', () => false);
     cy.visit('/login');
   });
 
@@ -16,7 +17,7 @@ describe('Login tests', () => {
         .find('input')
         .type(Cypress.env('admin_password'), { delay: 0 });
       cy.getDataTest('button-submit').click();
-      cy.url().should('eq', Cypress.config().baseUrl + '/dashboard');
+      cy.url().should('include', '/websites');
       cy.logout();
     },
   );

@@ -1,4 +1,4 @@
-import { Button, DialogTrigger, Icon, Menu, Popover } from '@umami/react-zen';
+import { Button, DialogTrigger, Icon, Menu, Popover } from '@hanzo/react-zen';
 import type { Key, ReactNode } from 'react';
 import { Ellipsis } from '@/components/icons';
 
