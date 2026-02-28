@@ -4,7 +4,7 @@ import ipaddr from 'ipaddr.js';
 import isLocalhost from 'is-localhost-ip';
 import maxmind from 'maxmind';
 import { UAParser } from 'ua-parser-js';
-import { getIpAddress, stripPort } from '@/lib/ip';
+import { anonymizeIp, getIpAddress, stripPort } from '@/lib/ip';
 import { safeDecodeURIComponent } from '@/lib/url';
 
 const MAXMIND = 'maxmind';
@@ -109,14 +109,17 @@ export async function getLocation(ip: string = '', headers: Headers, hasPayloadI
 
 export async function getClientInfo(request: Request, payload: Record<string, any>) {
   const userAgent = payload?.userAgent || request.headers.get('user-agent');
-  const ip = payload?.ip || getIpAddress(request.headers);
-  const location = await getLocation(ip, request.headers, !!payload?.ip);
+  const rawIp = payload?.ip || getIpAddress(request.headers);
+  // Use full IP for geolocation, then anonymize before returning (GDPR)
+  const location = await getLocation(rawIp, request.headers, !!payload?.ip);
   const country = safeDecodeURIComponent(location?.country);
   const region = safeDecodeURIComponent(location?.region);
   const city = safeDecodeURIComponent(location?.city);
   const browser = payload?.browser ?? browserName(userAgent);
   const os = payload?.os ?? (detectOS(userAgent) as string);
   const device = payload?.device ?? getDevice(userAgent, payload?.screen);
+  // Anonymize IP before use in session hashing / returning to caller
+  const ip = anonymizeIp(rawIp);
 
   return { userAgent, browser, os, ip, country, region, city, device };
 }
