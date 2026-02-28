@@ -122,6 +122,15 @@ export async function POST(request: Request) {
       return json({ beep: 'boop' });
     }
 
+    // DNT / Global Privacy Control — respect by default; set DISABLE_RESPECT_DNT=true to opt out
+    if (process.env.DISABLE_RESPECT_DNT !== 'true') {
+      const dnt = request.headers.get('dnt');
+      const gpc = request.headers.get('sec-gpc');
+      if (dnt === '1' || gpc === '1') {
+        return json({ ok: true });
+      }
+    }
+
     // IP block
     if (hasBlockedIp(ip)) {
       return forbidden();
