@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { saveAuth } from '@/lib/auth';
 import { ROLES } from '@/lib/constants';
 import { secret, uuid } from '@/lib/crypto';
+import { ensureIamOrgTeam } from '@/lib/iam-org';
 import { createSecureToken } from '@/lib/jwt';
 import { hashPassword } from '@/lib/password';
 import redis from '@/lib/redis';
@@ -27,6 +28,12 @@ const IAM_CLIENT_SECRET =
  *
  * Receives ?code=... from IAM, exchanges for tokens, finds/creates
  * the analytics user, generates a session token, and redirects to /sso.
+ *
+ * Multi-tenant org scoping:
+ *   1. Extracts `owner` claim from IAM token (format: "org/username")
+ *   2. Auto-creates a Team for each IAM org (team.id = deterministic UUID from org slug)
+ *   3. Assigns the user to the team with `team-member` role (or `team-owner` if first user)
+ *   4. Websites created under the team are org-scoped automatically
  */
 export async function GET(request: Request) {
   if (!IAM_URL || !IAM_CLIENT_ID) {
@@ -86,6 +93,16 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL('/login?error=iam_no_email', url.origin));
     }
 
+    // Extract org from IAM claims.
+    // Casdoor `owner` claim format: "org-slug" (the organization the user belongs to).
+    // Also check X-Hanzo-Org-Id header as fallback from gateway.
+    const iamOrgSlug =
+      iamUser.owner ||
+      iamUser.org ||
+      iamUser.organization ||
+      request.headers.get('x-hanzo-org-id') ||
+      '';
+
     // Find or create the analytics user
     let user = await getUserByUsername(email);
 
@@ -94,6 +111,11 @@ export async function GET(request: Request) {
       const password = hashPassword(uuid());
       const role = ROLES.user;
       user = await createUser({ id, username: email, password, role });
+    }
+
+    // Multi-tenant: ensure the user is assigned to the IAM org team
+    if (iamOrgSlug) {
+      await ensureIamOrgTeam(user.id, iamOrgSlug);
     }
 
     // Generate analytics session token
