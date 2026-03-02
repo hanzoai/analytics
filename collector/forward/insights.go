@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-// PostHogConfig holds PostHog forwarding configuration.
-type PostHogConfig struct {
+// InsightsConfig holds Insights forwarding configuration.
+type InsightsConfig struct {
 	Endpoint      string
 	APIKey        string
 	BatchSize     int
@@ -19,8 +19,8 @@ type PostHogConfig struct {
 	Timeout       time.Duration
 }
 
-// PostHogEvent represents an event to forward to PostHog.
-type PostHogEvent struct {
+// InsightsEvent represents an event to forward to Insights.
+type InsightsEvent struct {
 	Event      string                 `json:"event"`
 	DistinctID string                 `json:"distinct_id"`
 	Properties map[string]interface{} `json:"properties,omitempty"`
@@ -28,18 +28,18 @@ type PostHogEvent struct {
 	SentAt     time.Time              `json:"sent_at,omitempty"`
 }
 
-// PostHogClient forwards events to PostHog/Insights.
-type PostHogClient struct {
-	config     *PostHogConfig
+// InsightsClient forwards events to Hanzo Insights.
+type InsightsClient struct {
+	config     *InsightsConfig
 	httpClient *http.Client
-	eventQueue chan *PostHogEvent
+	eventQueue chan *InsightsEvent
 	wg         sync.WaitGroup
 	closed     bool
 	mu         sync.RWMutex
 }
 
-// NewPostHogClient creates a new PostHog forwarding client.
-func NewPostHogClient(config *PostHogConfig) *PostHogClient {
+// NewInsightsClient creates a new Insights forwarding client.
+func NewInsightsClient(config *InsightsConfig) *InsightsClient {
 	if config.BatchSize == 0 {
 		config.BatchSize = 100
 	}
@@ -50,10 +50,10 @@ func NewPostHogClient(config *PostHogConfig) *PostHogClient {
 		config.Timeout = 10 * time.Second
 	}
 
-	c := &PostHogClient{
+	c := &InsightsClient{
 		config:     config,
 		httpClient: &http.Client{Timeout: config.Timeout},
-		eventQueue: make(chan *PostHogEvent, config.BatchSize*10),
+		eventQueue: make(chan *InsightsEvent, config.BatchSize*10),
 	}
 
 	c.wg.Add(1)
@@ -61,8 +61,8 @@ func NewPostHogClient(config *PostHogConfig) *PostHogClient {
 	return c
 }
 
-// Capture sends an event to PostHog.
-func (c *PostHogClient) Capture(event *PostHogEvent) error {
+// Capture sends an event to Insights.
+func (c *InsightsClient) Capture(event *InsightsEvent) error {
 	if event.Timestamp.IsZero() {
 		event.Timestamp = time.Now()
 	}
@@ -74,18 +74,18 @@ func (c *PostHogClient) Capture(event *PostHogEvent) error {
 	closed := c.closed
 	c.mu.RUnlock()
 	if closed {
-		return c.sendEvents([]*PostHogEvent{event})
+		return c.sendEvents([]*InsightsEvent{event})
 	}
 
 	select {
 	case c.eventQueue <- event:
 		return nil
 	default:
-		return c.sendEvents([]*PostHogEvent{event})
+		return c.sendEvents([]*InsightsEvent{event})
 	}
 }
 
-func (c *PostHogClient) sendEvents(events []*PostHogEvent) error {
+func (c *InsightsClient) sendEvents(events []*InsightsEvent) error {
 	if len(events) == 0 {
 		return nil
 	}
@@ -120,15 +120,15 @@ func (c *PostHogClient) sendEvents(events []*PostHogEvent) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("PostHog API error: status %d", resp.StatusCode)
+		return fmt.Errorf("Insights API error: status %d", resp.StatusCode)
 	}
 	return nil
 }
 
-func (c *PostHogClient) processBatch() {
+func (c *InsightsClient) processBatch() {
 	defer c.wg.Done()
 
-	batch := make([]*PostHogEvent, 0, c.config.BatchSize)
+	batch := make([]*InsightsEvent, 0, c.config.BatchSize)
 	ticker := time.NewTicker(c.config.FlushInterval)
 	defer ticker.Stop()
 
@@ -156,8 +156,8 @@ func (c *PostHogClient) processBatch() {
 }
 
 // Flush sends all queued events.
-func (c *PostHogClient) Flush() error {
-	batch := make([]*PostHogEvent, 0, c.config.BatchSize)
+func (c *InsightsClient) Flush() error {
+	batch := make([]*InsightsEvent, 0, c.config.BatchSize)
 	for {
 		select {
 		case event := <-c.eventQueue:
@@ -172,7 +172,7 @@ func (c *PostHogClient) Flush() error {
 }
 
 // Close gracefully shuts down the client.
-func (c *PostHogClient) Close() error {
+func (c *InsightsClient) Close() error {
 	c.mu.Lock()
 	if c.closed {
 		c.mu.Unlock()
