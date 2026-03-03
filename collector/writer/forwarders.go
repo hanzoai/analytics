@@ -7,28 +7,24 @@ import (
 	"github.com/hanzoai/analytics/collector/forward"
 )
 
-// InsightsForwarder adapts forward.InsightsClient to the Forwarder interface.
 type InsightsForwarder struct {
 	client *forward.InsightsClient
 }
 
-// NewInsightsForwarder creates a forwarder that sends events to Hanzo Insights.
 func NewInsightsForwarder(config *forward.InsightsConfig) *InsightsForwarder {
 	return &InsightsForwarder{
 		client: forward.NewInsightsClient(config),
 	}
 }
 
-// Forward converts a RawEvent to an InsightsEvent and captures it.
 func (f *InsightsForwarder) Forward(event *collector.RawEvent) {
 	props := make(map[string]interface{})
 
-	// Copy existing properties.
 	for k, v := range event.Properties {
 		props[k] = v
 	}
 
-	// Add standard fields as properties so they are queryable in Insights.
+	// Standard fields as Insights-queryable properties
 	if event.OrganizationID != "" {
 		props["organization_id"] = event.OrganizationID
 	}
@@ -57,7 +53,6 @@ func (f *InsightsForwarder) Forward(event *collector.RawEvent) {
 		props["$lib"] = event.Lib
 	}
 
-	// AST fields.
 	if event.ASTContext != "" {
 		props["ast_context"] = event.ASTContext
 	}
@@ -80,7 +75,6 @@ func (f *InsightsForwarder) Forward(event *collector.RawEvent) {
 		props["component_data"] = event.ComponentData
 	}
 
-	// Element interaction fields.
 	if event.ElementID != "" {
 		props["element_id"] = event.ElementID
 	}
@@ -103,33 +97,27 @@ func (f *InsightsForwarder) Forward(event *collector.RawEvent) {
 	})
 }
 
-// Close shuts down the Insights forwarder.
 func (f *InsightsForwarder) Close() error {
 	return f.client.Close()
 }
 
-// DatastoreAPIForwarder adapts forward.DatastoreClient to the Forwarder interface.
 type DatastoreAPIForwarder struct {
 	client *forward.DatastoreClient
 }
 
-// NewDatastoreAPIForwarder creates a forwarder that sends events to the Hanzo datastore REST API.
 func NewDatastoreAPIForwarder(config *forward.DatastoreConfig) *DatastoreAPIForwarder {
 	return &DatastoreAPIForwarder{
 		client: forward.NewDatastoreClient(config),
 	}
 }
 
-// Forward converts a RawEvent to a DatastoreEvent and sends it.
 func (f *DatastoreAPIForwarder) Forward(event *collector.RawEvent) {
 	props := make(map[string]interface{})
 
-	// Copy existing properties.
 	for k, v := range event.Properties {
 		props[k] = v
 	}
 
-	// Include all structured fields so the datastore has the full picture.
 	setIfNotEmpty(props, "url", event.URL)
 	setIfNotEmpty(props, "url_path", event.URLPath)
 	setIfNotEmpty(props, "referrer", event.Referrer)
@@ -141,37 +129,31 @@ func (f *DatastoreAPIForwarder) Forward(event *collector.RawEvent) {
 	setIfNotEmpty(props, "user_agent", event.UserAgent)
 	setIfNotEmpty(props, "country", event.Country)
 
-	// AST fields.
 	setIfNotEmpty(props, "ast_context", event.ASTContext)
 	setIfNotEmpty(props, "ast_type", event.ASTType)
 	setIfNotEmpty(props, "page_title", event.PageTitle)
 	setIfNotEmpty(props, "page_description", event.PageDescription)
 	setIfNotEmpty(props, "page_type", event.PageType)
 
-	// Element fields.
 	setIfNotEmpty(props, "element_id", event.ElementID)
 	setIfNotEmpty(props, "element_type", event.ElementType)
 	setIfNotEmpty(props, "element_selector", event.ElementSelector)
 	setIfNotEmpty(props, "element_text", event.ElementText)
 	setIfNotEmpty(props, "element_href", event.ElementHref)
 
-	// Section fields.
 	setIfNotEmpty(props, "section_name", event.SectionName)
 	setIfNotEmpty(props, "section_type", event.SectionType)
 	setIfNotEmpty(props, "section_id", event.SectionID)
 
-	// Component fields.
 	setIfNotEmpty(props, "component_path", event.ComponentPath)
 	setIfNotEmpty(props, "component_data", event.ComponentData)
 
-	// Commerce fields.
 	setIfNotEmpty(props, "order_id", event.OrderID)
 	setIfNotEmpty(props, "product_id", event.ProductID)
 	if event.Revenue != 0 {
 		props["revenue"] = event.Revenue
 	}
 
-	// AI fields.
 	setIfNotEmpty(props, "model_provider", event.ModelProvider)
 	setIfNotEmpty(props, "model_name", event.ModelName)
 	if event.TokenCount > 0 {
@@ -184,7 +166,6 @@ func (f *DatastoreAPIForwarder) Forward(event *collector.RawEvent) {
 		props["output_tokens"] = event.OutputTokens
 	}
 
-	// Person properties as nested object.
 	if len(event.PersonProperties) > 0 {
 		if b, err := json.Marshal(event.PersonProperties); err == nil {
 			props["person_properties"] = string(b)
@@ -203,24 +184,20 @@ func (f *DatastoreAPIForwarder) Forward(event *collector.RawEvent) {
 	})
 }
 
-// Close shuts down the datastore API forwarder.
 func (f *DatastoreAPIForwarder) Close() error {
 	return f.client.Close()
 }
 
-// AnalyticsForwarder adapts forward.ForwardClient to the Forwarder interface.
 type AnalyticsForwarder struct {
 	client *forward.ForwardClient
 }
 
-// NewAnalyticsForwarder creates a forwarder that sends events to the Hanzo analytics backend (Umami).
 func NewAnalyticsForwarder(config *forward.ForwardConfig) *AnalyticsForwarder {
 	return &AnalyticsForwarder{
 		client: forward.NewForwardClient(config),
 	}
 }
 
-// Forward converts a RawEvent and sends it to the analytics backend.
 func (f *AnalyticsForwarder) Forward(event *collector.RawEvent) {
 	switch event.Event {
 	case "$pageview":
@@ -237,7 +214,6 @@ func (f *AnalyticsForwarder) Forward(event *collector.RawEvent) {
 	}
 }
 
-// Close shuts down the analytics forwarder.
 func (f *AnalyticsForwarder) Close() error {
 	return f.client.Close()
 }
