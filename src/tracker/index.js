@@ -41,6 +41,10 @@
   const snapPixelId = attr(`${_data}snap-pixel-id`);
   const plausibleDomain = attr(`${_data}plausible-domain`);
 
+  // Hanzo Insights (behavioral analytics + feature flags)
+  const insightsKey = attr(`${_data}insights-key`);
+  const insightsHost = attr(`${_data}insights-host`) || 'https://insights.hanzo.ai';
+
   const domains = domain.split(',').map(n => n.trim());
   const host =
     hostUrl || '__COLLECT_API_HOST__' || currentScript.src.split('/').slice(0, -1).join('/');
@@ -180,6 +184,20 @@
       window.snaptr('init', snapPixelId);
       window.snaptr('track', 'PAGE_VIEW');
     }
+
+    // Hanzo Insights — load PostHog-compatible SDK on demand
+    if (insightsKey) {
+      // biome-ignore lint: vendored PostHog snippet — minified third-party code
+      !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]);t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com",""),p.src+="/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(a!==void 0?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+" (stub)"},o="init push capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey identify alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_distinct_id reset capture alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted setPersonPropertiesForFlags opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+      window.posthog.init(insightsKey, {
+        api_host: insightsHost,
+        person_profiles: 'identified_only',
+        capture_pageview: false,
+        capture_pageleave: true,
+      });
+      // Expose as window.insights alias
+      window.insights = window.posthog;
+    }
   };
 
   /* Forward events to third-party providers */
@@ -198,6 +216,9 @@
           JSON.stringify({ n: 'pageview', u: url, d: plausibleDomain, r: referrer }),
         );
       } catch {}
+    }
+    if (insightsKey && window.posthog) {
+      window.posthog.capture('$pageview', { $current_url: url, title });
     }
   };
 
@@ -229,6 +250,9 @@
           }),
         );
       } catch {}
+    }
+    if (insightsKey && window.posthog) {
+      window.posthog.capture(name, data || {});
     }
   };
 
@@ -318,6 +342,13 @@
       }
     });
 
+    // Record interaction via @hanzo/ast client if available
+    if (window.hanzo?.ast) {
+      try {
+        window.hanzo.ast.record({ type: 'page_view', data: ast });
+      } catch {}
+    }
+
     // Send AST data
     if (ast.sections.length > 0 || (ast.structured && ast.structured.length > 0)) {
       sendAST(ast);
@@ -335,6 +366,13 @@
         credentials,
       });
     } catch {}
+
+    // Forward AST data to Insights for behavioral correlation
+    if (insightsKey && window.posthog) {
+      try {
+        window.posthog.capture('$ast_collected', payload);
+      } catch {}
+    }
   };
 
   /* Element interaction tracking */
@@ -556,6 +594,10 @@
   const identify = (id, data) => {
     if (typeof id === 'string') {
       identity = id;
+      // Forward identity to Insights for cross-product user linking
+      if (insightsKey && window.posthog) {
+        window.posthog.identify(id, typeof data === 'object' ? data : {});
+      }
     }
 
     cache = '';
