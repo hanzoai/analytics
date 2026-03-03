@@ -15,6 +15,12 @@ import (
 	collector "github.com/hanzoai/analytics/collector"
 )
 
+// Forwarder is an optional event forwarder called for every event written.
+type Forwarder interface {
+	Forward(event *collector.RawEvent)
+	Close() error
+}
+
 // Config configures the datastore writer.
 type Config struct {
 	DSN           string
@@ -22,6 +28,7 @@ type Config struct {
 	FlushInterval time.Duration
 	AsyncInsert   bool
 	BufferSize    int
+	Forwarders    []Forwarder
 }
 
 // DefaultConfig returns sensible defaults.
@@ -86,7 +93,7 @@ func (w *Writer) EnsureSchema(ctx context.Context) error {
 	return nil
 }
 
-// Write queues an event for writing.
+// Write queues an event for writing and forwards to all configured forwarders.
 func (w *Writer) Write(event *collector.RawEvent) error {
 	w.mu.RLock()
 	if w.closed {
@@ -103,6 +110,11 @@ func (w *Writer) Write(event *collector.RawEvent) error {
 	}
 	if event.Lib == "" {
 		event.Lib = "hanzo-analytics"
+	}
+
+	// Fan out to all configured forwarders (non-blocking, best-effort).
+	for _, f := range w.config.Forwarders {
+		f.Forward(event)
 	}
 
 	select {
@@ -257,7 +269,7 @@ func (w *Writer) Flush() error {
 	}
 }
 
-// Close gracefully shuts down the writer.
+// Close gracefully shuts down the writer and all forwarders.
 func (w *Writer) Close() error {
 	w.mu.Lock()
 	if w.closed {
@@ -269,5 +281,10 @@ func (w *Writer) Close() error {
 
 	close(w.eventCh)
 	w.wg.Wait()
+
+	for _, f := range w.config.Forwarders {
+		f.Close()
+	}
+
 	return w.conn.Close()
 }
