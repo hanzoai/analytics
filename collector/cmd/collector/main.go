@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/hanzoai/analytics/collector/api"
+	"github.com/hanzoai/analytics/collector/forward"
 	"github.com/hanzoai/analytics/collector/writer"
 )
 
@@ -24,13 +25,49 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Initialize datastore writer
+	// Build forwarders from environment configuration.
+	var forwarders []writer.Forwarder
+
+	// Insights forwarder (behavioral analytics / PostHog-compatible).
+	if endpoint := getEnv("INSIGHTS_HOST", os.Getenv("INSIGHTS_ENDPOINT")); endpoint != "" {
+		apiKey := getEnv("INSIGHTS_API_KEY", os.Getenv("INSIGHTS_KEY"))
+		if apiKey != "" {
+			fmt.Printf("Insights forwarding enabled: %s\n", endpoint)
+			forwarders = append(forwarders, writer.NewInsightsForwarder(&forward.InsightsConfig{
+				Endpoint: endpoint,
+				APIKey:   apiKey,
+			}))
+		}
+	}
+
+	// Datastore REST API forwarder (Hanzo datastore service).
+	if endpoint := getEnv("DATASTORE_API_URL", os.Getenv("DATASTORE_API_ENDPOINT")); endpoint != "" {
+		apiKey := getEnv("DATASTORE_API_KEY", "")
+		fmt.Printf("Datastore API forwarding enabled: %s\n", endpoint)
+		forwarders = append(forwarders, writer.NewDatastoreAPIForwarder(&forward.DatastoreConfig{
+			Endpoint: endpoint,
+			APIKey:   apiKey,
+		}))
+	}
+
+	// Analytics backend forwarder (Umami-compatible).
+	if endpoint := getEnv("ANALYTICS_FORWARD_URL", os.Getenv("ANALYTICS_ENDPOINT")); endpoint != "" {
+		websiteID := getEnv("ANALYTICS_WEBSITE_ID", "")
+		fmt.Printf("Analytics forwarding enabled: %s\n", endpoint)
+		forwarders = append(forwarders, writer.NewAnalyticsForwarder(&forward.ForwardConfig{
+			Endpoint:  endpoint,
+			WebsiteID: websiteID,
+		}))
+	}
+
+	// Initialize datastore writer with forwarders.
 	w, err := writer.New(&writer.Config{
 		DSN:           dsn,
 		BatchSize:     500,
 		FlushInterval: 5 * time.Second,
 		AsyncInsert:   true,
 		BufferSize:    10000,
+		Forwarders:    forwarders,
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Datastore: %v\n", err)
@@ -51,7 +88,7 @@ func main() {
 
 	// Health check
 	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+		c.JSON(http.StatusOK, gin.H{"status": "ok", "forwarders": len(forwarders)})
 	})
 
 	// Analytics endpoints
