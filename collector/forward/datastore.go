@@ -10,17 +10,14 @@ import (
 	"time"
 )
 
-// DatastoreConfig holds Hanzo datastore API forwarding configuration.
 type DatastoreConfig struct {
-	// Endpoint is the datastore ingest URL (e.g. http://datastore.hanzo.svc:8080/api/v1/ingest).
-	Endpoint      string
+	Endpoint      string // e.g. http://datastore.hanzo.svc:8080/api/v1/ingest
 	APIKey        string
 	BatchSize     int
 	FlushInterval time.Duration
 	Timeout       time.Duration
 }
 
-// DatastoreEvent represents an event to forward to the Hanzo datastore API.
 type DatastoreEvent struct {
 	Event          string                 `json:"event"`
 	DistinctID     string                 `json:"distinct_id"`
@@ -32,7 +29,6 @@ type DatastoreEvent struct {
 	Lib            string                 `json:"lib,omitempty"`
 }
 
-// DatastoreClient forwards events to the Hanzo datastore REST API.
 type DatastoreClient struct {
 	config     *DatastoreConfig
 	httpClient *http.Client
@@ -42,7 +38,6 @@ type DatastoreClient struct {
 	mu         sync.RWMutex
 }
 
-// NewDatastoreClient creates a new datastore forwarding client.
 func NewDatastoreClient(config *DatastoreConfig) *DatastoreClient {
 	if config.BatchSize == 0 {
 		config.BatchSize = 100
@@ -65,7 +60,7 @@ func NewDatastoreClient(config *DatastoreConfig) *DatastoreClient {
 	return c
 }
 
-// Send queues an event for forwarding to the datastore API.
+// Send queues an event, falling back to synchronous send if the queue is full or closed.
 func (c *DatastoreClient) Send(event *DatastoreEvent) error {
 	if event.Timestamp.IsZero() {
 		event.Timestamp = time.Now()
@@ -150,7 +145,6 @@ func (c *DatastoreClient) processBatch() {
 	}
 }
 
-// Flush sends all queued events.
 func (c *DatastoreClient) Flush() error {
 	batch := make([]*DatastoreEvent, 0, c.config.BatchSize)
 	for {
@@ -166,7 +160,6 @@ func (c *DatastoreClient) Flush() error {
 	}
 }
 
-// Close gracefully shuts down the client.
 func (c *DatastoreClient) Close() error {
 	c.mu.Lock()
 	if c.closed {
