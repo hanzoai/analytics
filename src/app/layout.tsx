@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Suspense } from 'react';
 import { Providers } from './Providers';
 import '@fontsource/inter/300.css';
@@ -36,6 +37,15 @@ export default function ({ children }) {
         <Suspense>
           <Providers>{children}</Providers>
         </Suspense>
+        <Script
+          id="hanzo-insights"
+          strategy="afterInteractive"
+          src={`${process.env.NEXT_PUBLIC_INSIGHTS_HOST || 'https://insights.hanzo.ai'}/static/array.js`}
+        />
+        <Script
+          id="hanzo-insights-init"
+          strategy="afterInteractive"
+        >{`window.ha&&ha.init&&ha.init('${process.env.NEXT_PUBLIC_INSIGHTS_API_KEY || 'phc_e16a2d5a8033442d87f090b24c606825'}',{api_host:'${process.env.NEXT_PUBLIC_INSIGHTS_HOST || 'https://insights.hanzo.ai'}',person_profiles:'identified_only'});`}</Script>
       </body>
     </html>
   );
