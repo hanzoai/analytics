@@ -26,15 +26,8 @@ export function LoginForm({ branding }: { branding: BrandingProps }) {
   const [showPassword, setShowPassword] = useState(!iamEnabled);
 
   function startIAMLogin() {
-    const redirectUri = `${window.location.origin}/api/auth/iam`;
-    const params = new URLSearchParams({
-      client_id: branding.iamClientId,
-      response_type: 'code',
-      redirect_uri: redirectUri,
-      scope: 'openid profile email',
-      state: crypto.randomUUID(),
-    });
-    window.location.href = `${branding.iamUrl}/oauth/authorize?${params}`;
+    // Server-side initiation sets HttpOnly state cookie for CSRF protection
+    window.location.href = '/api/auth/iam/login';
   }
 
   const handleSubmit = async (data: any) => {

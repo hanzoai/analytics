@@ -36,6 +36,7 @@ const IAM_CLIENT_SECRET =
  *   4. Websites created under the team are org-scoped automatically
  */
 const BASE_URL = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || '';
+const STATE_COOKIE = 'analytics_oauth_state';
 
 export async function GET(request: Request) {
   if (!IAM_URL || !IAM_CLIENT_ID) {
@@ -58,6 +59,22 @@ export async function GET(request: Request) {
 
   if (!code) {
     return NextResponse.redirect(new URL('/login', url.origin));
+  }
+
+  // Validate OAuth state parameter (CSRF protection)
+  const stateParam = url.searchParams.get('state');
+  const cookies = request.headers.get('cookie') || '';
+  const stateCookie = cookies
+    .split(';')
+    .map(c => c.trim())
+    .find(c => c.startsWith(`${STATE_COOKIE}=`))
+    ?.split('=')[1];
+  if (!stateParam || !stateCookie || stateParam !== stateCookie) {
+    console.error('OAuth state mismatch:', {
+      stateParam: !!stateParam,
+      stateCookie: !!stateCookie,
+    });
+    return NextResponse.redirect(new URL('/login?error=iam_state', url.origin));
   }
 
   try {
@@ -84,7 +101,7 @@ export async function GET(request: Request) {
     const accessToken = tokenData.access_token;
 
     if (!accessToken) {
-      console.error('IAM response missing access_token:', tokenData);
+      console.error('IAM response missing access_token');
       return NextResponse.redirect(new URL('/login?error=iam_no_token', url.origin));
     }
 
@@ -154,7 +171,10 @@ export async function GET(request: Request) {
     ssoUrl.searchParams.set('token', token);
     ssoUrl.searchParams.set('url', '/');
 
-    return NextResponse.redirect(ssoUrl);
+    const response = NextResponse.redirect(ssoUrl);
+    // Clear the OAuth state cookie
+    response.cookies.set(STATE_COOKIE, '', { maxAge: 0, path: '/' });
+    return response;
   } catch (err) {
     console.error('IAM auth error:', err);
     return NextResponse.redirect(new URL('/login?error=iam_error', url.origin));
