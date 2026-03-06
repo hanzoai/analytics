@@ -14,7 +14,9 @@ export function SSOPage() {
     if (url && token) {
       setClientAuthToken(token);
 
-      router.push(url);
+      // Validate redirect target is a relative path (prevent open redirect)
+      const safeUrl = url.startsWith('/') && !url.startsWith('//') ? url : '/';
+      router.push(safeUrl);
     }
   }, [router, url, token]);
 
