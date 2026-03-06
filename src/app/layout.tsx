@@ -45,7 +45,7 @@ export default function ({ children }) {
         <Script
           id="hanzo-insights-init"
           strategy="afterInteractive"
-        >{`window.ha&&ha.init&&ha.init('${process.env.NEXT_PUBLIC_INSIGHTS_API_KEY || 'phc_e16a2d5a8033442d87f090b24c606825'}',{api_host:'${process.env.NEXT_PUBLIC_INSIGHTS_HOST || 'https://insights.hanzo.ai'}',person_profiles:'identified_only'});`}</Script>
+        >{`window.hi&&hi.init&&hi.init('${process.env.NEXT_PUBLIC_INSIGHTS_API_KEY || 'hi_e16a2d5a8033442d87f090b24c606825'}',{api_host:'${process.env.NEXT_PUBLIC_INSIGHTS_HOST || 'https://insights.hanzo.ai'}',person_profiles:'identified_only'});hi.register({app:'hanzo-analytics',org:'hanzo'});`}</Script>
       </body>
     </html>
   );
