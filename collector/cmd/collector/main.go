@@ -28,7 +28,7 @@ func main() {
 	// Build forwarders from environment configuration.
 	var forwarders []writer.Forwarder
 
-	// Insights forwarder (behavioral analytics / PostHog-compatible).
+	// Insights forwarder (behavioral analytics / Insights-compatible).
 	if endpoint := getEnv("INSIGHTS_HOST", os.Getenv("INSIGHTS_ENDPOINT")); endpoint != "" {
 		apiKey := getEnv("INSIGHTS_API_KEY", os.Getenv("INSIGHTS_KEY"))
 		if apiKey != "" {
