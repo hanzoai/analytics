@@ -14,28 +14,28 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useMessages, useUpdateQuery } from '@/components/hooks';
 import { Logo } from '@/components/svg';
-import { branding, isIAMEnabled } from '@/lib/branding';
 import { setClientAuthToken } from '@/lib/client';
 import { setUser } from '@/store/app';
+import type { BrandingProps } from './LoginPage';
 
-function startIAMLogin() {
-  const redirectUri = `${window.location.origin}/api/auth/iam`;
-  const params = new URLSearchParams({
-    client_id: branding.iamClientId,
-    response_type: 'code',
-    redirect_uri: redirectUri,
-    scope: 'openid profile email',
-    state: crypto.randomUUID(),
-  });
-  window.location.href = `${branding.iamUrl}/login/oauth/authorize?${params}`;
-}
-
-export function LoginForm() {
+export function LoginForm({ branding }: { branding: BrandingProps }) {
   const { formatMessage, labels, getErrorMessage } = useMessages();
   const router = useRouter();
   const { mutateAsync, error } = useUpdateQuery('/auth/login');
-  const [showPassword, setShowPassword] = useState(!isIAMEnabled());
-  const iamEnabled = isIAMEnabled();
+  const iamEnabled = branding.iamEnabled;
+  const [showPassword, setShowPassword] = useState(!iamEnabled);
+
+  function startIAMLogin() {
+    const redirectUri = `${window.location.origin}/api/auth/iam`;
+    const params = new URLSearchParams({
+      client_id: branding.iamClientId,
+      response_type: 'code',
+      redirect_uri: redirectUri,
+      scope: 'openid profile email',
+      state: crypto.randomUUID(),
+    });
+    window.location.href = `${branding.iamUrl}/oauth/authorize?${params}`;
+  }
 
   const handleSubmit = async (data: any) => {
     await mutateAsync(data, {

@@ -35,12 +35,25 @@ const IAM_CLIENT_SECRET =
  *   3. Assigns the user to the team with `team-member` role (or `team-owner` if first user)
  *   4. Websites created under the team are org-scoped automatically
  */
+const BASE_URL = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || '';
+
 export async function GET(request: Request) {
   if (!IAM_URL || !IAM_CLIENT_ID) {
     return NextResponse.json({ error: 'IAM not configured' }, { status: 501 });
   }
 
   const url = new URL(request.url);
+  // Behind a reverse proxy, request.url resolves to the internal address (e.g. 0.0.0.0:3000).
+  // Use BASE_URL or X-Forwarded-Host to determine the real origin.
+  const forwardedHost = request.headers.get('x-forwarded-host') || request.headers.get('host');
+  const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
+  if (BASE_URL) {
+    url.protocol = new URL(BASE_URL).protocol;
+    url.host = new URL(BASE_URL).host;
+  } else if (forwardedHost) {
+    url.protocol = forwardedProto + ':';
+    url.host = forwardedHost;
+  }
   const code = url.searchParams.get('code');
 
   if (!code) {
@@ -50,7 +63,7 @@ export async function GET(request: Request) {
   try {
     // Exchange authorization code for tokens
     const redirectUri = `${url.origin}/api/auth/iam`;
-    const tokenRes = await fetch(`${IAM_URL}/api/login/oauth/access_token`, {
+    const tokenRes = await fetch(`${IAM_URL}/oauth/token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
@@ -76,7 +89,7 @@ export async function GET(request: Request) {
     }
 
     // Fetch user info from IAM
-    const userRes = await fetch(`${IAM_URL}/api/userinfo`, {
+    const userRes = await fetch(`${IAM_URL}/oauth/userinfo`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
@@ -86,17 +99,26 @@ export async function GET(request: Request) {
     }
 
     const iamUser = await userRes.json();
-    const email = iamUser.email || iamUser.preferred_username || iamUser.name;
+
+    // Decode JWT access token claims for fields not in userinfo (e.g. owner/org)
+    let jwtClaims: Record<string, unknown> = {};
+    try {
+      const payload = accessToken.split('.')[1];
+      jwtClaims = JSON.parse(Buffer.from(payload, 'base64url').toString());
+    } catch {
+      // Non-JWT token — fall back to userinfo only
+    }
+
+    const email = iamUser.email || jwtClaims.email || iamUser.preferred_username || iamUser.name;
 
     if (!email) {
       console.error('IAM user has no email:', iamUser);
       return NextResponse.redirect(new URL('/login?error=iam_no_email', url.origin));
     }
 
-    // Extract org from IAM claims.
-    // Casdoor `owner` claim format: "org-slug" (the organization the user belongs to).
-    // Also check X-Hanzo-Org-Id header as fallback from gateway.
+    // Extract org from JWT claims (owner) or userinfo or gateway header.
     const iamOrgSlug =
+      (jwtClaims.owner as string) ||
       iamUser.owner ||
       iamUser.org ||
       iamUser.organization ||
