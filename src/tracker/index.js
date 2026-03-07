@@ -204,7 +204,7 @@
             ((p = t.createElement('script')).type = 'text/javascript'),
               (p.crossOrigin = 'anonymous'),
               (p.async = !0),
-              (p.src = s.api_host.replace('.i.posthog.com', '')),
+              (p.src = s.api_host.replace('.i.insights.com', '')),
               (p.src += '/static/array.js'),
               (r = t.getElementsByTagName('script')[0]).parentNode.insertBefore(p, r);
             var u = e;
