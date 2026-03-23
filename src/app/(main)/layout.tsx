@@ -13,6 +13,6 @@ export default function ({ children }) {
 export const metadata: Metadata = {
   title: {
     template: '%s',
-    default: 'Analytics',
+    default: 'Hanzo Analytics',
   },
 };

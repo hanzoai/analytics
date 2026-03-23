@@ -1,4 +1,18 @@
 html body {
   --primary-color: #147af3;
   --primary-font-color: var(--light-color);
+  --font-family: "Geist Sans", sans-serif;
+}
+
+/* Force dark theme with true black backgrounds */
+html[data-theme="dark"] body,
+.dark-theme body {
+  --base-color-1: #0a0a0a;
+  --base-color-2: #0a0a0a;
+  --base-color-3: #141414;
+  --base-color-4: #1a1a1a;
+  --base-color-5: #252525;
+  --background-color: #000000;
+  --background-color-1: #0a0a0a;
+  --background-color-2: #0a0a0a;
 }

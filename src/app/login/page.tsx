@@ -16,7 +16,7 @@ export default async function () {
   return (
     <LoginPage
       branding={{
-        name: process.env.NEXT_PUBLIC_APP_NAME || process.env.APP_NAME || 'Analytics',
+        name: process.env.NEXT_PUBLIC_APP_NAME || process.env.APP_NAME || 'Hanzo Analytics',
         iamUrl,
         iamClientId,
         iamProviderName:
