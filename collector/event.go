@@ -148,6 +148,18 @@ var StandardEvents = struct {
 	PixelView          string
 	APIRequest         string
 	Exception          string
+
+	// Referral
+	ReferralLinkCreated      string
+	ReferralClaimed          string
+	ReferralCreditGranted    string
+	ReferralCommissionEarned string
+	ReferralTierUpgraded     string
+
+	// Contributor
+	ContributorRegistered     string
+	ContributorPayoutCalc     string
+	ContributorPayoutSent     string
 }{
 	PageView:           "$pageview",
 	ScreenView:         "$screen",
@@ -184,4 +196,14 @@ var StandardEvents = struct {
 	PixelView:          "pixel_view",
 	APIRequest:         "$api_request",
 	Exception:          "$exception",
+
+	ReferralLinkCreated:      "referral_link_created",
+	ReferralClaimed:          "referral_claimed",
+	ReferralCreditGranted:    "referral_credit_granted",
+	ReferralCommissionEarned: "referral_commission_earned",
+	ReferralTierUpgraded:     "referral_tier_upgraded",
+
+	ContributorRegistered:     "contributor_registered",
+	ContributorPayoutCalc:     "contributor_payout_calculated",
+	ContributorPayoutSent:     "contributor_payout_sent",
 }
