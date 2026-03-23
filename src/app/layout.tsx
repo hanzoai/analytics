@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import Script from 'next/script';
 import { Suspense } from 'react';
 import { Providers } from './Providers';
-import '@fontsource/inter/300.css';
-import '@fontsource/inter/400.css';
-import '@fontsource/inter/500.css';
-import '@fontsource/inter/700.css';
+import '@fontsource/geist-sans/300.css';
+import '@fontsource/geist-sans/400.css';
+import '@fontsource/geist-sans/500.css';
+import '@fontsource/geist-sans/700.css';
 import '@hanzo/react-zen/styles.css';
 import '@/styles/global.css';
 import '@/styles/variables.css';
@@ -29,8 +29,8 @@ export default function ({ children }) {
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
         <meta name="msapplication-TileColor" content="#da532c" />
-        <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#2f2f2f" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
         <meta name="robots" content="noindex,nofollow" />
       </head>
       <body>
@@ -51,7 +51,7 @@ export default function ({ children }) {
   );
 }
 
-const appName = process.env.NEXT_PUBLIC_APP_NAME || 'Analytics';
+const appName = process.env.NEXT_PUBLIC_APP_NAME || 'Hanzo Analytics';
 
 export const metadata: Metadata = {
   title: {
