@@ -16,7 +16,7 @@ function env(key: string): string {
 
 export const branding = {
   /** Display name shown in the sidebar, login page, and page titles. */
-  name: env('APP_NAME') || 'Analytics',
+  name: env('APP_NAME') || 'Hanzo Analytics',
 
   /** Logo SVG path data (viewBox 0 0 67 67). Set to empty string to hide logo. */
   logoSvg: env('LOGO_SVG'),
