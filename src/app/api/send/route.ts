@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     let cache: Cache | null = null;
 
     if (websiteId) {
-      const cacheHeader = request.headers.get('x-hanzo-cache');
+      const cacheHeader = request.headers.get('x-cache-hint');
 
       if (cacheHeader) {
         const result = await parseToken(cacheHeader, secret());

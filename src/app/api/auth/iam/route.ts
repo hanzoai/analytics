@@ -139,7 +139,7 @@ export async function GET(request: Request) {
       iamUser.owner ||
       iamUser.org ||
       iamUser.organization ||
-      request.headers.get('x-hanzo-org-id') ||
+      request.headers.get('x-iam-org-id') ||
       '';
 
     // Find or create the analytics user

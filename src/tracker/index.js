@@ -597,7 +597,7 @@
         body: JSON.stringify({ type, payload }),
         headers: {
           'Content-Type': 'application/json',
-          ...(typeof cache !== 'undefined' && { 'x-hanzo-cache': cache }),
+          ...(typeof cache !== 'undefined' && { 'x-cache-hint': cache }),
         },
         credentials,
       });
