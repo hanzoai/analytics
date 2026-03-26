@@ -17,9 +17,11 @@ COPY . .
 COPY docker/middleware.ts ./src
 
 ARG BASE_PATH
+ARG NEXT_PUBLIC_APP_NAME="Hanzo Analytics"
 
 ENV BASE_PATH=$BASE_PATH
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_APP_NAME=$NEXT_PUBLIC_APP_NAME
 ENV DATABASE_URL="postgresql://user:pass@localhost:5432/dummy"
 
 RUN npm run build-docker
