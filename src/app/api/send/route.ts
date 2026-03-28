@@ -6,6 +6,7 @@ import { COLLECTION_TYPE, EVENT_TYPE } from '@/lib/constants';
 import { hash, secret, uuid } from '@/lib/crypto';
 import datastore from '@/lib/datastore';
 import { getClientInfo, hasBlockedIp } from '@/lib/detect';
+import { forwardToInsights } from '@/lib/insights-forward';
 import { createToken, parseToken } from '@/lib/jwt';
 import { fetchWebsite } from '@/lib/load';
 import { parseRequest } from '@/lib/request';
@@ -266,6 +267,24 @@ export async function POST(request: Request) {
         ttclid,
         lifatid,
         twclid,
+      });
+
+      // Forward event to Insights for product analytics enrichment
+      forwardToInsights({
+        event: name ? name : '$pageview',
+        distinct_id: sessionId,
+        properties: {
+          $current_url: url ? safeDecodeURI(urlPath) : undefined,
+          $pathname: urlPath ? safeDecodeURI(urlPath) : undefined,
+          $referrer: referrer,
+          $browser: browser,
+          $os: os,
+          $device_type: device,
+          website_id: sourceId,
+          hostname: hostname || urlDomain,
+          ...(data || {}),
+        },
+        timestamp: createdAt.toISOString(),
       });
     } else if (type === COLLECTION_TYPE.identify) {
       if (data) {
