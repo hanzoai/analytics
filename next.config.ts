@@ -81,6 +81,10 @@ const headers = [
     headers: apiHeaders,
   },
   {
+    source: '/v1/analytics/:path*',
+    headers: apiHeaders,
+  },
+  {
     source: '/:path*',
     headers: defaultHeaders,
   },
@@ -90,7 +94,12 @@ const headers = [
   },
 ];
 
-const rewrites = [];
+const rewrites = [
+  {
+    source: '/v1/analytics/:path*',
+    destination: '/api/:path*',
+  },
+];
 
 if (trackerScriptURL) {
   rewrites.push({
