@@ -94,6 +94,7 @@ func main() {
 	// Analytics endpoints
 	handler := api.NewHandler(w)
 	handler.Route(r.Group("/"))
+	handler.Route(r.Group("/v1/analytics"))
 
 	// Start server
 	srv := &http.Server{
