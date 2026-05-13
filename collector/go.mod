@@ -1,6 +1,6 @@
 module github.com/hanzoai/analytics/collector
 
-go 1.26
+go 1.26.3
 
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.30.1
