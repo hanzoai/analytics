@@ -1,7 +1,9 @@
 # LLM.md - Hanzo Analytics
 
 ## Overview
-Privacy-focused web analytics for the Hanzo ecosystem. Umami fork with multi-tenant IAM integration.
+Privacy-focused web analytics for the Hanzo ecosystem. Multi-tenant IAM integration.
+
+**Upstream**: [Umami](https://github.com/umami-software/umami) (MIT). Branded as **Hanzo Analytics**.
 
 ## Tech Stack
 - **Language**: TypeScript (Next.js), Go (collector)
