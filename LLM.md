@@ -1,4 +1,4 @@
-# LLM.md - Hanzo Analytics
+# Hanzo Analytics
 
 ## Overview
 Privacy-focused web analytics for the Hanzo ecosystem. Multi-tenant IAM integration.
