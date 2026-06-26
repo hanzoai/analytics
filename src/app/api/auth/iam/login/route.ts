@@ -47,7 +47,7 @@ export async function GET(request: Request) {
     state,
   });
 
-  const response = NextResponse.redirect(`${IAM_URL}/oauth/authorize?${params}`);
+  const response = NextResponse.redirect(`${IAM_URL}/v1/iam/oauth/authorize?${params}`);
   response.cookies.set(STATE_COOKIE, state, {
     httpOnly: true,
     secure: true,
