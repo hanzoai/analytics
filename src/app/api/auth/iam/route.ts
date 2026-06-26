@@ -80,7 +80,7 @@ export async function GET(request: Request) {
   try {
     // Exchange authorization code for tokens
     const redirectUri = `${url.origin}/api/auth/iam`;
-    const tokenRes = await fetch(`${IAM_URL}/oauth/token`, {
+    const tokenRes = await fetch(`${IAM_URL}/v1/iam/oauth/access_token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
@@ -106,7 +106,7 @@ export async function GET(request: Request) {
     }
 
     // Fetch user info from IAM
-    const userRes = await fetch(`${IAM_URL}/oauth/userinfo`, {
+    const userRes = await fetch(`${IAM_URL}/v1/iam/oauth/userinfo`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
