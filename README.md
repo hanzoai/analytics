@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.svg" alt="analytics" width="880"></p>
+
 <p align="center">
   <img src="https://content.hanzo.ai/website/images/analytics-logo.png" alt="Analytics Logo" width="100">
 </p>
