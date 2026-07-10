@@ -51,22 +51,35 @@ merge cleanly forever. Write path stays no-Kafka direct-insert (`if (kafka.enabl
 
 ## Web Vitals (LCP/INP/CLS/FCP/TTFB)
 Cookieless, no PII. Enable per-site with `data-performance="true"` on the tracker `<script>`.
-- Tracker `src/tracker/index.js` `initPerformance()` collects TTFB/FCP/LCP (PerformanceObserver),
-  CLS (session-window), INP (p98 @ 40ms), re-flushes on SPA nav, sends `type:'performance'`.
-- `src/app/api/send/route.ts` validates the metrics and writes `EVENT_TYPE.performance (=5)`.
-- `saveEvent` persists `lcp/inp/cls/fcp/ttfb` (Datastore path; relational/prisma path unchanged).
-- CH columns: migration `09_add_performance.sql`. Queries: `reports/getPerformance*.ts`,
-  `performance/getPerformanceStats.ts`. Rebuild tracker: `pnpm build-tracker` (-> gitignored `public/script.js`).
+- **Write:** tracker `src/tracker/index.js` `initPerformance()` collects TTFB/FCP/LCP
+  (PerformanceObserver), CLS (session-window), INP (p98 @ 40ms), re-flushes on SPA nav, sends
+  `type:'performance'`. `src/app/api/send/route.ts` validates the metrics and writes
+  `EVENT_TYPE.performance (=5)`. `saveEvent` persists `lcp/inp/cls/fcp/ttfb` (Datastore path;
+  relational/prisma path unchanged — Datastore-only). CH columns: migration `09_add_performance.sql`.
+- **Read:** `/api/reports/performance` → `getPerformance*` / `performance/getPerformanceStats.ts`,
+  querying `website_event` directly with `event_type = 5`. `performanceReportSchema` is a variant of
+  `reportResultSchema`'s discriminatedUnion (without it, a `type:'performance'` request 400s).
+- **SQLi guard:** `metric` is interpolated into raw SQL (`order by ${metric}`, `quantile(${metric})`),
+  so it is allowlisted against `PERFORMANCE_METRICS` (constants.ts, single source of truth) at BOTH
+  the API boundary (`z.enum(PERFORMANCE_METRICS)`) and in the query funcs (`find(...) ?? 'lcp'`).
+- Rebuild tracker: `pnpm build-tracker` (-> gitignored `public/script.js`).
 
-## Property pivot tables (query-perf, invisible to users)
-Migration `11_add_event_session_data_pivot.sql`: `event_data_pivot` + MV (self-backfilled) and a
-`session_data` property-filter projection. `clickhouse.ts getPropertyFilterQuery()` (came in with the
-stock revert) queries them for property filters.
+## Property pivot (deferred)
+`clickhouse.ts getPropertyFilterQuery()` exists (it came in with the stock `clickhouse.ts` revert) but
+has **no caller** in this fork — the upstream property-query layer (getEventData*/getSessionData* pivot
+consumers) is not ported. So the pivot **migration was NOT shipped**: an `event_data_pivot`
+AggregatingMergeTree + MV firing on every insert with zero read benefit is pure write-amplification.
+Ship migration `11` (upstream) only once those readers are wired.
 
 ## ClickHouse migration runbook (operator-applied to live Datastore)
-Apply in order against `DATASTORE_URL` (`clickhouse-client < FILE`), each is idempotent:
-1. `09_add_performance.sql` — adds nullable perf columns + rebuilds hourly MV. No backfill (historical rows NULL).
-2. `11_add_event_session_data_pivot.sql` — creates pivot table+MV (self-backfills event_data) + session projection.
-   **MV caveat**: materialized views only capture rows inserted *after* creation. `09`'s hourly MV needs no
-   backfill; `11`'s event pivot self-backfills via its `INSERT ... SELECT`. For any *new* aggregate added later,
-   run an `INSERT ... SELECT` over historical `event_data`/`website_event` to backfill.
+Canonical DB is **`analytics`** (derived from the `DATASTORE_URL` pathname; schema.sql + migrations
+01–08 qualify tables as `analytics.*`). Apply against `DATASTORE_URL` (`clickhouse-client < FILE`),
+idempotent:
+1. `09_add_performance.sql` — adds nullable `lcp/inp/cls/fcp/ttfb` to `analytics.website_event` +
+   rebuilds `analytics.website_event_stats_hourly_mv` so `views` excludes `event_type IN (2,5)`
+   (i.e. perf events don't inflate view counts). **No backfill** — perf columns are NULL for
+   historical rows; type-5 is new so there is no view discontinuity for types 1/3/4.
+   *(`10_add_session_replay.sql` was also `analytics.`-corrected here — same `umami.`→`analytics.` bug.)*
+- **MV backfill caveat (general):** materialized views only capture rows inserted *after* creation.
+  For any *new* aggregate added later, run an `INSERT ... SELECT` over historical
+  `analytics.website_event` / `analytics.event_data` to backfill.

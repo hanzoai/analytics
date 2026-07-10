@@ -1,5 +1,5 @@
 -- Create session_replay
-CREATE TABLE umami.session_replay
+CREATE TABLE analytics.session_replay
 (
     replay_id UUID,
     website_id UUID,

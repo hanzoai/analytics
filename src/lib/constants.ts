@@ -95,6 +95,11 @@ export const EVENT_TYPE = {
   performance: 5,
 } as const;
 
+// Web Vitals metrics — single source of truth. These names are interpolated into raw SQL
+// (order by / quantile), so any consumer MUST allowlist against this tuple, never a raw string.
+export const PERFORMANCE_METRICS = ['lcp', 'inp', 'cls', 'fcp', 'ttfb'] as const;
+export type PerformanceMetric = (typeof PERFORMANCE_METRICS)[number];
+
 export const DATA_TYPE = {
   string: 1,
   number: 2,

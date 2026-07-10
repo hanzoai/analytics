@@ -1,4 +1,5 @@
 import clickhouse from '@/lib/clickhouse';
+import { PERFORMANCE_METRICS } from '@/lib/constants';
 import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 import type { QueryFilters } from '@/lib/types';
@@ -37,7 +38,15 @@ async function relationalQuery(
   parameters: PerformanceParameters,
   filters: QueryFilters,
 ): Promise<PerformanceResult> {
-  const { startDate, endDate, unit = 'day', timezone = 'utc', metric = 'lcp' } = parameters;
+  const {
+    startDate,
+    endDate,
+    unit = 'day',
+    timezone = 'utc',
+    metric: rawMetric = 'lcp',
+  } = parameters;
+  // Allowlist: metric is interpolated into raw SQL — never trust the request value.
+  const metric = PERFORMANCE_METRICS.find(m => m === rawMetric) ?? 'lcp';
   const { getDateSQL, rawQuery, parseFilters } = prisma;
   const { filterQuery, joinSessionQuery, cohortQuery, queryParams } = parseFilters({
     ...filters,
@@ -131,7 +140,15 @@ async function clickhouseQuery(
   parameters: PerformanceParameters,
   filters: QueryFilters,
 ): Promise<PerformanceResult> {
-  const { startDate, endDate, unit = 'day', timezone = 'utc', metric = 'lcp' } = parameters;
+  const {
+    startDate,
+    endDate,
+    unit = 'day',
+    timezone = 'utc',
+    metric: rawMetric = 'lcp',
+  } = parameters;
+  // Allowlist: metric is interpolated into raw SQL — never trust the request value.
+  const metric = PERFORMANCE_METRICS.find(m => m === rawMetric) ?? 'lcp';
   const { getDateSQL, rawQuery, parseFilters } = clickhouse;
   const { filterQuery, cohortQuery, queryParams } = parseFilters({ ...filters, websiteId });
 

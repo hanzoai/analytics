@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { isValidTimezone, normalizeTimezone } from '@/lib/date';
-import { UNIT_TYPES } from './constants';
+import { PERFORMANCE_METRICS, UNIT_TYPES } from './constants';
 
 export const timezoneParam = z
   .string()
@@ -200,6 +200,17 @@ export const breakdownReportSchema = z.object({
   }),
 });
 
+export const performanceReportSchema = z.object({
+  type: z.literal('performance'),
+  parameters: z.object({
+    startDate: z.coerce.date(),
+    endDate: z.coerce.date(),
+    unit: unitParam.optional(),
+    timezone: timezoneParam.optional(),
+    metric: z.enum(PERFORMANCE_METRICS).optional(),
+  }),
+});
+
 export const reportBaseSchema = z.object({
   websiteId: z.uuid(),
   type: reportTypeParam,
@@ -217,6 +228,7 @@ export const reportTypeSchema = z.discriminatedUnion('type', [
   revenueReportSchema,
   attributionReportSchema,
   breakdownReportSchema,
+  performanceReportSchema,
 ]);
 
 export const reportSchema = reportBaseSchema;
