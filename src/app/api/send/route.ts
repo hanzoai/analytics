@@ -2,9 +2,9 @@ import { startOfHour, startOfMonth } from 'date-fns';
 import { isbot } from 'isbot';
 import { serializeError } from 'serialize-error';
 import { z } from 'zod';
+import clickhouse from '@/lib/clickhouse';
 import { COLLECTION_TYPE, EVENT_TYPE } from '@/lib/constants';
 import { hash, secret, uuid } from '@/lib/crypto';
-import datastore from '@/lib/datastore';
 import { getClientInfo, hasBlockedIp } from '@/lib/detect';
 import { forwardToInsights } from '@/lib/insights-forward';
 import { createToken, parseToken } from '@/lib/jwt';
@@ -23,7 +23,7 @@ interface Cache {
 }
 
 const schema = z.object({
-  type: z.enum(['event', 'identify']),
+  type: z.enum(['event', 'identify', 'performance']),
   payload: z
     .object({
       website: z.uuid().optional(),
@@ -45,6 +45,11 @@ const schema = z.object({
       browser: z.string().optional(),
       os: z.string().optional(),
       device: z.string().optional(),
+      lcp: z.number().nonnegative().max(60000).optional(),
+      inp: z.number().nonnegative().max(60000).optional(),
+      cls: z.number().nonnegative().max(100).optional(),
+      fcp: z.number().nonnegative().max(60000).optional(),
+      ttfb: z.number().nonnegative().max(60000).optional(),
     })
     .refine(
       data => {
@@ -84,6 +89,11 @@ export async function POST(request: Request) {
       tag,
       timestamp,
       id,
+      lcp,
+      inp,
+      cls,
+      fcp,
+      ttfb,
     } = payload;
 
     const sourceId = websiteId || pixelId || linkId;
@@ -146,7 +156,7 @@ export async function POST(request: Request) {
     const sessionId = id ? uuid(sourceId, id) : uuid(sourceId, ip, userAgent, sessionSalt);
 
     // Create a session if not found
-    if (!datastore.enabled && !cache?.sessionId) {
+    if (!clickhouse.enabled && !cache?.sessionId) {
       await createSession({
         id: sessionId,
         websiteId: sourceId,
@@ -296,6 +306,40 @@ export async function POST(request: Request) {
           createdAt,
         });
       }
+    } else if (type === COLLECTION_TYPE.performance) {
+      const base = hostname ? `https://${hostname}` : 'https://localhost';
+      const currentUrl = new URL(url, base);
+      const urlPath = currentUrl.pathname === '/undefined' ? '' : currentUrl.pathname;
+
+      await saveEvent({
+        websiteId: sourceId,
+        sessionId,
+        visitId,
+        eventType: EVENT_TYPE.performance,
+        createdAt,
+
+        // Page
+        pageTitle: safeDecodeURIComponent(title),
+        urlPath: safeDecodeURI(urlPath),
+
+        // Session
+        distinctId: id,
+        browser,
+        os,
+        device,
+        screen,
+        language,
+        country,
+        region,
+        city,
+
+        // Web Vitals
+        lcp,
+        inp,
+        cls,
+        fcp,
+        ttfb,
+      });
     }
 
     const token = createToken({ websiteId, sessionId, visitId, iat }, secret());

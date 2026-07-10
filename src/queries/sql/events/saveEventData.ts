@@ -1,8 +1,8 @@
+import clickhouse from '@/lib/clickhouse';
 import { DATA_TYPE } from '@/lib/constants';
 import { uuid } from '@/lib/crypto';
 import { flattenJSON, getStringValue } from '@/lib/data';
-import datastore from '@/lib/datastore';
-import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
+import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
 import kafka from '@/lib/kafka';
 import prisma from '@/lib/prisma';
 import type { DynamicData } from '@/lib/types';
@@ -20,7 +20,7 @@ export interface SaveEventDataArgs {
 export async function saveEventData(data: SaveEventDataArgs) {
   return runQuery({
     [PRISMA]: () => relationalQuery(data),
-    [DATASTORE]: () => datastoreQuery(data),
+    [CLICKHOUSE]: () => clickhouseQuery(data),
   });
 }
 
@@ -47,10 +47,10 @@ async function relationalQuery(data: SaveEventDataArgs) {
   });
 }
 
-async function datastoreQuery(data: SaveEventDataArgs) {
+async function clickhouseQuery(data: SaveEventDataArgs) {
   const { websiteId, sessionId, eventId, urlPath, eventName, eventData, createdAt } = data;
 
-  const { insert, getUTCString } = datastore;
+  const { insert, getUTCString } = clickhouse;
   const { sendMessage } = kafka;
 
   const jsonKeys = flattenJSON(eventData);

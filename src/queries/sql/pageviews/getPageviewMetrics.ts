@@ -1,6 +1,6 @@
+import clickhouse from '@/lib/clickhouse';
 import { EVENT_COLUMNS, FILTER_COLUMNS, SESSION_COLUMNS } from '@/lib/constants';
-import datastore from '@/lib/datastore';
-import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
+import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 import type { QueryFilters } from '@/lib/types';
 
@@ -22,7 +22,7 @@ export async function getPageviewMetrics(
 ) {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [DATASTORE]: () => datastoreQuery(...args),
+    [CLICKHOUSE]: () => clickhouseQuery(...args),
   });
 }
 
@@ -92,14 +92,14 @@ async function relationalQuery(
   );
 }
 
-async function datastoreQuery(
+async function clickhouseQuery(
   websiteId: string,
   parameters: PageviewMetricsParameters,
   filters: QueryFilters,
 ): Promise<{ x: string; y: number }[]> {
   const { type, limit = 500, offset = 0 } = parameters;
   let column = FILTER_COLUMNS[type] || type;
-  const { rawQuery, parseFilters } = datastore;
+  const { rawQuery, parseFilters } = clickhouse;
   const { filterQuery, cohortQuery, queryParams } = parseFilters({
     ...filters,
     websiteId,

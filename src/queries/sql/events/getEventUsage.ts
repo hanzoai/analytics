@@ -1,5 +1,5 @@
-import datastore from '@/lib/datastore';
-import { DATASTORE, notImplemented, PRISMA, runQuery } from '@/lib/db';
+import clickhouse from '@/lib/clickhouse';
+import { CLICKHOUSE, notImplemented, PRISMA, runQuery } from '@/lib/db';
 import type { QueryFilters } from '@/lib/types';
 
 const FUNCTION_NAME = 'getEventUsage';
@@ -7,15 +7,15 @@ const FUNCTION_NAME = 'getEventUsage';
 export function getEventUsage(...args: [websiteIds: string[], filters: QueryFilters]) {
   return runQuery({
     [PRISMA]: notImplemented,
-    [DATASTORE]: () => datastoreQuery(...args),
+    [CLICKHOUSE]: () => clickhouseQuery(...args),
   });
 }
 
-function datastoreQuery(
+function clickhouseQuery(
   websiteIds: string[],
   filters: QueryFilters,
 ): Promise<{ websiteId: string; count: number }[]> {
-  const { rawQuery } = datastore;
+  const { rawQuery } = clickhouse;
   const { startDate, endDate } = filters;
 
   return rawQuery(

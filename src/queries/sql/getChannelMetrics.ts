@@ -1,3 +1,4 @@
+import clickhouse from '@/lib/clickhouse';
 import {
   EMAIL_DOMAINS,
   PAID_AD_PARAMS,
@@ -6,8 +7,7 @@ import {
   SOCIAL_DOMAINS,
   VIDEO_DOMAINS,
 } from '@/lib/constants';
-import datastore from '@/lib/datastore';
-import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
+import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 import type { QueryFilters } from '@/lib/types';
 
@@ -16,7 +16,7 @@ const FUNCTION_NAME = 'getChannelMetrics';
 export async function getChannelMetrics(...args: [websiteId: string, filters?: QueryFilters]) {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [DATASTORE]: () => datastoreQuery(...args),
+    [CLICKHOUSE]: () => clickhouseQuery(...args),
   });
 }
 
@@ -76,11 +76,11 @@ async function relationalQuery(websiteId: string, filters: QueryFilters) {
   ).then(results => results.map(item => ({ ...item, y: Number(item.y) })));
 }
 
-async function datastoreQuery(
+async function clickhouseQuery(
   websiteId: string,
   filters: QueryFilters,
 ): Promise<{ x: string; y: number }[]> {
-  const { rawQuery, parseFilters } = datastore;
+  const { rawQuery, parseFilters } = clickhouse;
   const { queryParams, filterQuery, cohortQuery, dateQuery } = parseFilters({
     ...filters,
     websiteId,

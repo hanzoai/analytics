@@ -30,6 +30,7 @@
   const domain = attr(`${_data}domains`) || '';
   const credentials = attr(`${_data}fetch-credentials`) || 'omit';
   const astEnabled = attr(`${_data}ast`) !== _false;
+  const perf = attr(`${_data}performance`) === _true;
 
   // Third-party analytics provider keys (unified tracking)
   const gaId = attr(`${_data}ga-id`);
@@ -446,6 +447,10 @@
   const handlePush = (_state, _title, url) => {
     if (!url) return;
 
+    if (typeof flushPerformance === 'function') {
+      flushPerformance();
+    }
+
     currentRef = currentUrl;
     currentUrl = normalize(new URL(url, location.href).toString());
 
@@ -620,6 +625,7 @@
       track();
       handlePathChanges();
       handleClicks();
+      if (perf) initPerformance();
       // Collect AST after page is ready
       setTimeout(collectAST, 100);
       setTimeout(handleSections, 500);
@@ -652,6 +658,169 @@
     );
   };
 
+  /* Performance (Web Vitals) */
+
+  const initPerformance = () => {
+    const metrics = {};
+    let sent = false;
+    let timeoutId;
+    let isInitialLoad = true;
+    let activationStart = 0;
+    let pageStartTime = 0;
+
+    const observe = (type, callback) => {
+      try {
+        const observer = new PerformanceObserver(list => {
+          list.getEntries().forEach(callback);
+        });
+        observer.observe({ type, buffered: true });
+      } catch {
+        /* not supported */
+      }
+    };
+
+    // TTFB
+    observe('navigation', entry => {
+      activationStart = entry.activationStart || 0;
+      metrics.ttfb = Math.max(entry.responseStart - activationStart, 0);
+    });
+
+    // FCP
+    observe('paint', entry => {
+      if (entry.name === 'first-contentful-paint') {
+        metrics.fcp = Math.max(entry.startTime - activationStart, 0);
+      }
+    });
+
+    // LCP
+    observe('largest-contentful-paint', entry => {
+      metrics.lcp = Math.max(entry.startTime - activationStart, 0);
+    });
+
+    // CLS - session windows algorithm (gap < 1s, max 5s duration; report worst window)
+    let clsSessionValue = 0;
+    let clsSessionEntries = [];
+    observe('layout-shift', entry => {
+      if (!entry.hadRecentInput) {
+        const lastEntry = clsSessionEntries[clsSessionEntries.length - 1];
+        const firstEntry = clsSessionEntries[0];
+        if (
+          lastEntry &&
+          entry.startTime - lastEntry.startTime - lastEntry.duration < 1000 &&
+          entry.startTime - firstEntry.startTime < 5000
+        ) {
+          clsSessionValue += entry.value;
+          clsSessionEntries.push(entry);
+        } else {
+          clsSessionValue = entry.value;
+          clsSessionEntries = [entry];
+        }
+        if (clsSessionValue > (metrics.cls || 0)) {
+          metrics.cls = clsSessionValue;
+        }
+      }
+    });
+
+    // INP - group by interactionId, 98th percentile, 40ms threshold
+    let interactions = {};
+    let inpObserver;
+    const recordInteractions = entries => {
+      entries.forEach(entry => {
+        if (entry.interactionId) {
+          const existing = interactions[entry.interactionId];
+          if (!existing || entry.duration > existing) {
+            interactions[entry.interactionId] = entry.duration;
+          }
+        }
+      });
+    };
+    try {
+      inpObserver = new PerformanceObserver(list => recordInteractions(list.getEntries()));
+      inpObserver.observe({ type: 'event', buffered: true, durationThreshold: 40 });
+    } catch {
+      /* not supported */
+    }
+
+    const computeInp = () => {
+      if (inpObserver) recordInteractions(inpObserver.takeRecords());
+      const values = Object.values(interactions).sort((a, b) => b - a);
+      if (values.length) {
+        const p98Index = Math.floor(Math.max(values.length, 10) * 0.02);
+        metrics.inp = values[Math.min(p98Index, values.length - 1)];
+      }
+    };
+
+    const getEntriesByType = type => {
+      try {
+        return window.performance?.getEntriesByType?.(type) || [];
+      } catch {
+        return [];
+      }
+    };
+
+    const applyFallbackMetrics = () => {
+      if (!isInitialLoad) return;
+
+      if (metrics.ttfb === undefined) {
+        const navigation = getEntriesByType('navigation')?.[0];
+        if (navigation) {
+          metrics.ttfb = Math.max(navigation.responseStart - (navigation.activationStart || 0), 0);
+        }
+      }
+
+      if (metrics.fcp === undefined) {
+        const fcpEntry = getEntriesByType('paint')?.find(
+          entry => entry.name === 'first-contentful-paint',
+        );
+        if (fcpEntry) {
+          metrics.fcp = Math.max(fcpEntry.startTime - activationStart, 0);
+        }
+      }
+
+      if (metrics.lcp === undefined) {
+        const lcpEntries = getEntriesByType('largest-contentful-paint');
+        const lcpEntry = lcpEntries?.[lcpEntries.length - 1];
+        if (lcpEntry) {
+          metrics.lcp = Math.max(lcpEntry.startTime - activationStart, 0);
+        }
+      }
+    };
+
+    const sendPerformance = () => {
+      if (sent) return;
+
+      applyFallbackMetrics();
+      computeInp();
+      metrics.duration = Math.round(performance.now() - pageStartTime);
+
+      sent = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      send({ ...getPayload(), ...metrics }, 'performance');
+    };
+
+    flushPerformance = () => {
+      sendPerformance();
+      isInitialLoad = false;
+      Object.keys(metrics).forEach(k => {
+        delete metrics[k];
+      });
+      activationStart = 0;
+      pageStartTime = performance.now();
+      clsSessionValue = 0;
+      clsSessionEntries = [];
+      interactions = {};
+      sent = false;
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(sendPerformance, 10000);
+    };
+    timeoutId = setTimeout(sendPerformance, 10000);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') sendPerformance();
+    });
+    window.addEventListener('pagehide', sendPerformance);
+  };
+
   /* Start */
 
   const tracker = { track, identify };
@@ -665,6 +834,7 @@
   let disabled = false;
   let cache;
   let identity;
+  let flushPerformance;
 
   if (autoTrack && !trackingDisabled()) {
     if (document.readyState === 'complete') {

@@ -1,11 +1,11 @@
 export const PRISMA = 'prisma';
 export const POSTGRESQL = 'postgresql';
-export const DATASTORE = 'datastore';
+export const CLICKHOUSE = 'clickhouse';
 export const KAFKA = 'kafka';
 export const KAFKA_PRODUCER = 'kafka-producer';
 
 // Fixes issue with converting bigint values
-BigInt.prototype.toJSON = function () {
+(BigInt.prototype as unknown as { toJSON(): number }).toJSON = function () {
   return Number(this);
 };
 
@@ -20,12 +20,12 @@ export function getDatabaseType(url = process.env.DATABASE_URL) {
 }
 
 export async function runQuery(queries: any) {
-  if (process.env.DATASTORE_URL) {
+  if (process.env.CLICKHOUSE_URL) {
     if (queries[KAFKA]) {
       return queries[KAFKA]();
     }
 
-    return queries[DATASTORE]();
+    return queries[CLICKHOUSE]();
   }
 
   const db = getDatabaseType();

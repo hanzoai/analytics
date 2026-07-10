@@ -84,6 +84,7 @@ export const FILTER_COLUMNS = {
 export const COLLECTION_TYPE = {
   event: 'event',
   identify: 'identify',
+  performance: 'performance',
 } as const;
 
 export const EVENT_TYPE = {
@@ -91,6 +92,7 @@ export const EVENT_TYPE = {
   customEvent: 2,
   linkEvent: 3,
   pixelEvent: 4,
+  performance: 5,
 } as const;
 
 export const DATA_TYPE = {
@@ -108,6 +110,8 @@ export const OPERATORS = {
   notSet: 'ns',
   contains: 'c',
   doesNotContain: 'dnc',
+  regex: 're',
+  notRegex: 'nre',
   true: 't',
   false: 'f',
   greaterThan: 'gt',

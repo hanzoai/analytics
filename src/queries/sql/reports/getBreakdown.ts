@@ -1,6 +1,6 @@
+import clickhouse from '@/lib/clickhouse';
 import { EVENT_TYPE, FILTER_COLUMNS, SESSION_COLUMNS } from '@/lib/constants';
-import datastore from '@/lib/datastore';
-import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
+import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 import type { QueryFilters } from '@/lib/types';
 
@@ -20,7 +20,7 @@ export async function getBreakdown(
 ) {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [DATASTORE]: () => datastoreQuery(...args),
+    [CLICKHOUSE]: () => clickhouseQuery(...args),
   });
 }
 
@@ -78,12 +78,12 @@ async function relationalQuery(
   );
 }
 
-async function datastoreQuery(
+async function clickhouseQuery(
   websiteId: string,
   parameters: BreakdownParameters,
   filters: QueryFilters,
 ): Promise<BreakdownData[]> {
-  const { parseFilters, rawQuery } = datastore;
+  const { parseFilters, rawQuery } = clickhouse;
   const { startDate, endDate, fields } = parameters;
   const { filterQuery, cohortQuery, queryParams } = parseFilters({
     ...filters,

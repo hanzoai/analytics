@@ -11,6 +11,13 @@ export type Role = ObjectValues<typeof ROLES>;
 export type DynamicDataType = ObjectValues<typeof DATA_TYPE>;
 export type Operator = (typeof OPERATORS)[keyof typeof OPERATORS];
 
+export interface PropertyFilter {
+  propertyName: string;
+  dataType: number;
+  operator: Operator;
+  value: string;
+}
+
 export interface Auth {
   user?: {
     id: string;
@@ -30,6 +37,7 @@ export interface Filter {
   type?: string;
   column?: string;
   prefix?: string;
+  paramName?: string;
 }
 
 export interface DateRange {
@@ -51,6 +59,8 @@ export interface QueryOptions {
   limit?: number;
   prefix?: string;
   isCohort?: boolean;
+  cohortMatch?: string;
+  cohortActionName?: string;
 }
 
 export interface QueryFilters
@@ -100,6 +110,7 @@ export interface SortParams {
 export interface PageParams {
   page?: number;
   pageSize?: number;
+  maxResults?: number;
 }
 
 export interface SegmentParams {

@@ -1,6 +1,6 @@
+import clickhouse from '@/lib/clickhouse';
 import { EVENT_TYPE } from '@/lib/constants';
-import datastore from '@/lib/datastore';
-import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
+import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 import type { QueryFilters } from '@/lib/types';
 
@@ -15,7 +15,7 @@ export async function getUTM(
 ) {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [DATASTORE]: () => datastoreQuery(...args),
+    [CLICKHOUSE]: () => clickhouseQuery(...args),
   });
 }
 
@@ -52,9 +52,13 @@ async function relationalQuery(
   );
 }
 
-async function datastoreQuery(websiteId: string, parameters: UTMParameters, filters: QueryFilters) {
+async function clickhouseQuery(
+  websiteId: string,
+  parameters: UTMParameters,
+  filters: QueryFilters,
+) {
   const { column, startDate, endDate } = parameters;
-  const { parseFilters, rawQuery } = datastore;
+  const { parseFilters, rawQuery } = clickhouse;
   const { filterQuery, cohortQuery, queryParams } = parseFilters({
     ...filters,
     websiteId,

@@ -1,8 +1,8 @@
+import clickhouse from '@/lib/clickhouse';
 import { DATA_TYPE } from '@/lib/constants';
 import { uuid } from '@/lib/crypto';
 import { flattenJSON, getStringValue } from '@/lib/data';
-import datastore from '@/lib/datastore';
-import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
+import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
 import kafka from '@/lib/kafka';
 import prisma from '@/lib/prisma';
 import type { DynamicData } from '@/lib/types';
@@ -18,7 +18,7 @@ export interface SaveSessionDataArgs {
 export async function saveSessionData(data: SaveSessionDataArgs) {
   return runQuery({
     [PRISMA]: () => relationalQuery(data),
-    [DATASTORE]: () => datastoreQuery(data),
+    [CLICKHOUSE]: () => clickhouseQuery(data),
   });
 }
 
@@ -78,14 +78,14 @@ export async function relationalQuery({
   }
 }
 
-async function datastoreQuery({
+async function clickhouseQuery({
   websiteId,
   sessionId,
   sessionData,
   distinctId,
   createdAt,
 }: SaveSessionDataArgs) {
-  const { insert, getUTCString } = datastore;
+  const { insert, getUTCString } = clickhouse;
   const { sendMessage } = kafka;
 
   const jsonKeys = flattenJSON(sessionData);

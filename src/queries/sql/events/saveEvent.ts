@@ -1,7 +1,7 @@
+import clickhouse from '@/lib/clickhouse';
 import { EVENT_NAME_LENGTH, PAGE_TITLE_LENGTH, URL_LENGTH } from '@/lib/constants';
 import { uuid } from '@/lib/crypto';
-import datastore from '@/lib/datastore';
-import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
+import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
 import kafka from '@/lib/kafka';
 import prisma from '@/lib/prisma';
 import { saveEventData } from './saveEventData';
@@ -53,12 +53,19 @@ export interface SaveEventArgs {
   ttclid?: string;
   lifatid?: string;
   twclid?: string;
+
+  // Performance (Web Vitals)
+  lcp?: number;
+  inp?: number;
+  cls?: number;
+  fcp?: number;
+  ttfb?: number;
 }
 
 export async function saveEvent(args: SaveEventArgs) {
   return runQuery({
     [PRISMA]: () => relationalQuery(args),
-    [DATASTORE]: () => datastoreQuery(args),
+    [CLICKHOUSE]: () => clickhouseQuery(args),
   });
 }
 
@@ -150,7 +157,7 @@ async function relationalQuery({
   }
 }
 
-async function datastoreQuery({
+async function clickhouseQuery({
   websiteId,
   sessionId,
   visitId,
@@ -186,8 +193,13 @@ async function datastoreQuery({
   ttclid,
   lifatid,
   twclid,
+  lcp,
+  inp,
+  cls,
+  fcp,
+  ttfb,
 }: SaveEventArgs) {
-  const { insert, getUTCString } = datastore;
+  const { insert, getUTCString } = clickhouse;
   const { sendMessage } = kafka;
   const eventId = uuid();
 
@@ -227,6 +239,11 @@ async function datastoreQuery({
     screen,
     language,
     hostname,
+    lcp,
+    inp,
+    cls,
+    fcp,
+    ttfb,
   };
 
   if (kafka.enabled) {
