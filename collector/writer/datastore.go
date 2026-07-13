@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	// hanzoai/datastore uses the ClickHouse wire protocol; this driver is
-	// protocol-compatible and used only for its connection/query interface.
-	ds "github.com/ClickHouse/clickhouse-go/v2"
-	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
+	// hanzo-ds is the canonical native datastore driver; used only for its
+	// connection/query interface.
+	ds "github.com/hanzo-ds/go"
+	"github.com/hanzo-ds/go/lib/driver"
 
 	collector "github.com/hanzoai/analytics/collector"
 )
