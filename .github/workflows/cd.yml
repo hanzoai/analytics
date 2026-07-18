@@ -4,12 +4,20 @@ on:
   push:
     branches: [main, dev, test]
     tags: ['v*']
+# id-token: write is required — the reusable build/sbom jobs request it for
+# cosign keyless signing; a caller that omits it fails workflow validation
+# (startup_failure) since a called job cannot exceed the caller's permissions.
 permissions:
   contents: read
   packages: write
+  id-token: write
 jobs:
   docker:
     uses: hanzoai/.github/.github/workflows/docker-build.yml@main
     with:
       image: ghcr.io/hanzoai/analytics
+      # hanzo-k8s is amd64-only; build a single arch so the release never
+      # blocks on arm64 runner availability. tag-single-arch still publishes
+      # the bare :{{version}} tag the operator pins.
+      platforms: linux/amd64
     secrets: inherit
