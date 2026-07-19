@@ -1,4 +1,4 @@
-import { Box, Row } from '@umami/react-zen';
+import { Box, Row } from '@hanzo/react-zen';
 import type { BoardColumn } from '@/lib/types';
 import { BoardViewColumn } from './BoardViewColumn';
 import { MIN_COLUMN_WIDTH } from './boardConstants';

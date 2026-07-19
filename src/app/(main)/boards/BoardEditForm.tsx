@@ -9,7 +9,7 @@ import {
   Row,
   Select,
   TextField,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { useBoardQuery, useMessages, useNavigation, useUpdateQuery } from '@/components/hooks';
 import { LinkSelect } from '@/components/input/LinkSelect';
 import { PixelSelect } from '@/components/input/PixelSelect';

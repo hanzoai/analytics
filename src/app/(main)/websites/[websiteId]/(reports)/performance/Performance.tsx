@@ -11,7 +11,7 @@ import {
   TabPanel,
   Tabs,
   Text,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { colord } from 'colord';
 import { useCallback, useMemo, useState } from 'react';
 import { BarChart } from '@/components/charts/BarChart';

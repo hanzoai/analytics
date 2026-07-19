@@ -1,4 +1,4 @@
-import { Icon } from '@umami/react-zen';
+import { Icon } from '@hanzo/react-zen';
 import { LinkButton } from '@/components/common/LinkButton';
 import { useNavigation } from '@/components/hooks';
 import { LayoutDashboard } from '@/components/icons';
