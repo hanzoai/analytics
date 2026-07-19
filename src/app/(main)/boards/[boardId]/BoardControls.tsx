@@ -1,4 +1,4 @@
-import { Box } from '@umami/react-zen';
+import { Box } from '@hanzo/react-zen';
 import { LinkControls } from '@/app/(main)/links/[linkId]/LinkControls';
 import { PixelControls } from '@/app/(main)/pixels/[pixelId]/PixelControls';
 import { WebsiteControls } from '@/app/(main)/websites/[websiteId]/WebsiteControls';

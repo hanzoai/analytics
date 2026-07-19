@@ -1,4 +1,4 @@
-import { Icon, type IconProps, Row, type RowProps, Text, type TextProps } from '@umami/react-zen';
+import { Icon, type IconProps, Row, type RowProps, Text, type TextProps } from '@hanzo/react-zen';
 import type { ReactNode } from 'react';
 
 interface IconLabelProps extends RowProps {

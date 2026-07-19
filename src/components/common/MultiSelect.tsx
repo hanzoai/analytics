@@ -1,4 +1,4 @@
-import { Button, Column, Icon, List, MenuTrigger, Popover, SearchField } from '@umami/react-zen';
+import { Button, Column, Icon, List, MenuTrigger, Popover, SearchField } from '@hanzo/react-zen';
 import type { ReactNode } from 'react';
 import { ChevronRight } from '@/components/icons';
 

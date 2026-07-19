@@ -1,5 +1,5 @@
 'use client';
-import { Loading, useToast } from '@umami/react-zen';
+import { Loading, useToast } from '@hanzo/react-zen';
 import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import { BoardContext, type LayoutGetter } from '@/app/(main)/boards/BoardProvider';

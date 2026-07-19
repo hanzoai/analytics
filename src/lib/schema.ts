@@ -62,6 +62,12 @@ export const teamRoleParam = z.enum(['team-member', 'team-view-only', 'team-mana
 
 export const anyObjectParam = z.record(z.string(), z.any());
 
+// Build a GET query schema that always accepts the standard date-range params
+// (startAt/endAt/timezone/unit/…) alongside the caller's own fields.
+export function withDateRange<T extends z.ZodRawShape>(params: T) {
+  return z.object({ ...dateRangeParams, ...params });
+}
+
 export const urlOrPathParam = z.string().refine(
   value => {
     try {

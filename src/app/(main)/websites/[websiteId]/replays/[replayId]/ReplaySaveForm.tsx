@@ -6,7 +6,7 @@ import {
   FormField,
   FormSubmitButton,
   TextField,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { useMessages, useUpdateQuery } from '@/components/hooks';
 import { touch } from '@/components/hooks/useModified';
 

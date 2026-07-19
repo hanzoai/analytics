@@ -1,8 +1,3 @@
-import { Panel } from '@/components/common/Panel';
-import { useBoard, useMessages, useNavigation } from '@/components/hooks';
-import { Pencil, Plus, X } from '@/components/icons';
-import { getBoardEntity, getBoardType, getResolvedComponentEntity } from '@/lib/boards';
-import type { BoardComponentConfig } from '@/lib/types';
 import {
   Box,
   Button,
@@ -13,8 +8,13 @@ import {
   Row,
   Tooltip,
   TooltipTrigger,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { useMemo, useState } from 'react';
+import { Panel } from '@/components/common/Panel';
+import { useBoard, useMessages, useNavigation } from '@/components/hooks';
+import { Pencil, Plus, X } from '@/components/icons';
+import { getBoardEntity, getBoardType, getResolvedComponentEntity } from '@/lib/boards';
+import type { BoardComponentConfig } from '@/lib/types';
 import { getComponentDefinition } from '../boardComponentRegistry';
 import { BoardComponentRenderer } from './BoardComponentRenderer';
 import { BoardComponentSelect } from './BoardComponentSelect';
@@ -48,7 +48,9 @@ export function BoardEditColumn({
       return null;
     }
 
-    return <BoardComponentRenderer config={component} websiteId={entityId} entityType={entityType} />;
+    return (
+      <BoardComponentRenderer config={component} websiteId={entityId} entityType={entityType} />
+    );
   }, [component, definition?.requiresWebsite, entityId, entityType]);
 
   const handleSelect = (config: BoardComponentConfig) => {
@@ -95,9 +97,7 @@ export function BoardEditColumn({
           >
             <TooltipTrigger delay={0}>
               <Button variant="outline" onPress={() => setShowSelect(true)}>
-                <Icon size="sm">
-                  {hasComponent ? <Pencil /> : <Plus />}
-                </Icon>
+                <Icon size="sm">{hasComponent ? <Pencil /> : <Plus />}</Icon>
               </Button>
               <Tooltip>{t(hasComponent ? labels.edit : labels.selectComponent)}</Tooltip>
             </TooltipTrigger>

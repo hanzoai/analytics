@@ -1,6 +1,6 @@
-import type { Session, Website } from '@/generated/prisma/client';
+import type { Session, Team, User, Website } from '@/generated/prisma/client';
 import redis from '@/lib/redis';
-import { getWebsite } from '@/queries/prisma';
+import { getTeam, getUser, getWebsite } from '@/queries/prisma';
 import { getWebsiteSession } from '@/queries/sql';
 
 // The KV cache is best-effort and must never block ingestion. node-redis queues
@@ -53,4 +53,24 @@ export async function fetchSession(websiteId: string, sessionId: string): Promis
   }
 
   return session;
+}
+
+export async function fetchAccount(userId: string): Promise<User> {
+  const account = await cached(`account:${userId}`, () => getUser(userId), 86400);
+
+  if (!account || account.deletedAt) {
+    return null;
+  }
+
+  return account;
+}
+
+export async function fetchTeam(teamId: string): Promise<Team> {
+  const team = await cached(`team:${teamId}`, () => getTeam(teamId), 86400);
+
+  if (!team) {
+    return null;
+  }
+
+  return team;
 }

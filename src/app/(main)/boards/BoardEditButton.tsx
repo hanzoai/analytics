@@ -1,4 +1,4 @@
-import { Icon } from '@umami/react-zen';
+import { Icon } from '@hanzo/react-zen';
 import { LinkButton } from '@/components/common/LinkButton';
 import { useMessages, useNavigation } from '@/components/hooks';
 import { Edit } from '@/components/icons';

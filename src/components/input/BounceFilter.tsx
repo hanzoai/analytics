@@ -1,5 +1,5 @@
 'use client';
-import { Checkbox, Row } from '@umami/react-zen';
+import { Checkbox, Row } from '@hanzo/react-zen';
 import { useMessages } from '@/components/hooks/useMessages';
 import { useNavigation } from '@/components/hooks/useNavigation';
 

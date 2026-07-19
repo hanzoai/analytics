@@ -1,5 +1,5 @@
 'use client';
-import { Column } from '@umami/react-zen';
+import { Column } from '@hanzo/react-zen';
 import { useEffect } from 'react';
 import { BoardControls } from '@/app/(main)/boards/[boardId]/BoardControls';
 import { BoardEditBody } from '@/app/(main)/boards/[boardId]/BoardEditBody';

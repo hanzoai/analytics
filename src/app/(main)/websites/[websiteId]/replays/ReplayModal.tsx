@@ -1,5 +1,5 @@
 'use client';
-import { Column, Dialog, Modal, type ModalProps } from '@umami/react-zen';
+import { Column, Dialog, Modal, type ModalProps } from '@hanzo/react-zen';
 import { ReplayPlayback } from '@/app/(main)/websites/[websiteId]/replays/[replayId]/ReplayPlayback';
 import { useNavigation } from '@/components/hooks';
 
