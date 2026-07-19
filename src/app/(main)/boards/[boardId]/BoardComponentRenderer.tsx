@@ -1,4 +1,4 @@
-import { Column, Text } from '@umami/react-zen';
+import { Column, Text } from '@hanzo/react-zen';
 import { memo } from 'react';
 import type { BoardComponentConfig } from '@/lib/types';
 import { getComponentDefinition } from '../boardComponentRegistry';
