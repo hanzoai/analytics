@@ -1,14 +1,8 @@
-import { Button, Icon } from '@umami/react-zen';
+import { Button, Icon } from '@hanzo/react-zen';
 import { useEffect, useRef, useState } from 'react';
 import { Check, Copy } from '@/components/icons';
 
-export function CopyButton({
-  value,
-  label = 'Copy',
-}: {
-  value: string;
-  label?: string;
-}) {
+export function CopyButton({ value, label = 'Copy' }: { value: string; label?: string }) {
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef<number | null>(null);
 
