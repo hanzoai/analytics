@@ -1,4 +1,4 @@
-import { Button, LoadingButton, Row } from '@umami/react-zen';
+import { Button, LoadingButton, Row } from '@hanzo/react-zen';
 import { PageHeader } from '@/components/common/PageHeader';
 import { useBoard, useMessages, useNavigation } from '@/components/hooks';
 

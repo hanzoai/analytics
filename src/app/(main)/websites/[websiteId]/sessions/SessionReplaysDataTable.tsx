@@ -1,5 +1,5 @@
 'use client';
-import { Column } from '@umami/react-zen';
+import { Column } from '@hanzo/react-zen';
 import { useState } from 'react';
 import { DataGrid } from '@/components/common/DataGrid';
 import { useSessionReplaysQuery } from '@/components/hooks';
