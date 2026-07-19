@@ -91,6 +91,7 @@ export const EVENT_TYPE = {
   customEvent: 2,
   linkEvent: 3,
   pixelEvent: 4,
+  performance: 5,
 } as const;
 
 export const DATA_TYPE = {
@@ -214,6 +215,29 @@ export const CHART_COLORS = [
 export const DOMAIN_REGEX =
   /^(localhost(:[1-9]\d{0,4})?|((?=[a-z0-9-_]{1,63}\.)(xn--)?[a-z0-9-_]+(-[a-z0-9-_]+)*\.)+(xn--)?[a-z0-9-_]{2,63})$/;
 export const SHARE_ID_REGEX = /^[a-zA-Z0-9]{8,50}$/;
+
+// Shareable/permissioned entity types. Numeric so they match the `share.share_type`
+// INTEGER column; website === 1 is authoritative from migration 15_add_share (existing
+// website shares are backfilled with share_type = 1).
+export const ENTITY_TYPE = {
+  website: 1,
+  user: 2,
+  team: 3,
+  board: 4,
+  pixel: 5,
+  link: 6,
+} as const;
+
+// Google Core Web Vitals rating thresholds: value <= good → "good",
+// value <= poor → "needs-improvement", else "poor". Keys match the lowercase
+// metric ids emitted by the performance report (lcp/inp/cls/fcp/ttfb).
+export const WEB_VITALS_THRESHOLDS = {
+  lcp: { good: 2500, poor: 4000 },
+  inp: { good: 200, poor: 500 },
+  cls: { good: 0.1, poor: 0.25 },
+  fcp: { good: 1800, poor: 3000 },
+  ttfb: { good: 800, poor: 1800 },
+} as const;
 export const DATETIME_REGEX =
   /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{3}(Z|\+[0-9]{2}:[0-9]{2})?)?$/;
 

@@ -1,10 +1,10 @@
-import { Row } from '@umami/react-zen';
+import { Row } from '@hanzo/react-zen';
 import { IconLabel } from '@/components/common/IconLabel';
 import { LinkButton } from '@/components/common/LinkButton';
 import { PageHeader } from '@/components/common/PageHeader';
 import { useBoard, useMessages, useNavigation } from '@/components/hooks';
-import { getBoardEntity } from '@/lib/boards';
 import { Edit, LayoutDashboard } from '@/components/icons';
+import { getBoardEntity } from '@/lib/boards';
 import { BoardEntityBadge } from '../BoardEntityBadge';
 import { useBoardEntityBadgeProps } from '../useBoardEntityBadgeProps';
 
