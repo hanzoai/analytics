@@ -10,7 +10,7 @@ import {
   Popover,
   Row,
   Text,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { ArrowRight } from 'lucide-react';
 import type { Key } from 'react';
 import { IconLabel } from '@/components/common/IconLabel';

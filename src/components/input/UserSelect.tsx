@@ -1,4 +1,4 @@
-import { ListItem, Select, type SelectProps } from '@umami/react-zen';
+import { ListItem, Select, type SelectProps } from '@hanzo/react-zen';
 import { useMemo, useState } from 'react';
 import { Empty } from '@/components/common/Empty';
 import { useMessages, useTeamMembersQuery, useUsersQuery } from '@/components/hooks';
