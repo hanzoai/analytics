@@ -1,25 +1,18 @@
 'use client';
-import { useRouter } from 'next/navigation';
+import { useIam } from '@hanzo/iam/react';
 import { useEffect } from 'react';
-import { useApi } from '@/components/hooks';
-import { removeClientAuthToken } from '@/lib/client';
 import { setUser } from '@/store/app';
 
 export function LogoutPage() {
-  const router = useRouter();
-  const { post } = useApi();
+  const { logout } = useIam();
 
   useEffect(() => {
-    async function logout() {
-      await post('/auth/logout');
-
-      window.location.href = `${process.env.basePath || ''}/login`;
-    }
-
-    removeClientAuthToken();
-    setUser(null);
+    // Clear the IAM session (local tokens) and the cached user, then land on
+    // the login page.
     logout();
-  }, [router, post]);
+    setUser(null);
+    window.location.href = `${process.env.basePath || ''}/login`;
+  }, [logout]);
 
   return null;
 }

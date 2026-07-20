@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { hashPassword } from '@/lib/password';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json, ok, unauthorized } from '@/lib/response';
 import { userRoleParam } from '@/lib/schema';
@@ -27,7 +26,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
 export async function POST(request: Request, { params }: { params: Promise<{ userId: string }> }) {
   const schema = z.object({
     username: z.string().max(255).optional(),
-    password: z.string().max(255).optional(),
     role: userRoleParam.optional(),
   });
 
@@ -43,15 +41,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ use
     return unauthorized();
   }
 
-  const { username, password, role } = body;
+  const { username, role } = body;
 
   const user = await getUser(userId);
 
   const data: any = {};
-
-  if (password) {
-    data.password = hashPassword(password);
-  }
 
   // Only admin can change these fields
   if (role && auth.user.isAdmin) {
@@ -64,9 +58,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ use
 
   // Check when username changes
   if (data.username && user.username !== data.username) {
-    const user = await getUserByUsername(username);
+    const existing = await getUserByUsername(username);
 
-    if (user) {
+    if (existing) {
       return badRequest({ message: 'User already exists' });
     }
   }

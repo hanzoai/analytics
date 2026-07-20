@@ -4,10 +4,6 @@ import { LoginForm } from './LoginForm';
 
 export interface BrandingProps {
   name: string;
-  iamUrl: string;
-  iamClientId: string;
-  iamProviderName: string;
-  iamEnabled: boolean;
 }
 
 export function LoginPage({ branding }: { branding: BrandingProps }) {
