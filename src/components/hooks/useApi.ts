@@ -1,6 +1,6 @@
+import { useIam } from '@hanzo/iam/react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { getClientAuthToken } from '@/lib/client';
 import { SHARE_TOKEN_HEADER } from '@/lib/constants';
 import { type FetchResponse, httpDelete, httpGet, httpPost, httpPut } from '@/lib/fetch';
 import { useApp } from '@/store/app';
@@ -18,9 +18,14 @@ async function handleResponse(res: FetchResponse): Promise<any> {
 
 export function useApi() {
   const shareToken = useApp(selector);
+  const { sdk, accessToken } = useIam();
+
+  // Prefer the live context token; fall back to the SDK's stored token so the
+  // bearer is present on the first render after a hard refresh.
+  const token = accessToken || sdk.getAccessToken();
 
   const defaultHeaders = {
-    authorization: `Bearer ${getClientAuthToken()}`,
+    authorization: `Bearer ${token}`,
     [SHARE_TOKEN_HEADER]: shareToken?.token,
   };
   const basePath = process.env.basePath;
