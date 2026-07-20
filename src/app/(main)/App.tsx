@@ -1,4 +1,5 @@
 'use client';
+import { useIam } from '@hanzo/iam/react';
 import { Column, Grid, Loading, Row } from '@hanzo/react-zen';
 import Script from 'next/script';
 import { useEffect } from 'react';
@@ -10,7 +11,8 @@ import { removeItem, setItem } from '@/lib/storage';
 import { UpdateNotice } from './UpdateNotice';
 
 export function App({ children }) {
-  const { user, isLoading, error } = useLoginQuery();
+  const { isAuthenticated, isLoading: iamLoading } = useIam();
+  const { user, isLoading } = useLoginQuery();
   const config = useConfig();
   const { pathname, teamId } = useNavigation();
 
@@ -22,15 +24,21 @@ export function App({ children }) {
     }
   }, [teamId]);
 
-  if (isLoading || !config) {
+  // Wait for the IAM SDK to restore any stored session before deciding.
+  if (iamLoading) {
     return <Loading placement="absolute" />;
   }
 
-  if (error) {
-    window.location.href = config.cloudMode
+  // No verified IAM session — send the user to the single login path.
+  if (!isAuthenticated) {
+    window.location.href = config?.cloudMode
       ? `${process.env.cloudUrl}/login`
       : `${process.env.basePath || ''}/login`;
     return null;
+  }
+
+  if (isLoading || !config) {
+    return <Loading placement="absolute" />;
   }
 
   if (!user || !config) {

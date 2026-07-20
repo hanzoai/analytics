@@ -1,8 +1,9 @@
 'use client';
-import { RouterProvider, ZenProvider } from '@hanzo/react-zen';
+import { IamProvider } from '@hanzo/iam/react';
+import { Loading, RouterProvider, ZenProvider } from '@hanzo/react-zen';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { IntlProvider } from 'react-intl';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { useLocale } from '@/components/hooks';
@@ -17,6 +18,15 @@ const client = new QueryClient({
     },
   },
 });
+
+const iamConfig = {
+  serverUrl: process.env.NEXT_PUBLIC_IAM_URL || 'https://iam.hanzo.ai',
+  clientId: process.env.NEXT_PUBLIC_IAM_CLIENT_ID || 'hanzo-analytics',
+  orgName: process.env.NEXT_PUBLIC_IAM_ORG || 'hanzo',
+  redirectUri:
+    (typeof window !== 'undefined' ? window.location.origin : '') + '/auth/callback',
+  scope: 'openid profile email',
+};
 
 function MessagesProvider({ children }) {
   const { locale, messages, dir } = useLocale();
@@ -35,6 +45,11 @@ function MessagesProvider({ children }) {
 
 export function Providers({ children }) {
   const router = useRouter();
+  // The IAM browser SDK reads sessionStorage at construction, so it must only
+  // instantiate in the browser. Defer mounting until after hydration.
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   function navigate(url: string) {
     if (shouldUseNativeLink(url)) {
@@ -48,15 +63,25 @@ export function Providers({ children }) {
     return url.startsWith('http');
   }
 
+  if (!mounted) {
+    return (
+      <ZenProvider colorScheme="dark">
+        <Loading placement="absolute" />
+      </ZenProvider>
+    );
+  }
+
   return (
-    <ZenProvider colorScheme="dark">
-      <RouterProvider navigate={navigate}>
-        <MessagesProvider>
-          <QueryClientProvider client={client}>
-            <ErrorBoundary>{children}</ErrorBoundary>
-          </QueryClientProvider>
-        </MessagesProvider>
-      </RouterProvider>
-    </ZenProvider>
+    <IamProvider config={iamConfig}>
+      <ZenProvider colorScheme="dark">
+        <RouterProvider navigate={navigate}>
+          <MessagesProvider>
+            <QueryClientProvider client={client}>
+              <ErrorBoundary>{children}</ErrorBoundary>
+            </QueryClientProvider>
+          </MessagesProvider>
+        </RouterProvider>
+      </ZenProvider>
+    </IamProvider>
   );
 }
