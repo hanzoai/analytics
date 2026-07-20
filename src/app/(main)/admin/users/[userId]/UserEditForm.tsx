@@ -4,7 +4,6 @@ import {
   FormField,
   FormSubmitButton,
   ListItem,
-  PasswordField,
   Select,
   TextField,
 } from '@hanzo/react-zen';
@@ -33,15 +32,6 @@ export function UserEditForm({ userId, onSave }: { userId: string; onSave?: () =
     <Form onSubmit={handleSubmit} error={getMessage(error?.code)} values={user}>
       <FormField name="username" label={formatMessage(labels.username)}>
         <TextField data-test="input-username" />
-      </FormField>
-      <FormField
-        name="password"
-        label={formatMessage(labels.password)}
-        rules={{
-          minLength: { value: 8, message: formatMessage(messages.minPasswordLength, { n: '8' }) },
-        }}
-      >
-        <PasswordField autoComplete="new-password" data-test="input-password" />
       </FormField>
 
       {user.id !== login.id && (
