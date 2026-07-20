@@ -1,5 +1,4 @@
 export const CURRENT_VERSION = process.env.currentVersion;
-export const AUTH_TOKEN = 'hanzo.analytics.auth';
 export const LOCALE_CONFIG = 'hanzo.analytics.locale';
 export const TIMEZONE_CONFIG = 'hanzo.analytics.timezone';
 export const DATE_RANGE_CONFIG = 'hanzo.analytics.date-range';
