@@ -1,12 +1,10 @@
-import { Column, Label, Row } from '@hanzo/react-zen';
-import { useConfig, useLoginQuery, useMessages } from '@/components/hooks';
+import { Column, Label } from '@hanzo/react-zen';
+import { useLoginQuery, useMessages } from '@/components/hooks';
 import { ROLES } from '@/lib/constants';
-import { PasswordChangeButton } from './PasswordChangeButton';
 
 export function ProfileSettings() {
   const { user } = useLoginQuery();
   const { formatMessage, labels } = useMessages();
-  const { cloudMode } = useConfig();
 
   if (!user) {
     return null;
@@ -38,14 +36,6 @@ export function ProfileSettings() {
         <Label>{formatMessage(labels.role)}</Label>
         {renderRole(role)}
       </Column>
-      {!cloudMode && (
-        <Column>
-          <Label>{formatMessage(labels.password)}</Label>
-          <Row>
-            <PasswordChangeButton />
-          </Row>
-        </Column>
-      )}
     </Column>
   );
 }
