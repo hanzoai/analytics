@@ -1,10 +1,10 @@
 import { Suspense } from 'react';
-import { SSOPage } from './SSOPage';
+import { AuthCallback } from './AuthCallback';
 
 export default function () {
   return (
     <Suspense>
-      <SSOPage />
+      <AuthCallback />
     </Suspense>
   );
 }

@@ -5,7 +5,6 @@ import {
   FormField,
   FormSubmitButton,
   ListItem,
-  PasswordField,
   Select,
   TextField,
 } from '@hanzo/react-zen';
@@ -33,13 +32,6 @@ export function UserAddForm({ onSave, onClose }) {
         rules={{ required: formatMessage(labels.required) }}
       >
         <TextField autoComplete="new-username" data-test="input-username" />
-      </FormField>
-      <FormField
-        label={formatMessage(labels.password)}
-        name="password"
-        rules={{ required: formatMessage(labels.required) }}
-      >
-        <PasswordField autoComplete="new-password" data-test="input-password" />
       </FormField>
       <FormField
         label={formatMessage(labels.role)}
