@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { ROLES } from '@/lib/constants';
 import { uuid } from '@/lib/crypto';
-import { hashPassword } from '@/lib/password';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json, unauthorized } from '@/lib/response';
 import { canCreateUser } from '@/permissions';
@@ -11,7 +10,6 @@ export async function POST(request: Request) {
   const schema = z.object({
     id: z.uuid().optional(),
     username: z.string().max(255),
-    password: z.string(),
     role: z.string().regex(/admin|user|view-only/i),
   });
 
@@ -25,7 +23,7 @@ export async function POST(request: Request) {
     return unauthorized();
   }
 
-  const { id, username, password, role } = body;
+  const { id, username, role } = body;
 
   const existingUser = await getUserByUsername(username, { showDeleted: true });
 
@@ -36,7 +34,9 @@ export async function POST(request: Request) {
   const user = await createUser({
     id: id || uuid(),
     username,
-    password: hashPassword(password),
+    // Authentication is owned by Hanzo IAM; the local password column is
+    // vestigial and never verified. Store an opaque, non-usable value.
+    password: uuid(),
     role: role ?? ROLES.user,
   });
 

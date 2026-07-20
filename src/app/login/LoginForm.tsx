@@ -1,44 +1,25 @@
 'use client';
-import {
-  Column,
-  Form,
-  FormButtons,
-  FormField,
-  FormSubmitButton,
-  Heading,
-  Icon,
-  PasswordField,
-  TextField,
-} from '@hanzo/react-zen';
+import { useIam } from '@hanzo/iam/react';
+import { Button, Column, Heading, Icon, Loading } from '@hanzo/react-zen';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { useMessages, useUpdateQuery } from '@/components/hooks';
+import { useEffect } from 'react';
 import { Logo } from '@/components/svg';
-import { setClientAuthToken } from '@/lib/client';
-import { setUser } from '@/store/app';
 import type { BrandingProps } from './LoginPage';
 
 export function LoginForm({ branding }: { branding: BrandingProps }) {
-  const { formatMessage, labels, getErrorMessage } = useMessages();
   const router = useRouter();
-  const { mutateAsync, error } = useUpdateQuery('/auth/login');
-  const iamEnabled = branding.iamEnabled;
-  const [showPassword, setShowPassword] = useState(!iamEnabled);
+  const { login, isAuthenticated, isLoading } = useIam();
 
-  function startIAMLogin() {
-    // Server-side initiation sets HttpOnly state cookie for CSRF protection
-    window.location.href = '/api/auth/iam/login';
+  // Already signed in — bounce to the dashboard.
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/');
+    }
+  }, [isAuthenticated, router]);
+
+  if (isLoading || isAuthenticated) {
+    return <Loading placement="absolute" />;
   }
-
-  const handleSubmit = async (data: any) => {
-    await mutateAsync(data, {
-      onSuccess: async ({ token, user }) => {
-        setClientAuthToken(token);
-        setUser(user);
-        router.push('/');
-      },
-    });
-  };
 
   return (
     <Column justifyContent="center" alignItems="center" gap="6">
@@ -48,81 +29,14 @@ export function LoginForm({ branding }: { branding: BrandingProps }) {
       <Heading>{branding.name}</Heading>
 
       <Column gap="4" style={{ width: '100%', maxWidth: 320 }}>
-        {iamEnabled && (
-          <button
-            type="button"
-            onClick={startIAMLogin}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              width: '100%',
-              padding: '10px 16px',
-              borderRadius: 8,
-              border: '1px solid var(--base400)',
-              background: 'var(--base900)',
-              color: 'var(--base50)',
-              fontSize: 14,
-              fontWeight: 500,
-              cursor: 'pointer',
-            }}
-          >
-            {branding.iamProviderName
-              ? `Sign in with ${branding.iamProviderName}`
-              : 'Sign in with SSO'}
-          </button>
-        )}
-
-        {iamEnabled && !showPassword && (
-          <button
-            type="button"
-            onClick={() => setShowPassword(true)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--base500)',
-              fontSize: 12,
-              cursor: 'pointer',
-              textDecoration: 'underline',
-              padding: 0,
-            }}
-          >
-            Sign in with username
-          </button>
-        )}
-
-        {showPassword && (
-          <Form onSubmit={handleSubmit} error={getErrorMessage(error)}>
-            <FormField
-              label={formatMessage(labels.username)}
-              data-test="input-username"
-              name="username"
-              rules={{ required: formatMessage(labels.required) }}
-            >
-              <TextField autoComplete="username" />
-            </FormField>
-
-            <FormField
-              label={formatMessage(labels.password)}
-              data-test="input-password"
-              name="password"
-              rules={{ required: formatMessage(labels.required) }}
-            >
-              <PasswordField autoComplete="current-password" />
-            </FormField>
-            <FormButtons>
-              <FormSubmitButton
-                data-test="button-submit"
-                variant="primary"
-                style={{ flex: 1 }}
-                isDisabled={false}
-              >
-                {formatMessage(labels.login)}
-              </FormSubmitButton>
-            </FormButtons>
-          </Form>
-        )}
+        <Button
+          variant="primary"
+          data-test="button-login"
+          onPress={() => login()}
+          style={{ width: '100%' }}
+        >
+          Log in with Hanzo
+        </Button>
       </Column>
     </Column>
   );
