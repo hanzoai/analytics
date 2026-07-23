@@ -1,4 +1,4 @@
-import { Column, Heading, Row, Text } from '@umami/react-zen';
+import { Column, Heading, Row, Text } from '@hanzo/react-zen';
 import { Panel } from '@/components/common/Panel';
 import { useBoard } from '@/components/hooks';
 import { getBoardType, getResolvedComponentEntity, isOpenBoardType } from '@/lib/boards';
