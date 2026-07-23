@@ -1,6 +1,6 @@
-import clickhouse from '@/lib/clickhouse';
+import datastore from '@/lib/datastore';
 import { SESSION_COLUMNS } from '@/lib/constants';
-import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
+import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 import type { QueryFilters } from '@/lib/types';
 import type { PerformanceParameters } from './getPerformance';
@@ -24,7 +24,7 @@ export async function getPerformanceMetrics(
 ) {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [CLICKHOUSE]: () => clickhouseQuery(...args),
+    [DATASTORE]: () => datastoreQuery(...args),
   });
 }
 
@@ -65,7 +65,7 @@ async function relationalQuery(
   );
 }
 
-async function clickhouseQuery(
+async function datastoreQuery(
   websiteId: string,
   parameters: PerformanceParameters,
   filters: QueryFilters,
@@ -73,7 +73,7 @@ async function clickhouseQuery(
   limit?: number,
 ): Promise<PerformanceMetricsData[]> {
   const { startDate, endDate, metric = 'lcp' } = parameters;
-  const { rawQuery, parseFilters } = clickhouse;
+  const { rawQuery, parseFilters } = datastore;
   const { filterQuery, cohortQuery, queryParams } = parseFilters({ ...filters, websiteId });
 
   return rawQuery<PerformanceMetricsData[]>(

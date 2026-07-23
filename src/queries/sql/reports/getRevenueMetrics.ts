@@ -1,4 +1,4 @@
-import clickhouse from '@/lib/clickhouse';
+import datastore from '@/lib/datastore';
 import {
   EMAIL_DOMAINS,
   PAID_AD_PARAMS,
@@ -7,7 +7,7 @@ import {
   SOCIAL_DOMAINS,
   VIDEO_DOMAINS,
 } from '@/lib/constants';
-import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
+import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 import type { QueryFilters } from '@/lib/types';
 import type { RevenuParameters } from './getRevenue';
@@ -24,7 +24,7 @@ export async function getRevenueMetrics(
 ) {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [CLICKHOUSE]: () => clickhouseQuery(...args),
+    [DATASTORE]: () => datastoreQuery(...args),
   });
 }
 
@@ -231,13 +231,13 @@ async function relationalQuery(
   return { country, region, referrer, channel };
 }
 
-async function clickhouseQuery(
+async function datastoreQuery(
   websiteId: string,
   parameters: RevenuParameters,
   filters: QueryFilters,
 ): Promise<RevenueMetricsResult> {
   const { startDate, endDate, currency } = parameters;
-  const { rawQuery, parseFilters } = clickhouse;
+  const { rawQuery, parseFilters } = datastore;
   const { filterQuery, cohortQuery, queryParams } = parseFilters({
     ...filters,
     websiteId,
