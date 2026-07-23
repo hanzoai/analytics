@@ -77,11 +77,7 @@ const apiHeaders = [
 
 const headers = [
   {
-    source: '/api/:path*',
-    headers: apiHeaders,
-  },
-  {
-    source: '/v1/analytics/:path*',
+    source: '/v1/:path*',
     headers: apiHeaders,
   },
   {
@@ -97,7 +93,7 @@ const headers = [
 const rewrites = [
   {
     source: '/v1/analytics/:path*',
-    destination: '/api/:path*',
+    destination: '/v1/:path*',
   },
 ];
 
@@ -116,7 +112,7 @@ if (collectApiEndpoint) {
 
   rewrites.push({
     source: collectApiEndpoint,
-    destination: '/api/send',
+    destination: '/v1/send',
   });
 }
 
@@ -197,7 +193,7 @@ export default {
       ...rewrites,
       {
         source: '/telemetry.js',
-        destination: '/api/scripts/telemetry',
+        destination: '/v1/scripts/telemetry',
       },
       {
         source: '/teams/:teamId/:path*',

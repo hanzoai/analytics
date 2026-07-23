@@ -16,6 +16,15 @@ export async function getWebsite(websiteId: string) {
   });
 }
 
+export async function getWebsiteByHost(host: string) {
+  return prisma.client.website.findFirst({
+    where: {
+      deletedAt: null,
+      OR: [{ domain: host }, { name: host }],
+    },
+  });
+}
+
 export async function getSharedWebsite(shareId: string) {
   return findWebsite({
     where: {

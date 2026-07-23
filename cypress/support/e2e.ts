@@ -14,7 +14,7 @@ Cypress.Commands.add('login', (username: string, password: string) => {
   cy.session([username, password], () => {
     cy.request({
       method: 'POST',
-      url: '/api/auth/login',
+      url: '/v1/auth/login',
       body: {
         username,
         password,
@@ -32,7 +32,7 @@ Cypress.Commands.add('login', (username: string, password: string) => {
 Cypress.Commands.add('addWebsite', (name: string, domain: string) => {
   cy.request({
     method: 'POST',
-    url: '/api/websites',
+    url: '/v1/websites',
     headers: {
       'Content-Type': 'application/json',
       Authorization: Cypress.env('authorization'),
@@ -51,7 +51,7 @@ Cypress.Commands.add('addWebsite', (name: string, domain: string) => {
 Cypress.Commands.add('deleteWebsite', (websiteId: string) => {
   cy.request({
     method: 'DELETE',
-    url: `/api/websites/${websiteId}`,
+    url: `/v1/websites/${websiteId}`,
     headers: {
       'Content-Type': 'application/json',
       Authorization: Cypress.env('authorization'),
@@ -64,7 +64,7 @@ Cypress.Commands.add('deleteWebsite', (websiteId: string) => {
 Cypress.Commands.add('addUser', (username: string, password: string, role: string) => {
   cy.request({
     method: 'POST',
-    url: '/api/users',
+    url: '/v1/users',
     headers: {
       'Content-Type': 'application/json',
       Authorization: Cypress.env('authorization'),
@@ -82,7 +82,7 @@ Cypress.Commands.add('addUser', (username: string, password: string, role: strin
 Cypress.Commands.add('deleteUser', (userId: string) => {
   cy.request({
     method: 'DELETE',
-    url: `/api/users/${userId}`,
+    url: `/v1/users/${userId}`,
     headers: {
       'Content-Type': 'application/json',
       Authorization: Cypress.env('authorization'),
@@ -95,7 +95,7 @@ Cypress.Commands.add('deleteUser', (userId: string) => {
 Cypress.Commands.add('addTeam', (name: string) => {
   cy.request({
     method: 'POST',
-    url: '/api/teams',
+    url: '/v1/teams',
     headers: {
       'Content-Type': 'application/json',
       Authorization: Cypress.env('authorization'),
@@ -111,7 +111,7 @@ Cypress.Commands.add('addTeam', (name: string) => {
 Cypress.Commands.add('deleteTeam', (teamId: string) => {
   cy.request({
     method: 'DELETE',
-    url: `/api/teams/${teamId}`,
+    url: `/v1/teams/${teamId}`,
     headers: {
       'Content-Type': 'application/json',
       Authorization: Cypress.env('authorization'),

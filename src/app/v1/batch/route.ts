@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import * as send from '@/app/api/send/route';
+import * as send from '@/app/v1/send/route';
 import { parseRequest } from '@/lib/request';
 import { json, serverError } from '@/lib/response';
 import { anyObjectParam } from '@/lib/schema';

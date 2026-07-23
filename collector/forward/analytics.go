@@ -129,7 +129,7 @@ func (c *ForwardClient) sendEvents(events []*ForwardEvent) error {
 			return fmt.Errorf("marshal: %w", err)
 		}
 
-		req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, c.config.Endpoint+"/api/send", bytes.NewReader(body))
+		req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, c.config.Endpoint+"/v1/send", bytes.NewReader(body))
 		if err != nil {
 			return fmt.Errorf("create request: %w", err)
 		}
