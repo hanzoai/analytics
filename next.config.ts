@@ -81,7 +81,9 @@ const headers = [
     headers: apiHeaders,
   },
   {
-    source: '/v1/analytics/:path*',
+    // CORS for every /v1 ingest (the hz.js /v1/event tag posts cross-origin from
+    // hanzo.ai / hanzo.app / hanzo.chat), not just /v1/analytics.
+    source: '/v1/:path*',
     headers: apiHeaders,
   },
   {
