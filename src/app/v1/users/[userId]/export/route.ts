@@ -1,5 +1,5 @@
 /**
- * GDPR Data Export — GET /api/users/[userId]/export
+ * GDPR Data Export — GET /v1/users/[userId]/export
  *
  * Returns all personal data associated with a user account as JSON.
  * Users can only export their own data; admins can export any user's data.

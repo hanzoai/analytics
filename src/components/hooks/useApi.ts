@@ -26,7 +26,7 @@ export function useApi() {
   const basePath = process.env.basePath;
 
   const getUrl = (url: string) => {
-    return url.startsWith('http') ? url : `${basePath || ''}/api${url}`;
+    return url.startsWith('http') ? url : `${basePath || ''}/v1${url}`;
   };
 
   const getHeaders = (headers: any = {}) => {

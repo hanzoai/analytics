@@ -27,7 +27,7 @@ export function LoginForm({ branding }: { branding: BrandingProps }) {
 
   function startIAMLogin() {
     // Server-side initiation sets HttpOnly state cookie for CSRF protection
-    window.location.href = '/api/auth/iam/login';
+    window.location.href = '/v1/auth/iam/login';
   }
 
   const handleSubmit = async (data: any) => {

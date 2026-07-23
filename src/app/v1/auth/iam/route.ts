@@ -24,7 +24,7 @@ const IAM_CLIENT_SECRET =
   process.env.HANZO_IAM_CLIENT_SECRET || process.env.IAM_CLIENT_SECRET || '';
 
 /**
- * GET /api/auth/iam — OAuth callback from external IAM provider.
+ * GET /v1/auth/iam — OAuth callback from external IAM provider.
  *
  * Receives ?code=... from IAM, exchanges for tokens, finds/creates
  * the analytics user, generates a session token, and redirects to /sso.
@@ -79,7 +79,7 @@ export async function GET(request: Request) {
 
   try {
     // Exchange authorization code for tokens
-    const redirectUri = `${url.origin}/api/auth/iam`;
+    const redirectUri = `${url.origin}/v1/auth/iam`;
     const tokenRes = await fetch(`${IAM_URL}/v1/iam/oauth/access_token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

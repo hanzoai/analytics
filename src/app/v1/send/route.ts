@@ -42,6 +42,7 @@ const schema = z.object({
       userAgent: z.string().optional(),
       timestamp: z.coerce.number().int().optional(),
       id: z.string().optional(),
+      distinctId: z.string().optional(),
       browser: z.string().optional(),
       os: z.string().optional(),
       device: z.string().optional(),
@@ -84,6 +85,7 @@ export async function POST(request: Request) {
       tag,
       timestamp,
       id,
+      distinctId,
     } = payload;
 
     const sourceId = websiteId || pixelId || linkId;
@@ -158,7 +160,7 @@ export async function POST(request: Request) {
         country,
         region,
         city,
-        distinctId: id,
+        distinctId: distinctId ?? id,
         createdAt,
       });
     }
@@ -238,7 +240,7 @@ export async function POST(request: Request) {
         referrerDomain,
 
         // Session
-        distinctId: id,
+        distinctId: distinctId ?? id,
         browser,
         os,
         device,
@@ -292,7 +294,7 @@ export async function POST(request: Request) {
           websiteId,
           sessionId,
           sessionData: data,
-          distinctId: id,
+          distinctId: distinctId ?? id,
           createdAt,
         });
       }

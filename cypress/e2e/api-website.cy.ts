@@ -12,7 +12,7 @@ describe('Website API tests', () => {
       const teamCreate = data.teamCreate;
       cy.request({
         method: 'POST',
-        url: '/api/teams',
+        url: '/v1/teams',
         headers: {
           'Content-Type': 'application/json',
           Authorization: Cypress.env('authorization'),
@@ -32,7 +32,7 @@ describe('Website API tests', () => {
       const websiteCreate = data.websiteCreate;
       cy.request({
         method: 'POST',
-        url: '/api/websites',
+        url: '/v1/websites',
         headers: {
           'Content-Type': 'application/json',
           Authorization: Cypress.env('authorization'),
@@ -50,7 +50,7 @@ describe('Website API tests', () => {
   it('Creates a website for team.', () => {
     cy.request({
       method: 'POST',
-      url: '/api/websites',
+      url: '/v1/websites',
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -73,7 +73,7 @@ describe('Website API tests', () => {
       const fixedId = uuid();
       cy.request({
         method: 'POST',
-        url: '/api/websites',
+        url: '/v1/websites',
         headers: {
           'Content-Type': 'application/json',
           Authorization: Cypress.env('authorization'),
@@ -88,7 +88,7 @@ describe('Website API tests', () => {
         // cleanup
         cy.request({
           method: 'DELETE',
-          url: `/api/websites/${fixedId}`,
+          url: `/v1/websites/${fixedId}`,
           headers: {
             'Content-Type': 'application/json',
             Authorization: Cypress.env('authorization'),
@@ -101,7 +101,7 @@ describe('Website API tests', () => {
   it('Returns all tracked websites.', () => {
     cy.request({
       method: 'GET',
-      url: '/api/websites',
+      url: '/v1/websites',
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -117,7 +117,7 @@ describe('Website API tests', () => {
   it('Gets a website by ID.', () => {
     cy.request({
       method: 'GET',
-      url: `/api/websites/${websiteId}`,
+      url: `/v1/websites/${websiteId}`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -134,7 +134,7 @@ describe('Website API tests', () => {
       const websiteUpdate = data.websiteUpdate;
       cy.request({
         method: 'POST',
-        url: `/api/websites/${websiteId}`,
+        url: `/v1/websites/${websiteId}`,
         headers: {
           'Content-Type': 'application/json',
           Authorization: Cypress.env('authorization'),
@@ -152,7 +152,7 @@ describe('Website API tests', () => {
   it('Updates a website with only shareId.', () => {
     cy.request({
       method: 'POST',
-      url: `/api/websites/${websiteId}`,
+      url: `/v1/websites/${websiteId}`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -167,7 +167,7 @@ describe('Website API tests', () => {
   it('Resets a website by removing all data related to the website.', () => {
     cy.request({
       method: 'POST',
-      url: `/api/websites/${websiteId}/reset`,
+      url: `/v1/websites/${websiteId}/reset`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -181,7 +181,7 @@ describe('Website API tests', () => {
   it('Deletes a website.', () => {
     cy.request({
       method: 'DELETE',
-      url: `/api/websites/${websiteId}`,
+      url: `/v1/websites/${websiteId}`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),

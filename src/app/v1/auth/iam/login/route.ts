@@ -16,7 +16,7 @@ const BASE_URL = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || '';
 const STATE_COOKIE = 'analytics_oauth_state';
 
 /**
- * GET /api/auth/iam/login — Initiate IAM OAuth flow.
+ * GET /v1/auth/iam/login — Initiate IAM OAuth flow.
  *
  * Generates a cryptographic state parameter, stores it in a HttpOnly cookie,
  * and redirects to the IAM authorization endpoint.
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
   }
 
   const state = crypto.randomUUID();
-  const redirectUri = `${url.origin}/api/auth/iam`;
+  const redirectUri = `${url.origin}/v1/auth/iam`;
   const params = new URLSearchParams({
     client_id: IAM_CLIENT_ID,
     response_type: 'code',
