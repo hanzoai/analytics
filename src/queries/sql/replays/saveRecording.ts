@@ -1,7 +1,7 @@
 import { gzipSync } from 'node:zlib';
-import clickhouse from '@/lib/clickhouse';
+import datastore from '@/lib/datastore';
 import { uuid } from '@/lib/crypto';
-import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
+import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
 import kafka from '@/lib/kafka';
 import prisma from '@/lib/prisma';
 
@@ -19,7 +19,7 @@ export interface SaveRecordingArgs {
 export async function saveRecording(args: SaveRecordingArgs) {
   return runQuery({
     [PRISMA]: () => relationalQuery(args),
-    [CLICKHOUSE]: () => clickhouseQuery(args),
+    [DATASTORE]: () => datastoreQuery(args),
   });
 }
 
@@ -50,7 +50,7 @@ async function relationalQuery({
   });
 }
 
-async function clickhouseQuery({
+async function datastoreQuery({
   websiteId,
   sessionId,
   visitId,
@@ -60,7 +60,7 @@ async function clickhouseQuery({
   startedAt,
   endedAt,
 }: SaveRecordingArgs) {
-  const { insert, getUTCString } = clickhouse;
+  const { insert, getUTCString } = datastore;
   const { sendMessage } = kafka;
 
   const message = {
