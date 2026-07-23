@@ -232,3 +232,14 @@ export async function getWebsiteCount(userId: string) {
     },
   });
 }
+
+// Resolve a website by its host key (domain or name) — the hz.js `data-site` value.
+// Exact match, non-deleted; used by the /v1/event ingest to map a tag hit → property.
+export async function getWebsiteByHost(host: string) {
+  return prisma.client.website.findFirst({
+    where: {
+      deletedAt: null,
+      OR: [{ domain: host }, { name: host }],
+    },
+  });
+}
