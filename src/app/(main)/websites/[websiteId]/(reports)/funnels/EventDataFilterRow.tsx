@@ -9,7 +9,7 @@ import {
   Loading,
   Select,
   useDebounce,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { endOfDay, subMonths } from 'date-fns';
 import { useState } from 'react';
 import { Empty } from '@/components/common/Empty';

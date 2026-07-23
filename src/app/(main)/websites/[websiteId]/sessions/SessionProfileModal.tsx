@@ -1,5 +1,5 @@
 'use client';
-import { Column, Dialog, Modal } from '@umami/react-zen';
+import { Column, Dialog, Modal } from '@hanzo/react-zen';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { buildPath } from '@/lib/url';
 import { SessionProfile } from './SessionProfile';

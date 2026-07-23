@@ -11,7 +11,7 @@ import {
   Row,
   Text,
   TextField,
-} from '@umami/react-zen';
+} from '@hanzo/react-zen';
 import { useEffect, useState } from 'react';
 import { useApi, useConfig, useMessages, useModified } from '@/components/hooks';
 import { SHARE_NAV_ITEMS } from './constants';
