@@ -1,29 +1,11 @@
 name: Create docker images (cloud)
-
+# Neutralized — the native deploy pipeline is .hanzo/workflows/deploy.yml.
+# GitHub is a mirror; the app image is built + pushed + deployed in-cluster
+# by act_runner (BuildKit → ghcr.io/hanzoai/analytics → operator reconcile).
 on:
-  push:
-    branches:
-      - analytics
-      - cloud
-
+  workflow_dispatch:
 jobs:
-  build:
-    name: Build, push, and deploy
-    runs-on: hanzo-build-linux-amd64
-
+  notice:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Generate random hash
-        id: random_hash
-        run: echo "hash=$(openssl rand -hex 4)" >> $GITHUB_OUTPUT
-
-      - uses: mr-smithers-excellent/docker-build-push@v6
-        name: Build & push Docker image to docker.io
-        with:
-          image: hanzoai/analytics
-          tags: cloud-${{ steps.random_hash.outputs.hash }}, cloud-latest
-          buildArgs: DATABASE_TYPE=postgresql
-          registry: docker.io
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+      - run: echo "native pipeline is .hanzo/workflows/deploy.yml; GitHub is a mirror"
