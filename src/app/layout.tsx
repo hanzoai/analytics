@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import { Suspense } from 'react';
 import { Providers } from './Providers';
 import '@fontsource/geist-sans/300.css';
@@ -37,15 +36,6 @@ export default function ({ children }) {
         <Suspense>
           <Providers>{children}</Providers>
         </Suspense>
-        <Script
-          id="hanzo-insights"
-          strategy="afterInteractive"
-          src={`${process.env.NEXT_PUBLIC_INSIGHTS_HOST || 'https://insights.hanzo.ai'}/static/array.js`}
-        />
-        <Script
-          id="hanzo-insights-init"
-          strategy="afterInteractive"
-        >{`window.hi&&hi.init&&hi.init('${process.env.NEXT_PUBLIC_INSIGHTS_API_KEY || 'hi_e16a2d5a8033442d87f090b24c606825'}',{api_host:'${process.env.NEXT_PUBLIC_INSIGHTS_HOST || 'https://insights.hanzo.ai'}',person_profiles:'identified_only'});hi.register({app:'hanzo-analytics',org:'hanzo'});`}</Script>
       </body>
     </html>
   );
