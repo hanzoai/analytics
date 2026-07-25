@@ -24,25 +24,27 @@ pnpm test
 - Websites scoped to Teams provide per-org data isolation
 - White-label branding via env vars: `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_IAM_PROVIDER_NAME`
 
-## Client SDK — `@hanzo/event` (`packages/event/`)
-The ONE browser telemetry client for the Hanzo fleet. Product analytics AND error
-capture through one client, one session, one identity — replaces `@hanzo/capture`
-(analytics-only) and `@sentry/nextjs` (a second SDK).
-- **Analytics**: `pageview`/`capture`/`identify`/`group` -> batched to this backend's
-  `POST /v1/analytics` (+ `/v1/tracker` beacon on unload). API preserved verbatim
-  from `@hanzo/capture` so the app repoint is a pure import rename.
-- **Errors**: `window.onerror` + `unhandledrejection` + a React `ErrorBoundary` +
-  manual `captureError` -> a valid **Sentry envelope** on `POST /v1/sentry` with a
-  Hanzo-minted DSN (`https://<version>:<hmac>@<host>/v1/sentry/<projectId>`; key rides
-  `?sentry_key=` so `sendBeacon` works). Secrets/PII scrubbed client-side before send;
-  `user.id` = OIDC subject only, never PII. Envelope round-trip verified against the
-  real o11y ingest parser (`errortracking/implerrortracking`).
-- **DSN** via `config.dsn` or `NEXT_PUBLIC_HANZO_EVENT_DSN`; absent => error capture is
-  inert (fail-safe, analytics unaffected).
-- **Ingest target**: `api.hanzo.ai` fronts both paths into `@hanzo/datastore` OLAP —
-  `/v1/analytics` -> `src/lib/datastore.ts` -> `compute_events`/`compute_usage`;
-  `/v1/sentry` -> o11y sentry ingest -> `o11y_sentry_events`.
-- Self-contained package: `cd packages/event && pnpm install --ignore-workspace && pnpm build && pnpm typecheck && pnpm test`.
+## Client SDK — `@hanzo/event` lives in `hanzoai/ui`, NOT here
+
+The canonical telemetry client is **`hanzoai/ui` → `pkgs/event`**, published to
+npm as `@hanzo/event`. This repo used to carry a FORK of it at `packages/event`
+(`@hanzo/event@0.2.0`, never published). That fork is deleted — do not recreate it.
+
+The fork was not harmless. It held the ONLY working Sentry-envelope
+implementation while the published package shipped a comment claiming that
+`POST /v1/event` was "lensed server-side" into Sentry. It is not, so every Hanzo
+property reported **zero** errors to the Sentry dashboard for as long as both
+copies existed. The envelope + scrub code was merged into the canonical package
+in `@hanzo/event@0.3.2`. One implementation, one home.
+
+What THIS repo owns is the **web-analytics plane**: the `hz.js` tracker
+(`public/hz.js`) and its ingest `POST /v1/event` (`src/app/v1/event/route.ts`).
+Note that door takes a **bare JSON array** of `{site, ts, type, path, …}`
+envelopes — it is a DIFFERENT protocol from `api.hanzo.ai/v1/event`
+(`{batch:[…]}`) despite the identical path spelling. An app's `@hanzo/event`
+client must point at the API host; pointing it here yields a 400 (and, from a
+browser, a failed CORS preflight).
+
 
 ## Key Integration Points
 - **IAM auth**: `src/app/api/auth/iam/route.ts` -- OAuth callback, org assignment
