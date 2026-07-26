@@ -1,15 +1,15 @@
 -- Add performance columns to website_event
-ALTER TABLE umami.website_event ADD COLUMN lcp Nullable(Decimal(10, 1)) AFTER twclid;
-ALTER TABLE umami.website_event ADD COLUMN inp Nullable(Decimal(10, 1)) AFTER lcp;
-ALTER TABLE umami.website_event ADD COLUMN cls Nullable(Decimal(10, 4)) AFTER inp;
-ALTER TABLE umami.website_event ADD COLUMN fcp Nullable(Decimal(10, 1)) AFTER cls;
-ALTER TABLE umami.website_event ADD COLUMN ttfb Nullable(Decimal(10, 1)) AFTER fcp;
+ALTER TABLE analytics.website_event ADD COLUMN lcp Nullable(Decimal(10, 1)) AFTER twclid;
+ALTER TABLE analytics.website_event ADD COLUMN inp Nullable(Decimal(10, 1)) AFTER lcp;
+ALTER TABLE analytics.website_event ADD COLUMN cls Nullable(Decimal(10, 4)) AFTER inp;
+ALTER TABLE analytics.website_event ADD COLUMN fcp Nullable(Decimal(10, 1)) AFTER cls;
+ALTER TABLE analytics.website_event ADD COLUMN ttfb Nullable(Decimal(10, 1)) AFTER fcp;
 
 -- Update materialized view to exclude performance events from view counts
-DROP TABLE umami.website_event_stats_hourly_mv;
+DROP TABLE analytics.website_event_stats_hourly_mv;
 
-CREATE MATERIALIZED VIEW umami.website_event_stats_hourly_mv
-TO umami.website_event_stats_hourly
+CREATE MATERIALIZED VIEW analytics.website_event_stats_hourly_mv
+TO analytics.website_event_stats_hourly
 AS
 SELECT
     website_id,
@@ -87,7 +87,7 @@ FROM (SELECT
     arrayFilter(x -> x != '', groupArray(tag)) tag,
     distinct_id,
     toStartOfHour(created_at) timestamp
-FROM umami.website_event
+FROM analytics.website_event
 GROUP BY website_id,
     session_id,
     visit_id,

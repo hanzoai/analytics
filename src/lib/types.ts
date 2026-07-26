@@ -30,6 +30,7 @@ export interface Filter {
   type?: string;
   column?: string;
   prefix?: string;
+  paramName?: string;
 }
 
 export interface DateRange {
@@ -51,6 +52,8 @@ export interface QueryOptions {
   limit?: number;
   prefix?: string;
   isCohort?: boolean;
+  cohortMatch?: string;
+  cohortActionName?: string;
 }
 
 export interface QueryFilters
