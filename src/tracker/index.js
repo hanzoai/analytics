@@ -652,9 +652,20 @@
     );
   };
 
+  // getSession hands the recorder the session cache token — the ONE thing it needs to
+  // attach replay chunks to the session the tracker already established. It is a read,
+  // never a way to set identity, so it returns the token and nothing else: no identity,
+  // no payload, nothing a caller could use to impersonate a visitor.
+  //
+  // The recorder has always called this; it just never existed, so waitForSession
+  // exhausted its attempts on every page and no recording was ever produced.
+  // Undefined until the first send completes — that is exactly the "not ready yet"
+  // signal the recorder polls on.
+  const getSession = () => (cache ? { cache } : undefined);
+
   /* Start */
 
-  const tracker = { track, identify };
+  const tracker = { track, identify, getSession };
 
   if (!window.hanzo) window.hanzo = tracker;
 

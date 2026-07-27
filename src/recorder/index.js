@@ -34,16 +34,29 @@ import { record } from 'rrweb';
   let startTime = null;
   let stopped = false;
 
+  // The tracker publishes itself as window.hanzo — the upstream `umami` global was
+  // renamed in the white-label and this file was never updated, so every lookup here
+  // resolved undefined and the recorder waited out its 50 attempts and gave up.
+  const tracker = () => window.hanzo;
+
+  let chunkIndex = 0;
+
   const sendEvents = (events, useKeepalive = false) => {
-    const session = window.umami?.getSession?.();
+    const session = tracker()?.getSession?.();
     if (!session?.cache) return;
 
+    const now = Date.now();
     const body = JSON.stringify({
       type: 'record',
       payload: {
         website,
         events,
-        timestamp: Math.floor(Date.now() / 1000),
+        // chunkIndex orders the chunks of ONE recording; the player stitches on it,
+        // so it must be monotonic per page and is never derived from arrival order.
+        chunkIndex: chunkIndex++,
+        startedAt: startTime,
+        endedAt: now,
+        timestamp: Math.floor(now / 1000),
       },
     });
 
@@ -56,7 +69,10 @@ import { record } from 'rrweb';
       body,
       headers: {
         'Content-Type': 'application/json',
-        'x-umami-cache': session.cache,
+        // Must match what /api/send reads. This said x-umami-cache, which the route
+        // never looks at, so even a recorder that started would have been treated as
+        // sessionless and dropped.
+        'x-cache-hint': session.cache,
       },
       credentials: 'omit',
     }).catch(() => {});
@@ -98,10 +114,13 @@ import { record } from 'rrweb';
     }
   };
 
+  // The recorder cannot start until the tracker has a session: replay chunks are keyed
+  // to session + visit, and a chunk sent before the first pageview has nothing to
+  // attach to. Poll for it rather than racing script order.
   const waitForSession = (attempts = 0) => {
     if (attempts > 50) return;
 
-    const session = window.umami?.getSession?.();
+    const session = tracker()?.getSession?.();
     if (session?.cache) {
       beginRecording();
     } else {
