@@ -1,4 +1,3 @@
-import { expect, test } from 'vitest';
 import { matchesConfiguredPath } from './match-configured-path';
 
 test('matches the exact configured path', () => {

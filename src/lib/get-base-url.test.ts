@@ -1,4 +1,3 @@
-import { expect, test } from 'vitest';
 import { HOMEPAGE_URL } from './constants';
 import { getBaseUrl } from './get-base-url';
 
