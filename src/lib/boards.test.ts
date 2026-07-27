@@ -1,4 +1,3 @@
-import { expect, test } from 'vitest';
 import {
   BOARD_COMPONENT_COMPATIBILITY_MATRIX,
   getSupportedBoardComponentEntityTypes,
