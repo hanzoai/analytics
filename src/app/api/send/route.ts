@@ -13,7 +13,7 @@ import { parseRequest } from '@/lib/request';
 import { badRequest, forbidden, json, serverError } from '@/lib/response';
 import { anyObjectParam, urlOrPathParam } from '@/lib/schema';
 import { safeDecodeURI, safeDecodeURIComponent } from '@/lib/url';
-import { createSession, saveEvent, saveSessionData } from '@/queries/sql';
+import { createSession, saveEvent, saveRecording, saveSessionData } from '@/queries/sql';
 
 interface Cache {
   websiteId: string;
@@ -23,7 +23,7 @@ interface Cache {
 }
 
 const schema = z.object({
-  type: z.enum(['event', 'identify']),
+  type: z.enum(['event', 'identify', 'record']),
   payload: z
     .object({
       website: z.uuid().optional(),
@@ -45,6 +45,15 @@ const schema = z.object({
       browser: z.string().optional(),
       os: z.string().optional(),
       device: z.string().optional(),
+      // Session-replay chunk (type: 'record'). events is an rrweb batch, kept as
+      // unknown[] because rrweb's shapes are its own and this route only counts,
+      // bounds and forwards them — it never interprets one. The 5000 cap bounds a
+      // single request; the recorder already flushes every 100 events, so a batch
+      // near the cap is a malformed or hostile client, not a busy page.
+      events: z.array(z.unknown()).max(5000).optional(),
+      chunkIndex: z.coerce.number().int().min(0).optional(),
+      startedAt: z.coerce.number().int().optional(),
+      endedAt: z.coerce.number().int().optional(),
     })
     .refine(
       data => {
@@ -84,6 +93,10 @@ export async function POST(request: Request) {
       tag,
       timestamp,
       id,
+      events,
+      chunkIndex,
+      startedAt,
+      endedAt,
     } = payload;
 
     const sourceId = websiteId || pixelId || linkId;
@@ -294,6 +307,31 @@ export async function POST(request: Request) {
           sessionData: data,
           distinctId: id,
           createdAt,
+        });
+      }
+    } else if (type === COLLECTION_TYPE.record) {
+      // Session-replay chunk. sessionId/visitId are already resolved above from the
+      // same cache token every other type uses, which is the reason this rides the
+      // shared door: a chunk is only meaningful against the session the tracker
+      // established, and that resolution exists here and nowhere else.
+      //
+      // An empty batch is a no-op, not an error — the recorder flushes on unload and
+      // may race an already-drained buffer. Storing it would create a chunk the player
+      // has to skip, and 4xx-ing it would make a healthy client look broken.
+      if (events?.length) {
+        await saveRecording({
+          websiteId,
+          sessionId,
+          visitId,
+          chunkIndex: chunkIndex ?? 0,
+          events,
+          eventCount: events.length,
+          // The recorder's own clock bounds the chunk, because these are the times the
+          // events actually happened; server receipt is later by the flush interval and
+          // by the network, and using it would stretch every chunk and make the
+          // player's timeline drift from the recording.
+          startedAt: startedAt ? new Date(startedAt) : createdAt,
+          endedAt: endedAt ? new Date(endedAt) : createdAt,
         });
       }
     }

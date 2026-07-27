@@ -83,6 +83,11 @@ export const FILTER_COLUMNS = {
 export const COLLECTION_TYPE = {
   event: 'event',
   identify: 'identify',
+  // record carries a batch of rrweb events for session replay. It rides the SAME
+  // /api/send door as the other two rather than getting its own endpoint: session and
+  // visit resolution, the cache token, website lookup and the disabled check are all
+  // there already, and a second collector would be a second copy of every one of them.
+  record: 'record',
 } as const;
 
 export const EVENT_TYPE = {
