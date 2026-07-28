@@ -1,3 +1,23 @@
+// Plain .mjs, NOT next.config.ts — deliberately.
+//
+// Next loads a TypeScript config through the TypeScript compiler API, and this
+// repo is on typescript ^7 (the new native compiler), whose API surface differs.
+// The build died before compiling anything:
+//
+//     ⨯ Failed to load next.config.ts
+//     [TypeError: Cannot read properties of undefined (reading 'fileExists')]
+//
+// which reads as a Next bug and is really a config-loader/toolchain mismatch.
+// Loading the config must not depend on which TypeScript is installed.
+//
+// This is a pure RENAME: the file contained no TypeScript-only syntax — no type
+// annotations, no interfaces, no assertions — so it was already plain ESM that
+// happened to carry a .ts extension. Nothing in it changes.
+//
+// hanzoai/console is on the same typescript ^7 and Next 15 line, already uses
+// next.config.mjs, and builds clean. TypeScript 7 stays for the application
+// source; only config LOADING is decoupled from it.
+
 import 'dotenv/config';
 import pkg from './package.json' with { type: 'json' };
 
