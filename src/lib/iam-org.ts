@@ -41,7 +41,7 @@ export function orgSlugToTeamId(orgSlug: string): string {
  */
 export async function ensureIamOrgTeam(userId: string, orgSlug: string): Promise<void> {
   if (!orgSlug || orgSlug === 'built-in') {
-    // Skip the Casdoor built-in org — it's not a real tenant
+    // Skip the IAM built-in org — it's not a real tenant
     return;
   }
 
