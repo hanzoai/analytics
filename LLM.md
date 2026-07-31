@@ -7,7 +7,7 @@ Privacy-focused web analytics for the Hanzo ecosystem. Multi-tenant IAM integrat
 
 ## Tech Stack
 - **Language**: TypeScript (Next.js), Go (collector)
-- **Database**: PostgreSQL (Prisma ORM), ClickHouse (via hanzoai/datastore)
+- **Database**: PostgreSQL (Prisma ORM), Hanzo Datastore (`hanzoai/datastore`)
 - **Auth**: Hanzo IAM (hanzo.id) OIDC SSO
 - **Infra**: K8s deployment at `universe/infra/k8s/analytics/`
 
@@ -58,5 +58,5 @@ browser, a failed CORS preflight).
 - `IAM_URL`, `IAM_CLIENT_ID`, `IAM_CLIENT_SECRET` -- Hanzo IAM OIDC
 - `INSIGHTS_HOST`, `INSIGHTS_API_KEY` -- event forwarding to Insights
 - `COMMERCE_API_URL`, `COMMERCE_TOKEN` -- billing metering
-- `DATASTORE_URL` -- ClickHouse connection (optional)
+- `DATASTORE_URL` -- Hanzo Datastore connection (optional)
 - `ALLOWED_ORIGINS` -- CORS whitelist for tracker scripts
