@@ -317,3 +317,17 @@ model Pixel {
   @@index([createdAt])
   @@map("pixel")
 }
+
+model Share {
+  id         String    @id @unique @map("share_id") @db.Uuid
+  entityId   String    @map("entity_id") @db.Uuid
+  name       String    @db.VarChar(200)
+  shareType  Int       @map("share_type")
+  slug       String    @unique @db.VarChar(100)
+  parameters Json
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime? @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([entityId])
+  @@map("share")
+}
