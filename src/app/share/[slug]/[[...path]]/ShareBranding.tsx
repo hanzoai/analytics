@@ -2,14 +2,17 @@
 import { Icon, Row, Text } from '@hanzo/react-zen';
 import { useShare } from '@/components/hooks';
 import { Logo } from '@/components/svg';
+import { branding } from '@/lib/branding';
 
 const LOGO_SIZE = { sm: 24, md: 32, lg: 40 };
 const TEXT_SIZE = { sm: 'sm', md: 'base', lg: 'lg' } as const;
 
 export function ShareBranding({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   const share = useShare();
-  const logoDomain = share?.whiteLabel?.domainName || 'https://umami.is';
-  const logoName = share?.whiteLabel?.displayName || 'umami';
+  // A share page is public, so its fallback branding is the one strangers see.
+  // Upstream's default named the vendor and linked off-site.
+  const logoDomain = share?.whiteLabel?.domainName || branding.logoHref;
+  const logoName = share?.whiteLabel?.displayName || branding.name;
   const logoImage = share?.whiteLabel?.logoUrl;
   const height = LOGO_SIZE[size];
 
