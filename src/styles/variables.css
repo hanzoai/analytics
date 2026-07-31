@@ -1,6 +1,8 @@
 html body {
+  /* The primary surface is pinned light in both themes, so its ink is pinned dark
+     to match. --light-color is #fff, which left the label at 1.12:1 on this surface. */
   --primary-color: #f2f2f2;
-  --primary-font-color: var(--light-color);
+  --primary-font-color: #070b13;
   --font-family: "Geist Sans", sans-serif;
 }
 
