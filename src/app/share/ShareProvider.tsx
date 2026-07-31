@@ -52,7 +52,7 @@ function getSharePath(pathname: string) {
 }
 
 export function ShareProvider({ slug, children }: { slug: string; children: ReactNode }) {
-  const { share, isLoading, isFetching } = useShareTokenQuery(slug);
+  const { shareToken: share, isLoading } = useShareTokenQuery(slug);
   const router = useRouter();
   const pathname = usePathname();
   const path = getSharePath(pathname);
@@ -75,7 +75,7 @@ export function ShareProvider({ slug, children }: { slug: string; children: Reac
     }
   }, [shouldRedirect, slug, allowedSections, router]);
 
-  if (isFetching && isLoading) {
+  if (isLoading) {
     return <Loading placement="absolute" />;
   }
 
