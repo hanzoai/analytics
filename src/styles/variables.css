@@ -30,6 +30,14 @@ html[data-theme="light"] {
    the ramp on <body> instead (as this file used to) moved the raw
    --base-color-N reads and left every derived token at its stock value. */
 html[data-theme="dark"],
+/* The pre-hydration frame. Before React mounts there is no data-theme, so
+   without this the ramp resolves to the LIGHT block and body paints #fcfcfc
+   over the black html — a full white flash on every cold load. Setting
+   `html { background: #000 }` alone does not fix it, because body covers the
+   viewport and paints last. Dark is already this app's default
+   (ZenProvider colorScheme="dark"), so the unthemed frame and the themed one
+   should agree; matching :not([data-theme]) is what makes them. */
+html:not([data-theme]),
 .dark-theme {
   /* The ramp stays monotonic: the ground, then each step raised above it.
      react-zen renders a `backgroundColor="n"` prop as var(--base-color-n), so
