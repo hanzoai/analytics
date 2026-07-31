@@ -1,20 +1,56 @@
-html body {
-  /* The primary surface is pinned light in both themes, so its ink is pinned dark
-     to match. --light-color is #fff, which left the label at 1.12:1 on this surface. */
-  --primary-color: #f2f2f2;
-  --primary-font-color: #070b13;
+/* Analytics shares its surface model with Insights: the page ground is true
+   black and every surface layers UP from it, so a raised panel is LIGHTER than
+   the ground it sits on. #262626 is the panel and #212121 the step below it --
+   the pair Insights settled on (frontend/src/styles/base.scss,
+   --color-neutral-cool-850). */
+
+:root {
   --font-family: "Geist Sans", sans-serif;
+
+  /* 4px reads as a square corner at button size. 8px is the radius the panels
+     already carry, so one value rounds both. */
+  --border-radius: var(--border-radius-3);
 }
 
-/* Hanzo dark palette */
-html[data-theme="dark"] body,
-.dark-theme body {
-  --base-color-1: #070b13;
-  --base-color-2: #070b13;
-  --base-color-3: #0d121d;
-  --base-color-4: #1f2937;
-  --base-color-5: #1f2937;
-  --background-color: #070b13;
-  --background-color-1: #070b13;
-  --background-color-2: #0d121d;
+/* Paint the ground before the bundle runs. The theme attribute lands on <html>
+   from a client hook, so until it fires the page shows the UA default -- white
+   -- and dark-mode users get a flash of it on every load. Light mode wins back
+   the moment the attribute resolves. */
+html {
+  background: #000;
+}
+
+html[data-theme="light"] {
+  background: #fff;
+}
+
+/* Scoped to <html>, the element react-zen declares its dark palette on. The
+   derived tokens -- --border-color, --highlight-color, --input-color,
+   --primary-font-color -- are resolved THERE from these ramp steps, so setting
+   the ramp on <body> instead (as this file used to) moved the raw
+   --base-color-N reads and left every derived token at its stock value. */
+html[data-theme="dark"],
+.dark-theme {
+  /* The ramp stays monotonic: the ground, then each step raised above it.
+     react-zen renders a `backgroundColor="n"` prop as var(--base-color-n), so
+     these steps are surface fills all over the app -- collapsing the low end
+     onto the ground turns every one of those fills into a black hole. */
+  --base-color-1: #000; /* the ground */
+  --base-color-2: #212121; /* the step below the panel */
+  --base-color-3: #262626; /* panel level */
+  --base-color-4: #2e2e2e;
+  --base-color-5: #363636;
+
+  --background-color: #262626; /* the raised panel */
+
+  /* Soft, one shade above the panel. A hairline bright enough to read against
+     the ground outlines every row, card and input, and the eye follows the grid
+     instead of the data. */
+  --border-color: #2e2e2e;
+
+  /* Hover lifts above the panel rather than sinking toward the ground. */
+  --highlight-color: #2e2e2e;
+
+  --active-color: #eeeeee;
+  --active-font-color: #000;
 }

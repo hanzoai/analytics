@@ -8,7 +8,7 @@ export interface BrandingProps {
 
 export function LoginPage({ branding }: { branding: BrandingProps }) {
   return (
-    <Column alignItems="center" height="100vh" backgroundColor="2" paddingTop="12">
+    <Column alignItems="center" height="100vh" backgroundColor="1" paddingTop="12">
       <LoginForm branding={branding} />
     </Column>
   );

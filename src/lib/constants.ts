@@ -186,34 +186,39 @@ export const ROLE_PERMISSIONS = {
   [ROLES.teamViewOnly]: [],
 } as const;
 
+/* `primary` drives the chart bars AND the map (base/stroke/hover), so it is the
+   single value that decided the product read as blue. `fill` is the map
+   landmass, which sits inside a panel and so has to layer above it, not below. */
 export const THEME_COLORS = {
   light: {
-    primary: '#2680eb',
+    primary: '#404040',
     text: '#838383',
     line: '#d9d9d9',
-    fill: '#f9f9f9',
+    fill: '#f0f0f0',
   },
   dark: {
-    primary: '#2680eb',
-    text: '#7b7b7b',
-    line: '#3a3a3a',
-    fill: '#191919',
+    primary: '#d4d4d4',
+    text: '#8a8a8a',
+    line: '#333333',
+    fill: '#3a3a3a',
   },
 } as const;
 
+/* Series are separated by lightness, not hue. Ordered so neighbours sit far
+   apart on the ramp -- adjacent series in a stack stay legible. */
 export const CHART_COLORS = [
-  '#2680eb',
-  '#9256d9',
-  '#44b556',
-  '#e68619',
-  '#e34850',
-  '#f7bd12',
-  '#01bad7',
-  '#6734bc',
-  '#89c541',
-  '#ffc301',
-  '#ec1562',
-  '#ffec16',
+  '#f5f5f5',
+  '#8a8a8a',
+  '#c9c9c9',
+  '#5c5c5c',
+  '#e0e0e0',
+  '#a3a3a3',
+  '#767676',
+  '#d4d4d4',
+  '#949494',
+  '#6b6b6b',
+  '#b8b8b8',
+  '#4f4f4f',
 ];
 
 export const DOMAIN_REGEX =
