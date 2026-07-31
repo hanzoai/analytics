@@ -1,6 +1,6 @@
 import { gunzipSync } from 'node:zlib';
-import clickhouse from '@/lib/clickhouse';
-import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
+import datastore from '@/lib/datastore';
+import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 
 const FUNCTION_NAME = 'getReplayChunks';
@@ -18,7 +18,7 @@ export interface ReplayChunk {
 export async function getReplayChunks(websiteId: string, visitId: string): Promise<ReplayChunk[]> {
   return runQuery({
     [PRISMA]: () => relationalQuery(websiteId, visitId),
-    [CLICKHOUSE]: () => clickhouseQuery(websiteId, visitId),
+    [DATASTORE]: () => datastoreQuery(websiteId, visitId),
   });
 }
 
@@ -58,8 +58,8 @@ async function relationalQuery(websiteId: string, visitId: string): Promise<Repl
   }));
 }
 
-async function clickhouseQuery(websiteId: string, visitId: string): Promise<ReplayChunk[]> {
-  const { rawQuery } = clickhouse;
+async function datastoreQuery(websiteId: string, visitId: string): Promise<ReplayChunk[]> {
+  const { rawQuery } = datastore;
 
   const results = await rawQuery<
     {

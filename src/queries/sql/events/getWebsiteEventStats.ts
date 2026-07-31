@@ -1,5 +1,5 @@
-import clickhouse from '@/lib/clickhouse';
-import { CLICKHOUSE, PRISMA, runQuery } from '@/lib/db';
+import datastore from '@/lib/datastore';
+import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
 import prisma from '@/lib/prisma';
 import type { QueryFilters } from '@/lib/types';
 
@@ -17,7 +17,7 @@ export async function getWebsiteEventStats(
 ): Promise<WebsiteEventStatsData[]> {
   return runQuery({
     [PRISMA]: () => relationalQuery(...args),
-    [CLICKHOUSE]: () => clickhouseQuery(...args),
+    [DATASTORE]: () => datastoreQuery(...args),
   });
 }
 
@@ -59,11 +59,11 @@ async function relationalQuery(
   ).then(result => result?.[0]);
 }
 
-async function clickhouseQuery(
+async function datastoreQuery(
   websiteId: string,
   filters: QueryFilters,
 ): Promise<WebsiteEventStatsData[]> {
-  const { rawQuery, parseFilters } = clickhouse;
+  const { rawQuery, parseFilters } = datastore;
   const { filterQuery, cohortQuery, queryParams } = parseFilters({
     ...filters,
     websiteId,
