@@ -9,6 +9,7 @@ type FormatMessage = (
 ) => string | null;
 
 interface UseMessages {
+  t: FormatMessage;
   formatMessage: FormatMessage;
   messages: typeof messages;
   labels: typeof labels;
@@ -44,5 +45,13 @@ export function useMessages(): UseMessages {
     return descriptor ? intl.formatMessage(descriptor, values, opts) : null;
   };
 
-  return { formatMessage, messages, labels, getMessage, getErrorMessage, FormattedMessage };
+  return {
+    t: formatMessage,
+    formatMessage,
+    messages,
+    labels,
+    getMessage,
+    getErrorMessage,
+    FormattedMessage,
+  };
 }
