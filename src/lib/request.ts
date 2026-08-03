@@ -1,7 +1,14 @@
 import { z } from 'zod';
 import { checkAuth } from '@/lib/auth';
 import { DEFAULT_PAGE_SIZE, FILTER_COLUMNS } from '@/lib/constants';
-import { getAllowedUnits, getMinimumUnit, maxDate, parseDateRange } from '@/lib/date';
+import {
+  getAllowedUnits,
+  getMinimumUnit,
+  isValidTimezone,
+  maxDate,
+  normalizeTimezone,
+  parseDateRange,
+} from '@/lib/date';
 import { fetchWebsite } from '@/lib/load';
 import { filtersArrayToObject } from '@/lib/params';
 import { badRequest, unauthorized } from '@/lib/response';
@@ -63,10 +70,15 @@ export function getRequestDateRange(query: Record<string, string>) {
   const startDate = new Date(+startAt);
   const endDate = new Date(+endAt);
 
+  // Both of these land in SQL by interpolation — `unit` inside date_trunc(),
+  // `timezone` inside `at time zone '…'` — where a bound parameter cannot go,
+  // so both need an allow-list. Routes that declare a zod schema get timezone
+  // checked by timezoneParam, but parseRequest is also called with no schema
+  // at all (GET /api/realtime/{websiteId}), and then this is the only gate.
   return {
     startDate,
     endDate,
-    timezone,
+    timezone: isValidTimezone(timezone) ? normalizeTimezone(timezone) : undefined,
     unit: getAllowedUnits(startDate, endDate).includes(unit)
       ? unit
       : getMinimumUnit(startDate, endDate),
