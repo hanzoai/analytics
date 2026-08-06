@@ -27,7 +27,6 @@
 
 ---
 
-Forked from [umami-software/umami](https://github.com/umami-software/umami) (MIT).
 
 ## 🚀 Getting Started
 
