@@ -125,14 +125,14 @@ jobs:
           echo "::error::pushed image never resolved: $img"; exit 1
 
       # THE DEPLOY. Everything above publishes an image; this is what makes
-      # production run it. cd.hanzo.ai watches hanzoai/universe, not the
-      # registry, so an image nothing points at is just bytes in ghcr.
+      # production run it. cd.hanzo.ai watches hanzo/universe — NOT hanzoai/
+      # universe, which is a separate repo with the same layout that deploys
+      # nothing — so an image nothing points at is just bytes in ghcr.
       - name: Ship it
         env:
           KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
           KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
           KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://kms.hanzo.ai' }}
-          KMS_ORG: ${{ vars.KMS_ORG || 'hanzo' }}
           KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
           # pin.sh probes the registry before it moves anything; these let it read
           # a private manifest instead of falling back to anonymous.
@@ -149,10 +149,13 @@ jobs:
             | jq -r '.accessToken // empty')
           [ -n "$KMS_TOKEN" ] || { echo "::error::KMS login failed at ${KMS_ENDPOINT}"; exit 1; }
 
+          # The org is carried by the token, not the path — a `/orgs/<org>/`
+          # segment here answers 404, and `-fsS` reports that as curl exit 22
+          # with no hint about which of the two calls failed.
           PIN_TOKEN=$(curl -fsS \
-            "${KMS_ENDPOINT}/v1/kms/orgs/${KMS_ORG}/secrets/deploy/UNIVERSE_PIN_TOKEN?env=${KMS_SECRET_ENV}" \
-            -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.secret.value // empty')
-          [ -n "$PIN_TOKEN" ] || { echo "::error::UNIVERSE_PIN_TOKEN missing in KMS at ${KMS_ORG}/deploy (env ${KMS_SECRET_ENV})"; exit 1; }
+            "${KMS_ENDPOINT}/v1/kms/secrets/deploy/UNIVERSE_PIN_TOKEN?env=${KMS_SECRET_ENV}" \
+            -H "Authorization: Bearer ${KMS_TOKEN}" | jq -r '.value // empty')
+          [ -n "$PIN_TOKEN" ] || { echo "::error::UNIVERSE_PIN_TOKEN missing in KMS at deploy (env ${KMS_SECRET_ENV})"; exit 1; }
           echo "::add-mask::${PIN_TOKEN}"
 
           # Shallow: universe is ~600MB of history and this needs one file from
@@ -192,3 +195,4 @@ jobs:
             esac
           done
           echo "::error::could not push the pin after 5 attempts"; exit 1
+
