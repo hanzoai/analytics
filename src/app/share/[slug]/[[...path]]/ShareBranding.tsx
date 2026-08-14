@@ -9,8 +9,8 @@ const TEXT_SIZE = { sm: 'sm', md: 'base', lg: 'lg' } as const;
 
 export function ShareBranding({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   const share = useShare();
-  // A share page is public, so its fallback branding is the one strangers see.
-  // Upstream's default named the vendor and linked off-site.
+  // A share page is public, so its fallback is the branding strangers see:
+  // this deployment's own name, linking back to this deployment.
   const logoDomain = share?.whiteLabel?.domainName || branding.logoHref;
   const logoName = share?.whiteLabel?.displayName || branding.name;
   const logoImage = share?.whiteLabel?.logoUrl;
