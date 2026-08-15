@@ -163,7 +163,10 @@ export const retentionReportSchema = z.object({
   parameters: z.object({
     startDate: z.coerce.date(),
     endDate: z.coerce.date(),
-    timezone: z.string().optional(),
+    // timezoneParam, not z.string(): report parameters bypass
+    // getRequestDateRange entirely — getRetention reads parameters.timezone
+    // straight into `at time zone '…'`.
+    timezone: timezoneParam.optional(),
   }),
 });
 
@@ -180,7 +183,7 @@ export const revenueReportSchema = z.object({
   parameters: z.object({
     startDate: z.coerce.date(),
     endDate: z.coerce.date(),
-    timezone: z.string().optional(),
+    timezone: timezoneParam.optional(),
     currency: z.string(),
   }),
 });
