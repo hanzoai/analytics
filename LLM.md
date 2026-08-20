@@ -6,10 +6,9 @@ Privacy-focused web analytics for the Hanzo ecosystem. Multi-tenant IAM integrat
 **Upstream**: [Umami](https://github.com/umami-software/umami) (MIT). Branded as **Hanzo Analytics**.
 
 ## Tech Stack
-- **Language**: TypeScript (Next.js), Go (collector)
+- **Language**: TypeScript (Next.js)
 - **Database**: PostgreSQL (Prisma ORM), Hanzo Datastore (`hanzoai/datastore`)
 - **Auth**: Hanzo IAM (hanzo.id) OIDC SSO
-- **Infra**: K8s deployment at `universe/infra/k8s/analytics/`
 
 ## Build & Run
 ```bash
@@ -24,39 +23,56 @@ pnpm test
 - Websites scoped to Teams provide per-org data isolation
 - White-label branding via env vars: `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_IAM_PROVIDER_NAME`
 
-## Client SDK — `@hanzo/event` lives in `hanzoai/ui`, NOT here
+## This repo serves NO `/v1/*` and owns NO client
 
-The canonical telemetry client is **`hanzoai/ui` → `pkgs/event`**, published to
-npm as `@hanzo/event`. This repo used to carry a FORK of it at `packages/event`
-(`@hanzo/event@0.2.0`, never published). That fork is deleted — do not recreate it.
+The measurement product is ONE product and it lives in `hanzoai/cloud`:
+`apps/analytics` owns `/v1/analytics` plus the ingest doors `/v1/event` and
+`/v1/insights/e`. This repo holds per-site history in its own Postgres; it is not a
+second implementation of that surface, and the four things that made it one are
+deleted.
 
-The fork was not harmless. It held the ONLY working Sentry-envelope
-implementation while the published package shipped a comment claiming that
-`POST /v1/event` was "lensed server-side" into Sentry. It is not, so every Hanzo
-property reported **zero** errors to the Sentry dashboard for as long as both
-copies existed. The envelope + scrub code was merged into the canonical package
-in `@hanzo/event@0.3.2`. One implementation, one home.
+**`POST /v1/event` (`src/app/v1/event/route.ts`) — DELETED.** It took a **bare JSON
+array** of `{site, ts, type, path, …}` envelopes on a path spelled identically to
+cloud's front door, which takes `{batch:[…]}`. Measured, live:
 
-What THIS repo owns is the **web-analytics plane**: the `hz.js` tracker
-(`public/hz.js`) and its ingest `POST /v1/event` (`src/app/v1/event/route.ts`).
-Note that door takes a **bare JSON array** of `{site, ts, type, path, …}`
-envelopes — it is a DIFFERENT protocol from `api.hanzo.ai/v1/event`
-(`{batch:[…]}`) despite the identical path spelling. An app's `@hanzo/event`
-client must point at the API host; pointing it here yields a 400 (and, from a
-browser, a failed CORS preflight).
+```
+POST api.hanzo.ai/v1/event       {"batch":[]}  -> 200 {"accepted":0,"dropped":0}
+POST analytics.hanzo.ai/v1/event []            -> 204
+```
 
+One path spelling, two protocols, two servers — so a `@hanzo/event` client pointed
+at the wrong host failed silently. One door survives and it is cloud's. Do not add
+a `/v1/*` route to this repo.
+
+**`public/hz.js` — MOVED to `hanzoai/ui` → `pkgs/event` (`@hanzo/event@0.3.7`).**
+The tag is a *client*, and the house has one client home. There it is the
+script-tag distribution of `@hanzo/event`: same `WireEvent` batch, same
+`POST {host}/v1/event`, default host `api.hanzo.ai`, shipped on the CDN as
+`https://unpkg.com/@hanzo/event/hz.js`. Do not add a tracker back here.
+
+**`collector/` (Go) — DELETED.** A THIRD event collector, its own Go module,
+deployed nowhere in `universe`, forwarding to a service that no longer exists.
+
+**`src/lib/insights-forward.ts` — DELETED**, with its call site in
+`src/app/api/send/route.ts` and its `INSIGHTS_HOST` / `INSIGHTS_API_KEY` env. It
+fire-and-forgot every event at that same deleted service.
+
+The client SDK is `hanzoai/ui` → `pkgs/event`, published as `@hanzo/event`. This
+repo used to carry a FORK of it at `packages/event` (`@hanzo/event@0.2.0`, never
+published). That fork is deleted — do not recreate it. It was not harmless: it held
+the ONLY working Sentry-envelope implementation while the published package shipped
+a comment claiming `POST /v1/event` was "lensed server-side" into Sentry. It is not,
+so every Hanzo property reported **zero** errors for as long as both copies existed.
+The envelope + scrub code merged into the canonical package in `@hanzo/event@0.3.2`.
 
 ## Key Integration Points
 - **IAM auth**: `src/app/api/auth/iam/route.ts` -- OAuth callback, org assignment
 - **Branding**: `src/lib/branding.ts` -- runtime env-based white-label config
-- **Insights forwarding**: `src/lib/insights-forward.ts` -- fire-and-forget event forwarding to Insights capture
 - **Commerce billing**: `src/lib/commerce.ts` + `src/app/api/cron/billing/route.ts` -- usage metering to Commerce API
-- **Collector (Go)**: `collector/` -- standalone event collector with forwarders to Insights, Datastore, and Analytics backends
 
 ## K8s Environment Variables (deployment.yaml)
 - `DATABASE_URL`, `APP_SECRET`, `KV_URL` -- from KMS via `analytics-secrets`
 - `IAM_URL`, `IAM_CLIENT_ID`, `IAM_CLIENT_SECRET` -- Hanzo IAM OIDC
-- `INSIGHTS_HOST`, `INSIGHTS_API_KEY` -- event forwarding to Insights
 - `COMMERCE_API_URL`, `COMMERCE_TOKEN` -- billing metering
 - `DATASTORE_URL` -- Hanzo Datastore connection (optional)
 - `ALLOWED_ORIGINS` -- CORS whitelist for tracker scripts
