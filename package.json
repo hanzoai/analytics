@@ -1,6 +1,7 @@
 {
   "name": "@hanzo/analytics",
-  "version": "3.0.11",
+  "version": "3.1.2",
+  "private": true,
   "description": "Privacy-focused web analytics for the Hanzo ecosystem.",
   "author": "Hanzo AI, Inc. <eng@hanzo.ai>",
   "license": "MIT",
