@@ -20,9 +20,9 @@ importers:
       '@dicebear/core':
         specifier: ^9.2.3
         version: 9.2.4
-      '@fontsource/geist-sans':
-        specifier: ^5.2.5
-        version: 5.2.5
+      '@hanzo/design':
+        specifier: ^0.5.21
+        version: 0.5.21
       '@hanzo/iam':
         specifier: ^0.13.6
         version: 0.13.6(react@19.2.3)
@@ -1221,9 +1221,6 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@fontsource/geist-sans@5.2.5':
-    resolution: {integrity: sha512-anllOHyJbElRs9fV15TeDRqAeb1IKm4bSknPl6ZMoyPTx1BBy7logudcUwpNjmQLkzn4Q0JGQLRCUKJYoyST6A==}
-
   '@fontsource/jetbrains-mono@5.2.8':
     resolution: {integrity: sha512-6w8/SG4kqvIMu7xd7wt6x3idn1Qux3p9N62s6G3rfldOUYHpWcc2FKrqf+Vo44jRvqWj2oAtTHrZXEP23oSKwQ==}
 
@@ -1290,6 +1287,10 @@ packages:
     peerDependenciesMeta:
       ts-jest:
         optional: true
+
+  '@hanzo/design@0.5.21':
+    resolution: {integrity: sha512-E2g6DZCn2IUf2AQKqPMwlVV5fz2wvIpAagFRLx33gIsJfmpyubFnx0LINjFs7UoMI1ajnwSa73k7rPteVSemUw==}
+    hasBin: true
 
   '@hanzo/iam@0.13.6':
     resolution: {integrity: sha512-Fbu7NiJindwwQIew7RSyspqbqR/g998cg+tkLrvrxC8zj9yJh5WRSVvhMdJ6PwHA7GRPz+Ox4uKJPQJrP4SSkw==}
@@ -8006,8 +8007,6 @@ snapshots:
   '@esbuild/win32-x64@0.27.0':
     optional: true
 
-  '@fontsource/geist-sans@5.2.5': {}
-
   '@fontsource/jetbrains-mono@5.2.8': {}
 
   '@formatjs/cli@4.8.4(ts-jest@29.4.6(@babel/core@7.28.3)(@jest/transform@29.7.0)(@jest/types@30.0.5)(babel-jest@29.7.0(@babel/core@7.28.3))(esbuild@0.25.12)(jest-util@30.0.5)(jest@29.7.0(@types/node@24.10.1)(ts-node@10.9.2(@types/node@24.10.1)(typescript@5.9.3)))(typescript@5.9.3))':
@@ -8117,6 +8116,8 @@ snapshots:
       typescript: 4.9.5
     optionalDependencies:
       ts-jest: 29.4.6(@babel/core@7.28.3)(@jest/transform@29.7.0)(@jest/types@30.0.5)(babel-jest@29.7.0(@babel/core@7.28.3))(esbuild@0.25.12)(jest-util@30.0.5)(jest@29.7.0(@types/node@24.10.1)(ts-node@10.9.2(@types/node@24.10.1)(typescript@5.9.3)))(typescript@5.9.3)
+
+  '@hanzo/design@0.5.21': {}
 
   '@hanzo/iam@0.13.6(react@19.2.3)':
     dependencies:
