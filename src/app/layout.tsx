@@ -1,10 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Providers } from './Providers';
-import '@fontsource/geist-sans/300.css';
-import '@fontsource/geist-sans/400.css';
-import '@fontsource/geist-sans/500.css';
-import '@fontsource/geist-sans/700.css';
+import '@hanzo/design/tokens/fonts.css';
 import '@hanzo/react-zen/styles.css';
 import '@/styles/global.css';
 import '@/styles/variables.css';
