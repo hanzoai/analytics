@@ -1,5 +1,7 @@
 import type { SVGProps } from 'react';
 
+import { MARK_BLOCKS } from '@hanzo/logo/logos';
+
 const SvgLogo = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -9,11 +11,9 @@ const SvgLogo = (props: SVGProps<SVGSVGElement>) => (
     viewBox="0 0 67 67"
     {...props}
   >
-    <path d="M22.21 67V44.6369H0V67H22.21Z" />
-    <path d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z" />
-    <path d="M22.21 0H0V22.3184H22.21V0Z" />
-    <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" />
-    <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" />
+    {MARK_BLOCKS.map((d) => (
+      <path key={d} d={d} />
+    ))}
   </svg>
 );
 export default SvgLogo;
