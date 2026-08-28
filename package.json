@@ -66,7 +66,7 @@
     "@dicebear/collection": "^9.2.3",
     "@dicebear/core": "^9.2.3",
     "@fontsource/geist-sans": "^5.2.5",
-    "@hanzo/iam": "^0.13.6",
+    "@hanzo/iam": "catalog:",
     "@hanzo/react-zen": "npm:@umami/react-zen@^0.211.0",
     "@hanzo/redis-client": "npm:@umami/redis-client@^0.29.0",
     "@hello-pangea/dnd": "^17.0.0",
@@ -184,5 +184,6 @@
       "prisma",
       "sharp"
     ]
-  }
+  },
+  "packageManager": "pnpm@11.24.0"
 }
