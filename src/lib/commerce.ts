@@ -5,7 +5,6 @@
  *
  * Configuration via environment variables:
  *   COMMERCE_API_URL  -- Commerce API base URL (e.g. http://commerce.hanzo.svc:8001)
- *   COMMERCE_TOKEN    -- Inter-service auth token for Commerce API
  */
 
 const COMMERCE_API_URL = process.env.COMMERCE_API_URL || '';
