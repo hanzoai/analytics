@@ -1,10 +1,7 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Providers } from './Providers';
-import '@fontsource/geist-sans/300.css';
-import '@fontsource/geist-sans/400.css';
-import '@fontsource/geist-sans/500.css';
-import '@fontsource/geist-sans/700.css';
+import '@hanzo/design/tokens/fonts.css';
 import '@hanzo/react-zen/styles.css';
 import '@/styles/global.css';
 import '@/styles/variables.css';
@@ -26,8 +23,8 @@ export default function ({ children }) {
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="manifest" href="/site.webmanifest" />
-        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
-        <meta name="msapplication-TileColor" content="#da532c" />
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#0a0a0a" />
+        <meta name="msapplication-TileColor" content="#ffffff" />
         <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
         <meta name="robots" content="noindex,nofollow" />
