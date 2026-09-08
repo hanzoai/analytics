@@ -5,7 +5,7 @@
    --color-neutral-cool-850). */
 
 :root {
-  --font-family: "Geist Sans", sans-serif;
+  --font-family: var(--font-sans);
 
   /* 4px reads as a square corner at button size. 8px is the radius the panels
      already carry, so one value rounds both. */

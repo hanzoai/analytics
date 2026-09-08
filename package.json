@@ -127,7 +127,9 @@
     "ua-parser-js": "catalog:",
     "uuid": "catalog:",
     "zod": "catalog:",
-    "zustand": "catalog:"
+    "zustand": "catalog:",
+    "@hanzo/design": "catalog:",
+    "@hanzo/logo": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

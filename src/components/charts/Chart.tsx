@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Legend } from '@/components/metrics/Legend';
 import { DEFAULT_ANIMATION_DURATION } from '@/lib/constants';
 
-ChartJS.defaults.font.family = 'Inter';
+ChartJS.defaults.font.family = 'Zen';
 
 export interface ChartProps extends BoxProps {
   type?: 'bar' | 'bubble' | 'doughnut' | 'pie' | 'line' | 'polarArea' | 'radar' | 'scatter';
