@@ -1,6 +1,8 @@
 'use client';
+import { GuiProvider } from '@hanzo/gui';
 import { IamProvider } from '@hanzo/iam/react';
 import { Loading, RouterProvider, ZenProvider } from '@hanzo/react-zen';
+import { config as gui } from '@hanzo/ui/gui-config';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -24,8 +26,7 @@ const iamConfig = {
   clientId: process.env.NEXT_PUBLIC_IAM_CLIENT_ID || 'hanzo-analytics',
   orgName: process.env.NEXT_PUBLIC_IAM_ORG || 'hanzo',
   organization: process.env.NEXT_PUBLIC_IAM_ORG || 'hanzo',
-  redirectUri:
-    (typeof window !== 'undefined' ? window.location.origin : '') + '/auth/callback',
+  redirectUri: (typeof window !== 'undefined' ? window.location.origin : '') + '/auth/callback',
   scope: 'openid profile email',
 };
 
@@ -74,15 +75,19 @@ export function Providers({ children }) {
 
   return (
     <IamProvider config={iamConfig}>
-      <ZenProvider colorScheme="dark">
-        <RouterProvider navigate={navigate}>
-          <MessagesProvider>
-            <QueryClientProvider client={client}>
-              <ErrorBoundary>{children}</ErrorBoundary>
-            </QueryClientProvider>
-          </MessagesProvider>
-        </RouterProvider>
-      </ZenProvider>
+      {/* @hanzo/gui draws the sign-in and the shared analytics views; the rest of
+          the app keeps react-zen. One provider for both, here. */}
+      <GuiProvider config={gui} defaultTheme="dark">
+        <ZenProvider colorScheme="dark">
+          <RouterProvider navigate={navigate}>
+            <MessagesProvider>
+              <QueryClientProvider client={client}>
+                <ErrorBoundary>{children}</ErrorBoundary>
+              </QueryClientProvider>
+            </MessagesProvider>
+          </RouterProvider>
+        </ZenProvider>
+      </GuiProvider>
     </IamProvider>
   );
 }

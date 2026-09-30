@@ -65,6 +65,7 @@
     "@dicebear/collection": "catalog:",
     "@dicebear/core": "catalog:",
     "@fontsource/geist-sans": "catalog:",
+    "@hanzo/dashboard": "catalog:",
     "@hanzo/design": "catalog:",
     "@hanzo/gui": "catalog:",
     "@hanzo/iam": "catalog:",

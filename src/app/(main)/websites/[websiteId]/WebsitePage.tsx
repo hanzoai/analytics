@@ -1,22 +1,24 @@
 'use client';
-import { Column } from '@hanzo/react-zen';
-import { ExpandedViewModal } from '@/app/(main)/websites/[websiteId]/ExpandedViewModal';
-import { Panel } from '@/components/common/Panel';
-import { WebsiteChart } from './WebsiteChart';
-import { WebsiteControls } from './WebsiteControls';
-import { WebsiteMetricsBar } from './WebsiteMetricsBar';
-import { WebsitePanels } from './WebsitePanels';
+import { analyticsSource, ProductAnalytics, WebAnalytics } from '@hanzo/dashboard';
+import { YStack } from '@hanzo/gui';
+import { useIam } from '@hanzo/iam/react';
+import { useMemo } from 'react';
 
+/**
+ * A website's page is the shared analytics views (@hanzo/dashboard), the same ones
+ * a project's page in the platform mounts, over this app's own /v1 API.
+ */
 export function WebsitePage({ websiteId }: { websiteId: string }) {
+  const { sdk } = useIam();
+  const source = useMemo(
+    () => analyticsSource({ base: process.env.basePath || '', token: () => sdk.getAccessToken() }),
+    [sdk],
+  );
+
   return (
-    <Column gap>
-      <WebsiteControls websiteId={websiteId} />
-      <WebsiteMetricsBar websiteId={websiteId} showChange={true} />
-      <Panel minHeight="520px">
-        <WebsiteChart websiteId={websiteId} />
-      </Panel>
-      <WebsitePanels websiteId={websiteId} />
-      <ExpandedViewModal websiteId={websiteId} />
-    </Column>
+    <YStack gap="$6" width="100%">
+      <WebAnalytics source={source} website={websiteId} />
+      <ProductAnalytics source={source} website={websiteId} />
+    </YStack>
   );
 }

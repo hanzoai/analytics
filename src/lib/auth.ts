@@ -30,6 +30,20 @@ const IAM_CLIENT_ID =
   process.env.IAM_CLIENT_ID ||
   'hanzo-analytics';
 
+/**
+ * The IAM apps whose tokens this API accepts: its own, and the first-party
+ * surfaces that mount its views with the viewer's own bearer (the platform
+ * console, by brand). IAM_AUDIENCES names them; the token's owner and org still
+ * decide what it may read.
+ */
+const IAM_AUDIENCES = [
+  IAM_CLIENT_ID,
+  ...(process.env.IAM_AUDIENCES || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean),
+];
+
 export function getBearerToken(request: Request) {
   const auth = request.headers.get('authorization');
 
@@ -106,6 +120,7 @@ export async function checkAuth(request: Request) {
     const result = await validateToken(token, {
       serverUrl: IAM_SERVER_URL,
       clientId: IAM_CLIENT_ID,
+      audience: IAM_AUDIENCES,
     });
 
     if (result.ok) {

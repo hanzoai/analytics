@@ -199,6 +199,8 @@ export default withGui({
   },
   basePath,
   output: 'standalone',
+  // The shared analytics views ship as TypeScript source.
+  transpilePackages: ['@hanzo/dashboard'],
   eslint: {
     ignoreDuringBuilds: true,
   },
