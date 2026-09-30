@@ -16,11 +16,11 @@ catalogs:
       specifier: ^2.1.1
       version: 2.1.1
     '@dicebear/collection':
-      specifier: ^9.4.2
+      specifier: ^9.2.3
       version: 9.4.2
     '@dicebear/core':
-      specifier: ^10.7.0
-      version: 10.7.0
+      specifier: ^9.2.3
+      version: 9.4.3
     '@fontsource/geist-sans':
       specifier: ^5.3.0
       version: 5.3.0
@@ -94,8 +94,8 @@ catalogs:
       specifier: 19.2.5
       version: 19.2.5
     '@types/react-window':
-      specifier: ^2.0.0
-      version: 2.0.0
+      specifier: ^1.8.8
+      version: 1.8.8
     babel-plugin-react-compiler:
       specifier: ^1.0.0
       version: 1.0.0
@@ -232,8 +232,8 @@ catalogs:
       specifier: ^15.8.1
       version: 15.8.1
     pure-rand:
-      specifier: ^8.4.2
-      version: 8.4.2
+      specifier: ^7.0.1
+      version: 7.0.1
     react:
       specifier: 19.2.8
       version: 19.2.8
@@ -247,8 +247,8 @@ catalogs:
       specifier: ^10.1.24
       version: 10.2.2
     react-resizable-panels:
-      specifier: ^2.1.9
-      version: 2.1.9
+      specifier: ^4.11.2
+      version: 4.14.1
     react-simple-maps:
       specifier: ^3.0.0
       version: 3.0.0
@@ -256,8 +256,8 @@ catalogs:
       specifier: ^2.1.7
       version: 2.1.7
     react-window:
-      specifier: ^2.3.0
-      version: 2.3.1
+      specifier: ^1.8.6
+      version: 1.8.11
     request-ip:
       specifier: ^3.3.0
       version: 3.3.0
@@ -443,10 +443,10 @@ importers:
         version: 2.1.1
       '@dicebear/collection':
         specifier: 'catalog:'
-        version: 9.4.2(@dicebear/core@10.7.0)
+        version: 9.4.2(@dicebear/core@9.4.3)
       '@dicebear/core':
         specifier: 'catalog:'
-        version: 10.7.0
+        version: 9.4.3
       '@fontsource/geist-sans':
         specifier: 'catalog:'
         version: 5.3.0
@@ -587,7 +587,7 @@ importers:
         version: 15.8.1
       pure-rand:
         specifier: 'catalog:'
-        version: 8.4.2
+        version: 7.0.1
       react:
         specifier: 'catalog:'
         version: 19.2.8
@@ -602,7 +602,7 @@ importers:
         version: 10.2.2(@types/react@19.2.18)(react@19.2.8)
       react-resizable-panels:
         specifier: 'catalog:'
-        version: 2.1.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 4.14.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-simple-maps:
         specifier: 'catalog:'
         version: 3.0.0(prop-types@15.8.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -611,7 +611,7 @@ importers:
         version: 2.1.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-window:
         specifier: 'catalog:'
-        version: 2.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 1.8.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       request-ip:
         specifier: 'catalog:'
         version: 3.3.0
@@ -687,7 +687,7 @@ importers:
         version: 19.2.5(@types/react@19.2.18)
       '@types/react-window':
         specifier: 'catalog:'
-        version: 2.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 1.8.8
       babel-plugin-react-compiler:
         specifier: 'catalog:'
         version: 1.0.0
@@ -1456,9 +1456,9 @@ packages:
     peerDependencies:
       '@dicebear/core': ^9.0.0
 
-  '@dicebear/core@10.7.0':
-    resolution: {integrity: sha512-JUOzKOd8RUByJJo8ZL+C7YE/pvEsWewfpbWUmR8OIQZWv/PvUQHnohdevySC3icyyxe6EIU/8B/rQgA42us1QA==}
-    engines: {node: '>=22.0.0'}
+  '@dicebear/core@9.4.3':
+    resolution: {integrity: sha512-9ITrQI57k3p5hKuU8HZJ1d0kPdrmTKEJDOdlKQ8CpaChbtmnD1R+dtWmNz5IesYThXM8F64pJ0ZvJ2rsY8Hciw==}
+    engines: {node: '>=18.0.0'}
 
   '@dicebear/croodles-neutral@9.4.2':
     resolution: {integrity: sha512-oG5IeUdtiYshQ89gkAVcl5w3xAEi5UZX2fTzIyelpBPCG176l7VuuFzlxi2umnB3E6LVHYy06DXvUo/p+rXB2Q==}
@@ -3998,9 +3998,8 @@ packages:
     peerDependencies:
       '@types/react': ^19.2.0
 
-  '@types/react-window@2.0.0':
-    resolution: {integrity: sha512-E8hMDtImEpMk1SjswSvqoSmYvk7GEtyVaTa/GJV++FdDNuMVVEzpAClyJ0nqeKYBrMkGiyH6M1+rPLM0Nu1exQ==}
-    deprecated: This is a stub types definition. react-window provides its own type definitions, so you do not need this installed.
+  '@types/react-window@1.8.8':
+    resolution: {integrity: sha512-8Ls660bHR1AUA2kuRvVG9D/4XpRC6wjAaPT9dil7Ckc76eP9TKWZwwmgfq8Q1LANX3QNDnoU4Zp48A3w+zK69Q==}
 
   '@types/react@19.2.18':
     resolution: {integrity: sha512-AnzbBERsrLKtk2XSfTbYRLjQPdy116Sty4q+T+Bp3IC4l6jNBvreVPAHmpq9qhXQM7CXZPjLVmGMw9sy+hxQ3w==}
@@ -7493,9 +7492,6 @@ packages:
   pure-rand@7.0.1:
     resolution: {integrity: sha512-oTUZM/NAZS8p7ANR3SHh30kXB+zK2r2BPcEn/awJIbOvq82WoMN4p62AWWp3Hhw50G0xMsw1mhIBLqHw64EcNQ==}
 
-  pure-rand@8.4.2:
-    resolution: {integrity: sha512-vvuOGgcuPJAirlHvuQw1TrOiw7ptaIXXmIbNuiNOY6lNGJJH49PQ1Kj4nd783nPdQhQdicgOjVI2yI/9BD6/Ng==}
-
   qified@0.10.1:
     resolution: {integrity: sha512-+Owyggi9IxT1ePKGafcI87ubSmxol6smwJ+RAHDQlx9+9cPwFWDiKFFCPuWhr9ignlGpZ9vDQLw67N4dcTVFEA==}
     engines: {node: '>=20'}
@@ -7581,11 +7577,11 @@ packages:
       redux:
         optional: true
 
-  react-resizable-panels@2.1.9:
-    resolution: {integrity: sha512-z77+X08YDIrgAes4jl8xhnUu1LNIRp4+E7cv4xHmLOxxUPO/ML7PSrE813b90vj7xvQ1lcf7g2uA9GeMZonjhQ==}
+  react-resizable-panels@4.14.1:
+    resolution: {integrity: sha512-OB1bXDNTLcGgTTbaX6Dn5efZhlMboSnkfr1w4xpsJTHPEbRJpACBhXpgRCXozgPO1ztgFeZRUe5J3mFNCVKm5g==}
     peerDependencies:
-      react: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
-      react-dom: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
 
   react-simple-maps@3.0.0:
     resolution: {integrity: sha512-vKNFrvpPG8Vyfdjnz5Ne1N56rZlDfHXv5THNXOVZMqbX1rWZA48zQuYT03mx6PAKanqarJu/PDLgshIZAfHHqw==}
@@ -7614,12 +7610,6 @@ packages:
     peerDependencies:
       react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-
-  react-window@2.3.1:
-    resolution: {integrity: sha512-x/+N6b7FNVtlKE7ZQlfOY2bYdA7VXvT2B1Emo/ndAsFsSQ98FBIO88MsatNELbSIlYJgkCd7unBps5XMfv0Eyg==}
-    peerDependencies:
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
 
   react@19.2.8:
     resolution: {integrity: sha512-PWaYA1L/q9u2u7xYQi+Y3L3Yfnie7XyLeaJICV1MGD6LprsBxcAqGjYyr0eY3p+QdsA+x/Irkt4Qif8D63+Sbw==}
@@ -9351,166 +9341,168 @@ snapshots:
 
   '@date-fns/utc@2.1.1': {}
 
-  '@dicebear/adventurer-neutral@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/adventurer-neutral@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/adventurer@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/adventurer@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/avataaars-neutral@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/avataaars-neutral@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/avataaars@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/avataaars@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/big-ears-neutral@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/big-ears-neutral@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/big-ears@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/big-ears@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/big-smile@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/big-smile@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/bottts-neutral@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/bottts-neutral@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/bottts@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/bottts@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/collection@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/collection@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/adventurer': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/adventurer-neutral': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/avataaars': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/avataaars-neutral': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/big-ears': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/big-ears-neutral': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/big-smile': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/bottts': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/bottts-neutral': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/core': 10.7.0
-      '@dicebear/croodles': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/croodles-neutral': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/dylan': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/fun-emoji': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/glass': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/icons': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/identicon': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/initials': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/lorelei': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/lorelei-neutral': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/micah': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/miniavs': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/notionists': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/notionists-neutral': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/open-peeps': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/personas': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/pixel-art': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/pixel-art-neutral': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/rings': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/shapes': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/thumbs': 9.4.2(@dicebear/core@10.7.0)
-      '@dicebear/toon-head': 9.4.2(@dicebear/core@10.7.0)
+      '@dicebear/adventurer': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/adventurer-neutral': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/avataaars': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/avataaars-neutral': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/big-ears': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/big-ears-neutral': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/big-smile': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/bottts': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/bottts-neutral': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/core': 9.4.3
+      '@dicebear/croodles': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/croodles-neutral': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/dylan': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/fun-emoji': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/glass': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/icons': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/identicon': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/initials': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/lorelei': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/lorelei-neutral': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/micah': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/miniavs': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/notionists': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/notionists-neutral': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/open-peeps': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/personas': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/pixel-art': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/pixel-art-neutral': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/rings': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/shapes': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/thumbs': 9.4.2(@dicebear/core@9.4.3)
+      '@dicebear/toon-head': 9.4.2(@dicebear/core@9.4.3)
 
-  '@dicebear/core@10.7.0': {}
-
-  '@dicebear/croodles-neutral@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/core@9.4.3':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@types/json-schema': 7.0.15
 
-  '@dicebear/croodles@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/croodles-neutral@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/dylan@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/croodles@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/fun-emoji@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/dylan@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/glass@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/fun-emoji@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/icons@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/glass@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/identicon@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/icons@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/initials@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/identicon@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/lorelei-neutral@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/initials@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/lorelei@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/lorelei-neutral@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/micah@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/lorelei@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/miniavs@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/micah@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/notionists-neutral@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/miniavs@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/notionists@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/notionists-neutral@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/open-peeps@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/notionists@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/personas@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/open-peeps@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/pixel-art-neutral@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/personas@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/pixel-art@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/pixel-art-neutral@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/rings@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/pixel-art@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/shapes@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/rings@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/thumbs@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/shapes@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
 
-  '@dicebear/toon-head@9.4.2(@dicebear/core@10.7.0)':
+  '@dicebear/thumbs@9.4.2(@dicebear/core@9.4.3)':
     dependencies:
-      '@dicebear/core': 10.7.0
+      '@dicebear/core': 9.4.3
+
+  '@dicebear/toon-head@9.4.2(@dicebear/core@9.4.3)':
+    dependencies:
+      '@dicebear/core': 9.4.3
 
   '@electric-sql/pglite-socket@0.1.3(@electric-sql/pglite@0.4.3)':
     dependencies:
@@ -12119,12 +12111,9 @@ snapshots:
     dependencies:
       '@types/react': 19.2.18
 
-  '@types/react-window@2.0.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@types/react-window@1.8.8':
     dependencies:
-      react-window: 1.8.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-    transitivePeerDependencies:
-      - react
-      - react-dom
+      '@types/react': 19.2.18
 
   '@types/react@19.2.18':
     dependencies:
@@ -16021,8 +16010,6 @@ snapshots:
 
   pure-rand@7.0.1: {}
 
-  pure-rand@8.4.2: {}
-
   qified@0.10.1:
     dependencies:
       hookified: 2.2.0
@@ -16166,7 +16153,7 @@ snapshots:
       '@types/react': 19.2.18
       redux: 5.0.1
 
-  react-resizable-panels@2.1.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  react-resizable-panels@4.14.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
@@ -16221,11 +16208,6 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.28.3
       memoize-one: 5.2.1
-      react: 19.2.8
-      react-dom: 19.2.8(react@19.2.8)
-
-  react-window@2.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
-    dependencies:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
 
