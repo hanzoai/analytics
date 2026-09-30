@@ -92,6 +92,16 @@ test('what is not a visit is skipped', () => {
   ).toBeNull();
 });
 
+test('the device ingest named wins over parsing the agent', () => {
+  const v = visitOf(
+    page({ attributes: { user_agent: CHROME, browser: 'chrome', os: 'macos', device: 'desktop' } }),
+    SITES,
+  );
+  expect(v.event.os).toBe('macos');
+  expect(v.event.device).toBe('desktop');
+  expect(v.session.device).toBe('desktop');
+});
+
 test('a signed-in visitor without an anonymous id is keyed on distinct_id', () => {
   const v = visitOf(page({ anonymous_id: undefined, distinct_id: 'user-9' }), SITES);
   expect(v.event.distinctId).toBe('user-9');

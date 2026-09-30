@@ -20,6 +20,7 @@
 
 import 'dotenv/config';
 import pkg from './package.json' with { type: 'json' };
+import withGui from '@hanzo/ui/next';
 
 const TRACKER_SCRIPT = '/script.js';
 
@@ -184,8 +185,10 @@ if (cloudMode) {
   });
 }
 
+// The login renders @hanzo/ui's SignIn, which draws through @hanzo/gui; withGui
+// is the one place a Next host learns to build that graph for the web.
 /** @type {import('next').NextConfig} */
-export default {
+export default withGui({
   reactStrictMode: false,
   env: {
     basePath,
@@ -221,4 +224,4 @@ export default {
   async redirects() {
     return [...redirects];
   },
-};
+}, import.meta.dirname);

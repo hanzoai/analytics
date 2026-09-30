@@ -41,6 +41,9 @@ const COLUMNS = new Set([
   'utm_term',
   'utm_content',
   'user_agent',
+  'browser',
+  'os',
+  'device',
   'country',
   'screen',
   'language',
@@ -113,9 +116,11 @@ export function visitOf(f: Fact, sites: Site[]): Visit | null {
   const sessionId = uuid(site.id, visitor);
   const visitId = uuid(sessionId, hash(startOfHour(createdAt).toUTCString()));
 
-  const browser = agent ? browserName(agent) || undefined : undefined;
-  const os = agent ? (detectOS(agent) as string) || undefined : undefined;
-  const device = agent ? getDevice(agent, a.screen) || undefined : undefined;
+  // Ingest names the device once for every store; the agent is parsed here only
+  // when it did not.
+  const browser = a.browser || (agent ? browserName(agent) || undefined : undefined);
+  const os = a.os || (agent ? (detectOS(agent) as string) || undefined : undefined);
+  const device = a.device || (agent ? getDevice(agent, a.screen) || undefined : undefined);
   const country = a.country || undefined;
 
   let referrerPath: string | undefined;
