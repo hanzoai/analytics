@@ -7,11 +7,12 @@
  * Nothing posts to analytics as a destination.
  *
  * One act fact becomes one website_event: a `page` fact a pageview, a `track`
- * fact with a plain name a custom event. The site is the host of the fact's url,
- * matched to the longest registered website domain it ends with, so www.hanzo.ai
- * is hanzo.ai and any *.hanzo.app is hanzo.app. The visitor is the fact's
- * anonymous_id, else its distinct_id, and the session is derived from it exactly
- * as /v1/send derives one from `id`.
+ * fact with a plain name a custom event, on the website of the cloud project whose
+ * key admitted it (src/lib/project.ts). A project's website is created the first
+ * time its facts arrive, in its org's team; /v1/pixels renames and retires them
+ * from cloud's /v1/projects. The visitor is the fact's anonymous_id, else its
+ * distinct_id, and the session is derived from it exactly as /v1/send derives one
+ * from `id`.
  *
  * What the stamp at ingest names is read, never re-derived from a request this
  * process did not see: attributes.user_agent, attributes.country,
@@ -21,6 +22,7 @@
 import debug from 'debug';
 import { AckPolicy, connect, DeliverPolicy, type JetStreamManager, type JsMsg } from 'nats';
 import { getLocation } from '@/lib/detect';
+import { ensureOrgTeam } from '@/lib/iam-org';
 import prisma from '@/lib/prisma';
 import { type Fact, type Site, visitOf } from '@/lib/visit';
 import { createSession, saveEvent } from '@/queries/sql';
@@ -31,17 +33,21 @@ export const STREAM = 'EVENT';
 export const SUBJECT = 'event.act';
 export const DURABLE = 'analytics';
 
-let sites: { at: number; list: Site[] } = { at: 0, list: [] };
+const known = new Set<string>();
 
-/** The registered websites, re-read once a minute so a new site is picked up without a restart. */
-async function websites(): Promise<Site[]> {
-  if (Date.now() - sites.at < 60_000) return sites.list;
-  const rows = await prisma.client.website.findMany({
-    where: { deletedAt: null },
-    select: { id: true, domain: true },
+/**
+ * The project's website, created the first time the project's facts arrive and
+ * restored if it was retired, since a fact means its key still resolves.
+ */
+async function ensureWebsite(site: Site) {
+  if (known.has(site.id)) return;
+  const teamId = await ensureOrgTeam(site.org);
+  await prisma.client.website.upsert({
+    where: { id: site.id },
+    create: { id: site.id, name: site.slug, domain: site.host || null, teamId },
+    update: { deletedAt: null },
   });
-  sites = { at: Date.now(), list: rows.filter(r => r.domain) as Site[] };
-  return sites.list;
+  known.add(site.id);
 }
 
 /** A duplicate key is a redelivered fact that already landed. */
@@ -51,8 +57,9 @@ function landed(err: unknown): boolean {
 
 /** Store one fact. Resolves when it is stored, or when it is not a visit. */
 export async function land(f: Fact): Promise<boolean> {
-  const v = visitOf(f, await websites());
+  const v = visitOf(f);
   if (!v) return false;
+  await ensureWebsite(v.site);
   if (v.ip) {
     const place = await getLocation(v.ip, new Headers(), true).catch(() => null);
     if (place) {

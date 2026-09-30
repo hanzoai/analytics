@@ -31,6 +31,19 @@ export function orgSlugToTeamId(orgSlug: string): string {
   return v5(`hanzo-analytics-org:${orgSlug}`, IAM_ORG_NAMESPACE);
 }
 
+/** The org's team, created on first sight. Returns its id. */
+export async function ensureOrgTeam(orgSlug: string): Promise<string> {
+  const teamId = orgSlugToTeamId(orgSlug);
+  const { client } = prisma;
+  const existing = await client.team.findUnique({ where: { id: teamId } });
+  if (!existing) {
+    await client.team.create({
+      data: { id: teamId, name: orgSlug.charAt(0).toUpperCase() + orgSlug.slice(1) },
+    });
+  }
+  return teamId;
+}
+
 /**
  * Ensure the IAM org has a corresponding analytics Team, and the user is a member.
  *
@@ -45,22 +58,9 @@ export async function ensureIamOrgTeam(userId: string, orgSlug: string): Promise
     return;
   }
 
-  const teamId = orgSlugToTeamId(orgSlug);
-  const teamName = orgSlug.charAt(0).toUpperCase() + orgSlug.slice(1);
+  const teamId = await ensureOrgTeam(orgSlug);
 
   const { client } = prisma;
-
-  // Upsert the team (create if not exists)
-  const existingTeam = await client.team.findUnique({ where: { id: teamId } });
-
-  if (!existingTeam) {
-    await client.team.create({
-      data: {
-        id: teamId,
-        name: teamName,
-      },
-    });
-  }
 
   // Check if user is already a member
   const existingMembership = await client.teamUser.findFirst({

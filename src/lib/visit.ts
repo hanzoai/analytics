@@ -1,5 +1,6 @@
 /**
- * What one bus fact is to analytics: the website_event a visit becomes. Pure, so
+ * What one bus fact is to analytics: the website_event a visit becomes, on the
+ * website of the cloud project whose key admitted it (src/lib/project.ts). Pure, so
  * the whole mapping is asserted in a test; src/lib/bus.ts stores what this returns.
  */
 import { startOfHour } from 'date-fns';
@@ -8,6 +9,7 @@ import { isbot } from 'isbot';
 import { EVENT_NAME_LENGTH, EVENT_TYPE } from '@/lib/constants';
 import { hash, uuid } from '@/lib/crypto';
 import { getDevice } from '@/lib/detect';
+import { websiteIdOf } from '@/lib/project';
 import type { createSession, saveEvent } from '@/queries/sql';
 
 /** One fact as cloud puts it on the bus (apps/event/bus.go `message`). */
@@ -24,11 +26,16 @@ export interface Fact {
   anonymous_id?: string;
   attributes?: Record<string, string>;
   ip?: string;
+  /** The project key that admitted the fact, and the project's slug beside it. */
+  key?: string;
+  product?: string;
 }
 
 export interface Site {
   id: string;
-  domain: string;
+  org: string;
+  slug: string;
+  host: string;
 }
 
 /** Attributes that become columns, so they are not repeated as event data. */
@@ -52,31 +59,24 @@ const COLUMNS = new Set([
   'title',
 ]);
 
-/** A registered domain in the form hosts are compared in. */
-export function bare(domain: string): string {
-  return (domain || '')
-    .trim()
-    .toLowerCase()
-    .replace(/^[a-z]+:\/\//, '')
-    .replace(/[/:].*$/, '')
-    .replace(/^www\./, '');
-}
-
-/** The website a host belongs to: the longest registered domain it is or ends with. */
-export function siteOf(host: string, sites: Site[]): Site | null {
-  const h = bare(host);
-  if (!h) return null;
-  let best: Site | null = null;
-  for (const s of sites) {
-    const d = bare(s.domain);
-    if (d && (h === d || h.endsWith(`.${d}`)) && (!best || d.length > bare(best.domain).length)) {
-      best = s;
-    }
+/**
+ * The website a fact belongs to: the cloud project whose key admitted it. A project
+ * key admission carries the project's slug as the fact's product, so (org, product)
+ * names the project, and an unkeyed fact belongs to no website.
+ */
+export function siteOf(f: Fact): Site | null {
+  if (!f.key || !f.org || !f.product) return null;
+  let host = '';
+  try {
+    host = f.url ? new URL(f.url).hostname.replace(/^www\./, '') : '';
+  } catch {
+    host = '';
   }
-  return best;
+  return { id: websiteIdOf(f.org, f.product), org: f.org, slug: f.product, host };
 }
 
 export interface Visit {
+  site: Site;
   session: Parameters<typeof createSession>[0];
   event: Parameters<typeof saveEvent>[0];
   ip?: string;
@@ -84,10 +84,10 @@ export interface Visit {
 
 /**
  * The website_event a fact is, or null when it is not a visit: another signal,
- * no url, no registered site, no visitor, an autocapture ($-named) track, or a bot.
+ * no url, no project key, no visitor, an autocapture ($-named) track, or a bot.
  * Pure apart from the id derivation, so the whole mapping is asserted in a test.
  */
-export function visitOf(f: Fact, sites: Site[]): Visit | null {
+export function visitOf(f: Fact): Visit | null {
   if (f.signal && f.signal !== 'act') return null;
   const page = f.kind === 'page';
   const named = f.kind === 'track' && !!f.name && !f.name.startsWith('$');
@@ -100,7 +100,7 @@ export function visitOf(f: Fact, sites: Site[]): Visit | null {
   } catch {
     return null;
   }
-  const site = siteOf(url.hostname, sites);
+  const site = siteOf(f);
   if (!site) return null;
 
   const visitor = f.anonymous_id || f.distinct_id;
@@ -146,6 +146,7 @@ export function visitOf(f: Fact, sites: Site[]): Visit | null {
 
   const q = url.searchParams;
   return {
+    site,
     ip: f.ip,
     session: {
       id: sessionId,
