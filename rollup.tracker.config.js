@@ -11,7 +11,7 @@ export default {
   plugins: [
     replace({
       __COLLECT_API_HOST__: process.env.COLLECT_API_HOST || '',
-      __COLLECT_API_ENDPOINT__: process.env.COLLECT_API_ENDPOINT || '/api/send',
+      __COLLECT_API_ENDPOINT__: process.env.COLLECT_API_ENDPOINT || '/v1/send',
       delimiters: ['', ''],
       preventAssignment: true,
     }),

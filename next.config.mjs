@@ -97,12 +97,8 @@ const apiHeaders = [
 
 const headers = [
   {
-    source: '/api/:path*',
-    headers: apiHeaders,
-  },
-  {
-    // CORS for every /v1 ingest (the hz.js /v1/event tag posts cross-origin from
-    // hanzo.ai / hanzo.app / hanzo.chat), not just /v1/analytics.
+    // Every route this app serves is under /v1, and the tracker posts to
+    // /v1/send cross-origin from the sites it measures.
     source: '/v1/:path*',
     headers: apiHeaders,
   },
@@ -116,12 +112,7 @@ const headers = [
   },
 ];
 
-const rewrites = [
-  {
-    source: '/v1/analytics/:path*',
-    destination: '/api/:path*',
-  },
-];
+const rewrites = [];
 
 if (trackerScriptURL) {
   rewrites.push({
@@ -138,7 +129,7 @@ if (collectApiEndpoint) {
 
   rewrites.push({
     source: collectApiEndpoint,
-    destination: '/api/send',
+    destination: '/v1/send',
   });
 }
 
@@ -219,7 +210,7 @@ export default {
       ...rewrites,
       {
         source: '/telemetry.js',
-        destination: '/api/scripts/telemetry',
+        destination: '/v1/scripts/telemetry',
       },
       {
         source: '/teams/:teamId/:path*',

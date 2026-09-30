@@ -9,7 +9,7 @@
  *
  *   ?timezone=utc'||(select/**\/password/**\/from/**\/"user"/**\/limit/**\/1)||'
  *
- * Reachable two ways: GET /api/realtime/{websiteId} calls parseRequest with no
+ * Reachable two ways: GET /v1/realtime/{websiteId} calls parseRequest with no
  * zod schema at all, and retention/revenue report parameters declared timezone
  * as a bare z.string() while dateRangeParams used the refined timezoneParam.
  *
@@ -88,7 +88,7 @@ describe('timezone cannot reach an interpolated SQL literal', () => {
     ).toBe('America/New_York');
   });
 
-  test('GET /api/realtime/{websiteId}?timezone= does not reach postgres date SQL', async () => {
+  test('GET /v1/realtime/{websiteId}?timezone= does not reach postgres date SQL', async () => {
     // The realtime route calls parseRequest(request) with NO zod schema, so
     // `query` is the raw searchParams object — this is the only gate.
     const filters = getRequestDateRange({ startAt: '0', endAt: '86400000', timezone: PAYLOAD });
@@ -100,7 +100,7 @@ describe('timezone cannot reach an interpolated SQL literal', () => {
     expect(emitted[0]).not.toContain('at time zone');
   });
 
-  test('GET /api/realtime/{websiteId}?timezone= does not reach clickhouse date SQL', async () => {
+  test('GET /v1/realtime/{websiteId}?timezone= does not reach clickhouse date SQL', async () => {
     process.env.DATASTORE_URL = 'http://u:p@localhost:8123/analytics';
 
     const filters = getRequestDateRange({ startAt: '0', endAt: '86400000', timezone: PAYLOAD });
@@ -111,7 +111,7 @@ describe('timezone cannot reach an interpolated SQL literal', () => {
     expect(emitted[0]).not.toContain('select/**/password');
   });
 
-  test('POST /api/reports/retention rejects an unparseable parameters.timezone', async () => {
+  test('POST /v1/reports/retention rejects an unparseable parameters.timezone', async () => {
     const parsed = retentionReportSchema.safeParse({
       type: 'retention',
       parameters: {
@@ -141,7 +141,7 @@ describe('timezone cannot reach an interpolated SQL literal', () => {
     expect(emitted[0]).not.toContain('select/**/password');
   });
 
-  test('POST /api/reports/revenue rejects an unparseable parameters.timezone', () => {
+  test('POST /v1/reports/revenue rejects an unparseable parameters.timezone', () => {
     const parsed = revenueReportSchema.safeParse({
       type: 'revenue',
       parameters: {

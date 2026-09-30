@@ -15,14 +15,13 @@ export default {
     commonjs(),
     replace({
       __COLLECT_API_HOST__: process.env.COLLECT_API_HOST || '',
-      // Was /api/record — an endpoint that was never built, so every chunk the recorder
-      // managed to emit 404'd. Replay now rides the SAME collector as the tracker with
-      // type:'record'. That is not just consolidation: a chunk is keyed to the session
-      // and visit, and the cache-token resolution that produces them lives in /api/send.
+      // Replay rides the SAME collector as the tracker with type:'record'. A chunk is
+      // keyed to the session and visit, and the cache-token resolution that produces
+      // them lives in /v1/send.
       // A separate collector would need its own copy of that, plus the website lookup
       // and the disabled check, and any drift between the two copies would silently
       // orphan replays from the sessions they belong to.
-      __COLLECT_REPLAY_ENDPOINT__: process.env.COLLECT_REPLAY_ENDPOINT || '/api/send',
+      __COLLECT_REPLAY_ENDPOINT__: process.env.COLLECT_REPLAY_ENDPOINT || '/v1/send',
       delimiters: ['', ''],
       preventAssignment: true,
     }),

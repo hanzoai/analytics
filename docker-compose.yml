@@ -13,7 +13,7 @@ services:
     init: true
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "curl http://localhost:3000/api/heartbeat"]
+      test: ["CMD-SHELL", "curl http://localhost:3000/v1/heartbeat"]
       interval: 5s
       timeout: 5s
       retries: 5

@@ -43,7 +43,6 @@
     "download-country-names": "node scripts/download-country-names.js",
     "download-language-names": "node scripts/download-language-names.js",
     "prepare": "node -e \"if (process.env.NODE_ENV !== 'production'){process.exit(1)} \" || husky install",
-    "postbuild": "node scripts/postbuild.js",
     "test": "jest",
     "cypress-open": "cypress open cypress run",
     "cypress-run": "cypress run cypress run",

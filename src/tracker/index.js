@@ -400,7 +400,7 @@
   const sendAST = async payload => {
     if (trackingDisabled()) return;
     try {
-      await fetch(`${host.replace(/\/$/, '')}/api/ast`, {
+      await fetch(`${host.replace(/\/$/, '')}/v1/ast`, {
         keepalive: true,
         method: 'POST',
         body: JSON.stringify(payload),
@@ -422,7 +422,7 @@
   const trackElement = async (el, eventName) => {
     if (trackingDisabled()) return;
     try {
-      await fetch(`${host.replace(/\/$/, '')}/api/element`, {
+      await fetch(`${host.replace(/\/$/, '')}/v1/element`, {
         keepalive: true,
         method: 'POST',
         body: JSON.stringify({
@@ -536,7 +536,7 @@
             '';
           if (!name) return;
 
-          fetch(`${host.replace(/\/$/, '')}/api/section`, {
+          fetch(`${host.replace(/\/$/, '')}/v1/section`, {
             keepalive: true,
             method: 'POST',
             body: JSON.stringify({

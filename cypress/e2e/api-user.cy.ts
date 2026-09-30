@@ -12,7 +12,7 @@ describe('User API tests', () => {
       const userCreate = data.userCreate;
       cy.request({
         method: 'POST',
-        url: '/api/users',
+        url: '/v1/users',
         headers: {
           'Content-Type': 'application/json',
           Authorization: Cypress.env('authorization'),
@@ -30,7 +30,7 @@ describe('User API tests', () => {
   it('Returns all users. Admin access is required.', () => {
     cy.request({
       method: 'GET',
-      url: '/api/admin/users',
+      url: '/v1/admin/users',
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -48,7 +48,7 @@ describe('User API tests', () => {
       const userUpdate = data.userUpdate;
       cy.request({
         method: 'POST',
-        url: `/api/users/${userId}`,
+        url: `/v1/users/${userId}`,
         headers: {
           'Content-Type': 'application/json',
           Authorization: Cypress.env('authorization'),
@@ -67,7 +67,7 @@ describe('User API tests', () => {
   it('Gets a user by ID.', () => {
     cy.request({
       method: 'GET',
-      url: `/api/users/${userId}`,
+      url: `/v1/users/${userId}`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -83,7 +83,7 @@ describe('User API tests', () => {
   it('Deletes a user.', () => {
     cy.request({
       method: 'DELETE',
-      url: `/api/users/${userId}`,
+      url: `/v1/users/${userId}`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -97,7 +97,7 @@ describe('User API tests', () => {
   it('Gets all websites that belong to a user.', () => {
     cy.request({
       method: 'GET',
-      url: `/api/users/${userId}/websites`,
+      url: `/v1/users/${userId}/websites`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -111,7 +111,7 @@ describe('User API tests', () => {
   it('Gets all teams that belong to a user.', () => {
     cy.request({
       method: 'GET',
-      url: `/api/users/${userId}/teams`,
+      url: `/v1/users/${userId}/teams`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),

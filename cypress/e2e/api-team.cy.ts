@@ -10,7 +10,7 @@ describe('Team API tests', () => {
       const userCreate = data.userCreate;
       cy.request({
         method: 'POST',
-        url: '/api/users',
+        url: '/v1/users',
         headers: {
           'Content-Type': 'application/json',
           Authorization: Cypress.env('authorization'),
@@ -30,7 +30,7 @@ describe('Team API tests', () => {
       const teamCreate = data.teamCreate;
       cy.request({
         method: 'POST',
-        url: '/api/teams',
+        url: '/v1/teams',
         headers: {
           'Content-Type': 'application/json',
           Authorization: Cypress.env('authorization'),
@@ -48,7 +48,7 @@ describe('Team API tests', () => {
   it('Gets a teams by ID.', () => {
     cy.request({
       method: 'GET',
-      url: `/api/teams/${teamId}`,
+      url: `/v1/teams/${teamId}`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -64,7 +64,7 @@ describe('Team API tests', () => {
       const teamUpdate = data.teamUpdate;
       cy.request({
         method: 'POST',
-        url: `/api/teams/${teamId}`,
+        url: `/v1/teams/${teamId}`,
         headers: {
           'Content-Type': 'application/json',
           Authorization: Cypress.env('authorization'),
@@ -81,7 +81,7 @@ describe('Team API tests', () => {
   it('Get all users that belong to a team.', () => {
     cy.request({
       method: 'GET',
-      url: `/api/teams/${teamId}/users`,
+      url: `/v1/teams/${teamId}/users`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -98,7 +98,7 @@ describe('Team API tests', () => {
   it('Get a user belonging to a team.', () => {
     cy.request({
       method: 'GET',
-      url: `/api/teams/${teamId}/users/${Cypress.env('admin_user_id')}`,
+      url: `/v1/teams/${teamId}/users/${Cypress.env('admin_user_id')}`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -114,7 +114,7 @@ describe('Team API tests', () => {
   it('Get all websites belonging to a team.', () => {
     cy.request({
       method: 'GET',
-      url: `/api/teams/${teamId}/websites`,
+      url: `/v1/teams/${teamId}/websites`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -128,7 +128,7 @@ describe('Team API tests', () => {
   it('Add a user to a team.', () => {
     cy.request({
       method: 'POST',
-      url: `/api/teams/${teamId}/users`,
+      url: `/v1/teams/${teamId}/users`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -147,7 +147,7 @@ describe('Team API tests', () => {
   it(`Update a user's role on a team.`, () => {
     cy.request({
       method: 'POST',
-      url: `/api/teams/${teamId}/users/${userId}`,
+      url: `/v1/teams/${teamId}/users/${userId}`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -165,7 +165,7 @@ describe('Team API tests', () => {
   it(`Remove a user from a team.`, () => {
     cy.request({
       method: 'DELETE',
-      url: `/api/teams/${teamId}/users/${userId}`,
+      url: `/v1/teams/${teamId}/users/${userId}`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -178,7 +178,7 @@ describe('Team API tests', () => {
   it('Deletes a team.', () => {
     cy.request({
       method: 'DELETE',
-      url: `/api/teams/${teamId}`,
+      url: `/v1/teams/${teamId}`,
       headers: {
         'Content-Type': 'application/json',
         Authorization: Cypress.env('authorization'),
@@ -192,7 +192,7 @@ describe('Team API tests', () => {
   // it('Gets all teams that belong to a user.', () => {
   //   cy.request({
   //     method: 'GET',
-  //     url: `/api/users/${userId}/teams`,
+  //     url: `/v1/users/${userId}/teams`,
   //     headers: {
   //       'Content-Type': 'application/json',
   //       Authorization: Cypress.env('authorization'),

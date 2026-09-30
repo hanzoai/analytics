@@ -74,7 +74,7 @@ export function getRequestDateRange(query: Record<string, string>) {
   // `timezone` inside `at time zone '…'` — where a bound parameter cannot go,
   // so both need an allow-list. Routes that declare a zod schema get timezone
   // checked by timezoneParam, but parseRequest is also called with no schema
-  // at all (GET /api/realtime/{websiteId}), and then this is the only gate.
+  // at all (GET /v1/realtime/{websiteId}), and then this is the only gate.
   return {
     startDate,
     endDate,

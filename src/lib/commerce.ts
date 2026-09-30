@@ -39,7 +39,7 @@ export async function reportUsage(payload: UsagePayload): Promise<boolean> {
   }
 
   try {
-    const res = await fetch(`${COMMERCE_API_URL}/api/v1/usage`, {
+    const res = await fetch(`${COMMERCE_API_URL}/v1/billing/usage`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

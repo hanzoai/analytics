@@ -4,7 +4,7 @@
  * A slow or unreachable KV must never block ingestion: fetchWebsite /
  * fetchSession bound the cache read and fall back to the database (the source
  * of truth). Regression test for the analytics.hanzo.ai outage where a dead
- * KV_URL (redis-master, ENOTFOUND) hung every POST /api/send indefinitely
+ * KV_URL (redis-master, ENOTFOUND) hung every POST /v1/send indefinitely
  * because node-redis queues commands against an unreachable host with no
  * command timeout.
  */

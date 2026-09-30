@@ -69,7 +69,7 @@ import { record } from 'rrweb';
       body,
       headers: {
         'Content-Type': 'application/json',
-        // Must match what /api/send reads. This said x-umami-cache, which the route
+        // Must match what /v1/send reads. This said x-umami-cache, which the route
         // never looks at, so even a recorder that started would have been treated as
         // sessionless and dropped.
         'x-cache-hint': session.cache,

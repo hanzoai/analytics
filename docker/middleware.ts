@@ -5,7 +5,7 @@ export const config = {
 };
 
 const TRACKER_PATH = '/script.js';
-const COLLECT_PATH = '/api/send';
+const COLLECT_PATH = '/v1/send';
 const LOGIN_PATH = '/login';
 
 const apiHeaders = {

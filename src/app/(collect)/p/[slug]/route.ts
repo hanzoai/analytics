@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
-import { POST } from '@/app/api/send/route';
+import { POST } from '@/app/v1/send/route';
 import type { Pixel } from '@/generated/prisma/client';
 import redis from '@/lib/redis';
 import { notFound } from '@/lib/response';

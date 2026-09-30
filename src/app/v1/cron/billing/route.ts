@@ -1,5 +1,5 @@
 /**
- * GET /api/cron/billing
+ * GET /v1/cron/billing
  *
  * Periodic usage reporting to Commerce API.
  * Reports per-team pageview/event counts for the previous hour.

@@ -23,26 +23,25 @@ pnpm test
 - Websites scoped to Teams provide per-org data isolation
 - White-label branding via env vars: `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_IAM_PROVIDER_NAME`
 
-## This repo serves NO `/v1/*` and owns NO client
+## Every route is `/v1/*`; `/v1/event` is not one of them
 
-The measurement product is ONE product and it lives in `hanzoai/cloud`:
-`apps/analytics` owns `/v1/analytics` plus the ingest doors `/v1/event` and
-`/v1/insights/e`. This repo holds per-site history in its own Postgres; it is not a
-second implementation of that surface, and the four things that made it one are
-deleted.
+The app's routes live in `src/app/v1/**` and nothing is served under `/api/`.
+The dashboard calls them through `useApi` (`/v1${url}`), the tracker posts to
+`/v1/send` (and `/v1/ast`, `/v1/element`, `/v1/section`), and the recorder rides
+the same `/v1/send`. `src/lib/__tests__/v1-surface.test.ts` fails if
+`src/app/api` comes back or any first-party file names an `/api/` path again.
+
+The measurement product's ingest door is `hanzoai/cloud`'s: `apps/analytics`
+owns `/v1/analytics` plus `/v1/event` and `/v1/insights/e` on api.hanzo.ai. This
+repo holds per-site history in its own Postgres and is not a second
+implementation of that surface — never add `src/app/v1/event` or
+`src/app/v1/analytics` here.
 
 **`POST /v1/event` (`src/app/v1/event/route.ts`) — DELETED.** It took a **bare JSON
 array** of `{site, ts, type, path, …}` envelopes on a path spelled identically to
-cloud's front door, which takes `{batch:[…]}`. Measured, live:
-
-```
-POST api.hanzo.ai/v1/event       {"batch":[]}  -> 200 {"accepted":0,"dropped":0}
-POST analytics.hanzo.ai/v1/event []            -> 204
-```
-
-One path spelling, two protocols, two servers — so a `@hanzo/event` client pointed
-at the wrong host failed silently. One door survives and it is cloud's. Do not add
-a `/v1/*` route to this repo.
+cloud's front door, which takes `{batch:[…]}`. One path spelling, two protocols,
+two servers — so a `@hanzo/event` client pointed at the wrong host failed
+silently. One door survives and it is cloud's.
 
 **`public/hz.js` — MOVED to `hanzoai/ui` → `pkgs/event` (`@hanzo/event@0.3.7`).**
 The tag is a *client*, and the house has one client home. There it is the
@@ -54,7 +53,7 @@ script-tag distribution of `@hanzo/event`: same `WireEvent` batch, same
 deployed nowhere in `universe`, forwarding to a service that no longer exists.
 
 **`src/lib/insights-forward.ts` — DELETED**, with its call site in
-`src/app/api/send/route.ts` and its `INSIGHTS_HOST` / `INSIGHTS_API_KEY` env. It
+`src/app/v1/send/route.ts` and its `INSIGHTS_HOST` / `INSIGHTS_API_KEY` env. It
 fire-and-forgot every event at that same deleted service.
 
 The client SDK is `hanzoai/ui` → `pkgs/event`, published as `@hanzo/event`. This
@@ -66,9 +65,9 @@ so every Hanzo property reported **zero** errors for as long as both copies exis
 The envelope + scrub code merged into the canonical package in `@hanzo/event@0.3.2`.
 
 ## Key Integration Points
-- **IAM auth**: `src/app/api/auth/iam/route.ts` -- OAuth callback, org assignment
+- **IAM auth**: `src/app/auth/callback` (redirect_uri `/auth/callback`) + `src/app/v1/auth/verify/route.ts`
 - **Branding**: `src/lib/branding.ts` -- runtime env-based white-label config
-- **Commerce billing**: `src/lib/commerce.ts` + `src/app/api/cron/billing/route.ts` -- usage metering to Commerce API
+- **Commerce billing**: `src/lib/commerce.ts` + `src/app/v1/cron/billing/route.ts` -- usage metering to Commerce `/v1/billing/usage` (inert: COMMERCE_API_URL is unset in prod, and the payload is not the shape commerce's RecordUsage binds)
 
 ## K8s Environment Variables (deployment.yaml)
 - `DATABASE_URL`, `APP_SECRET`, `KV_URL` -- from KMS via `analytics-secrets`
