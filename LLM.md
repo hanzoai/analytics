@@ -23,6 +23,31 @@ pnpm test
 - Websites scoped to Teams provide per-org data isolation
 - White-label branding via env vars: `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_IAM_PROVIDER_NAME`
 
+## Visits arrive from cloud's event bus
+
+Every site posts its events to `api.hanzo.ai/v1/event`, the one ingest, and
+nothing posts to this app as a destination. `src/lib/bus.ts` binds the durable
+`analytics` on cloud's `EVENT` stream, filtered to `event.act`
+(`CLOUD_PUBSUB_URL`, nats on `cloud.hanzo.svc:4222`), from `src/instrumentation.ts`
+at server start. On its first bind it reads what the stream still holds (three
+days), which is the backfill.
+
+`src/lib/visit.ts` is the whole mapping, pure and tested: a `page` fact is a
+pageview and a `track` fact with a plain name is a custom event, on the website
+whose domain the fact's host is or ends with (so `*.hanzo.app` is `hanzo.app`).
+The visitor is `anonymous_id`, else `distinct_id`, and the session is
+`uuid(website, visitor)`. The fact id names the stored event, so a redelivery is
+refused as a duplicate. Browser, os, device, country, screen and language are
+read from the fact's attributes, stamped once at ingest; the agent is parsed
+only when ingest did not name the device. The fact vocabulary is HIP-1190 §6.1.
+
+The Hanzo websites belong to team `5340db05…` (uuid v5 of the IAM org `hanzo`).
+`/websites` lists a person's own websites and every website of a team they are
+in; an admin-org member joins team hanzo on first sign-in.
+
+`/v1/send` (the upstream tracker door) remains only while the last pages that
+still load `script.js` move to `@hanzo/event`; delete the route then.
+
 ## Every route is `/v1/*`; `/v1/event` is not one of them
 
 The app's routes live in `src/app/v1/**` and nothing is served under `/api/`.
