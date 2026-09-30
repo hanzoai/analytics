@@ -8,6 +8,8 @@ import { saveEventData } from './saveEventData';
 import { saveRevenue } from './saveRevenue';
 
 export interface SaveEventArgs {
+  /** A caller that can replay an event names it, so the replay is refused as a duplicate. */
+  id?: string;
   websiteId: string;
   sessionId: string;
   visitId: string;
@@ -63,6 +65,7 @@ export async function saveEvent(args: SaveEventArgs) {
 }
 
 async function relationalQuery({
+  id,
   websiteId,
   sessionId,
   visitId,
@@ -90,7 +93,7 @@ async function relationalQuery({
   lifatid,
   twclid,
 }: SaveEventArgs) {
-  const websiteEventId = uuid();
+  const websiteEventId = id ?? uuid();
 
   await prisma.client.websiteEvent.create({
     data: {
@@ -151,6 +154,7 @@ async function relationalQuery({
 }
 
 async function datastoreQuery({
+  id,
   websiteId,
   sessionId,
   visitId,
@@ -189,7 +193,7 @@ async function datastoreQuery({
 }: SaveEventArgs) {
   const { insert, getUTCString } = datastore;
   const { sendMessage } = kafka;
-  const eventId = uuid();
+  const eventId = id ?? uuid();
 
   const message = {
     website_id: websiteId,

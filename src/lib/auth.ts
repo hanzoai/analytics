@@ -84,6 +84,13 @@ async function resolveIamUser(result: {
     if (orgSlug) {
       await ensureIamOrgTeam(userId, orgSlug);
     }
+
+    // The admin org operates the platform, and the platform's own sites belong to
+    // org hanzo, so an admin-org member is a member of that team as well.
+    if (orgSlug === 'admin') {
+      await ensureIamOrgTeam(userId, 'hanzo');
+      log('admin-org member %s joined team hanzo', email);
+    }
   }
 
   return getUser(userId);

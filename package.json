@@ -105,6 +105,7 @@
     "kafkajs": "catalog:",
     "lucide-react": "catalog:",
     "maxmind": "catalog:",
+    "nats": "catalog:",
     "next": "catalog:",
     "node-fetch": "catalog:",
     "npm-run-all": "catalog:",

@@ -70,11 +70,12 @@ export async function getAllUserWebsitesIncludingTeamOwner(userId: string, filte
   );
 }
 
+/** The websites a person sees: their own, and every website of a team they are a member of. */
 export async function getUserWebsites(userId: string, filters?: QueryFilters) {
   return getWebsites(
     {
       where: {
-        userId,
+        OR: [{ userId }, { team: { deletedAt: null, members: { some: { userId } } } }],
       },
       include: {
         user: {
