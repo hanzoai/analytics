@@ -413,7 +413,7 @@ overrides:
   '@hanzogui/separator': 8.3.5
   '@hanzogui/shapes': 8.3.5
   '@hanzogui/sheet': 8.3.5
-  '@hanzogui/shell': 8.3.5
+  '@hanzogui/shell': ^8.3.20
   '@hanzogui/sizable-context': 8.3.5
   '@hanzogui/spacer': 8.3.5
   '@hanzogui/stacks': 8.3.5
@@ -482,10 +482,10 @@ importers:
         version: '@umami/redis-client@0.29.0(supports-color@8.1.1)'
       '@hanzo/ui':
         specifier: 'catalog:'
-        version: 8.27.31(9515ae2fee6380ad34b3f8c5d5cf291f)
+        version: 8.27.31(bca09954b15540844c2271738a1e3092)
       '@hanzogui/shell':
-        specifier: 8.3.5
-        version: 8.3.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^8.3.20
+        version: 8.3.20(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@hello-pangea/dnd':
         specifier: 'catalog:'
         version: 18.0.1(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -2472,7 +2472,7 @@ packages:
       '@hanzogui/config': 8.3.5
       '@hanzogui/lucide-icons-2': 8.3.5
       '@hanzogui/next-theme': 8.3.5
-      '@hanzogui/shell': 8.3.5
+      '@hanzogui/shell': ^8.3.20
       '@hanzogui/telemetry': 8.3.5
       '@hanzogui/toast': 8.3.5
       next: '>=16.3.3'
@@ -2858,8 +2858,8 @@ packages:
     peerDependencies:
       react: '>=19.2.8'
 
-  '@hanzogui/shell@8.3.5':
-    resolution: {integrity: sha512-EyWbG/MNo0OBhsnYFwIn3td8WmmDud1YhMtx2wh/LvjRpXPWri/md27W51H0BZB6gSc6ZHsgLx0lkE0vbVbYXA==}
+  '@hanzogui/shell@8.3.20':
+    resolution: {integrity: sha512-8o/cO06ixslJKybUvcc7Kd0qt79xCESuZjCsqEDTb1UlGbhiUaSgrxTNRfI1EfGj4AyOZ6Nyu7ChjvKgb0/fJg==}
     peerDependencies:
       react: '>=19.2.8'
       react-dom: '>=19.2.8'
@@ -11911,7 +11911,7 @@ snapshots:
       '@hanzogui/lucide-icons-2': 8.3.5(react-dom@19.2.8(react@19.2.8))(react-native-svg@15.15.5(react-native@0.87.1(@babel/core@7.28.3(supports-color@8.1.1))(@react-native/metro-config@0.87.1(@babel/core@7.28.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.8)(supports-color@8.1.1))(react@19.2.8))(react@19.2.8)
       react: 19.2.8
 
-  '@hanzo/ui@8.27.31(9515ae2fee6380ad34b3f8c5d5cf291f)':
+  '@hanzo/ui@8.27.31(bca09954b15540844c2271738a1e3092)':
     dependencies:
       '@hanzo/appearance': 0.2.2(react@19.2.8)
       '@hanzo/brand': 1.4.8(react@19.2.8)
@@ -11934,7 +11934,7 @@ snapshots:
       react-native-web: 0.21.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
     optionalDependencies:
       '@hanzo/iam': 0.21.24(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@hanzogui/shell': 8.3.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@hanzogui/shell': 8.3.20(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       next: 16.3.3(@babel/core@7.28.3(supports-color@8.1.1))(@types/node@26.4.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
     transitivePeerDependencies:
       - encoding
@@ -12758,7 +12758,7 @@ snapshots:
     transitivePeerDependencies:
       - react-dom
 
-  '@hanzogui/shell@8.3.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@hanzogui/shell@8.3.20(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
