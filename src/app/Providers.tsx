@@ -23,6 +23,7 @@ const iamConfig = {
   serverUrl: process.env.NEXT_PUBLIC_IAM_URL || 'https://iam.hanzo.ai',
   clientId: process.env.NEXT_PUBLIC_IAM_CLIENT_ID || 'hanzo-analytics',
   orgName: process.env.NEXT_PUBLIC_IAM_ORG || 'hanzo',
+  organization: process.env.NEXT_PUBLIC_IAM_ORG || 'hanzo',
   redirectUri:
     (typeof window !== 'undefined' ? window.location.origin : '') + '/auth/callback',
   scope: 'openid profile email',

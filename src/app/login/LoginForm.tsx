@@ -1,14 +1,19 @@
 'use client';
 import { useIam } from '@hanzo/iam/react';
-import { Button, Column, Heading, Icon, Loading } from '@hanzo/react-zen';
+import { Loading } from '@hanzo/react-zen';
+import { SignIn } from '@hanzo/ui/auth';
+import '@hanzo/ui/auth.css';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { Logo } from '@/components/svg';
 import type { BrandingProps } from './LoginPage';
 
+/**
+ * IAM's sign-in drawn on this page: the credential posts to this origin's
+ * /v1/iam routes, IAM returns a PKCE-bound code, and /auth/callback finishes.
+ */
 export function LoginForm({ branding }: { branding: BrandingProps }) {
   const router = useRouter();
-  const { login, isAuthenticated, isLoading } = useIam();
+  const { isAuthenticated, isLoading } = useIam();
 
   // Already signed in — bounce to the dashboard.
   useEffect(() => {
@@ -22,22 +27,13 @@ export function LoginForm({ branding }: { branding: BrandingProps }) {
   }
 
   return (
-    <Column justifyContent="center" alignItems="center" gap="6">
-      <Icon size="lg">
-        <Logo />
-      </Icon>
-      <Heading>{branding.name}</Heading>
-
-      <Column gap="4" style={{ width: '100%', maxWidth: 320 }}>
-        <Button
-          variant="primary"
-          data-test="button-login"
-          onPress={() => login()}
-          style={{ width: '100%' }}
-        >
-          Log in with Hanzo
-        </Button>
-      </Column>
-    </Column>
+    <SignIn
+      mode="login"
+      site={branding.name}
+      callbackPath="/auth/callback"
+      signupPath="https://hanzo.ai/signup"
+      termsPath="https://hanzo.ai/terms"
+      privacyPath="https://hanzo.ai/privacy"
+    />
   );
 }

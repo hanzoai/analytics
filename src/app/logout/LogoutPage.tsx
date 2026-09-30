@@ -1,18 +1,17 @@
 'use client';
-import { useIam } from '@hanzo/iam/react';
+import { useSignOut } from '@hanzo/ui/auth';
 import { useEffect } from 'react';
 import { setUser } from '@/store/app';
 
 export function LogoutPage() {
-  const { logout } = useIam();
+  const signOut = useSignOut({ to: `${process.env.basePath || ''}/login?from=logout` });
 
   useEffect(() => {
-    // Clear the IAM session (local tokens) and the cached user, then land on
-    // the login page.
-    logout();
+    // Revoke both tokens through this origin's /v1/iam routes, clear the
+    // session and the cached user, then land on the login page.
     setUser(null);
-    window.location.href = `${process.env.basePath || ''}/login`;
-  }, [logout]);
+    void signOut();
+  }, [signOut]);
 
   return null;
 }

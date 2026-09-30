@@ -65,9 +65,13 @@
     "@dicebear/collection": "catalog:",
     "@dicebear/core": "catalog:",
     "@fontsource/geist-sans": "catalog:",
+    "@hanzo/design": "catalog:",
     "@hanzo/iam": "catalog:",
+    "@hanzo/logo": "catalog:",
     "@hanzo/react-zen": "npm:@umami/react-zen@^0.211.0",
     "@hanzo/redis-client": "npm:@umami/redis-client@^0.29.0",
+    "@hanzo/ui": "catalog:",
+    "@hanzogui/shell": "catalog:",
     "@hello-pangea/dnd": "catalog:",
     "@prisma/adapter-pg": "catalog:",
     "@prisma/client": "catalog:",
@@ -126,9 +130,7 @@
     "ua-parser-js": "catalog:",
     "uuid": "catalog:",
     "zod": "catalog:",
-    "zustand": "catalog:",
-    "@hanzo/design": "catalog:",
-    "@hanzo/logo": "catalog:"
+    "zustand": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
