@@ -5,10 +5,9 @@ FROM node:${NODE_IMAGE_VERSION} AS deps
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-# pnpm 9: dependency build scripts run by default. pnpm 10 added an approval gate
-# (ERR_PNPM_IGNORED_BUILDS) that fails non-interactive builds (prisma engines, etc.).
-RUN npm install -g pnpm@9
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+# The version package.json declares; its allowBuilds list approves the build scripts.
+RUN npm install -g pnpm@11.24.0
 RUN pnpm install --frozen-lockfile
 
 # Rebuild the source code only when needed

@@ -9,6 +9,8 @@ allowBuilds:
   cypress: false
   esbuild: false
   sharp: false
+  '@parcel/watcher': false
+  unrs-resolver: false
 ignoredBuiltDependencies:
   - cypress
   - esbuild
