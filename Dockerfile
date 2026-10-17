@@ -21,21 +21,16 @@ ARG BASE_PATH
 ARG NEXT_PUBLIC_APP_NAME="Hanzo Analytics"
 
 # Client-side IAM config is read in a browser bundle, so Next.js inlines these
-# at build time — the runtime App CR env never reaches the browser. Bake the
-# canonical hanzo.id origin + client here so the login button routes to
-# hanzo.id/v1/iam/oauth/authorize. CI may override via build-args.
-ARG NEXT_PUBLIC_IAM_URL="https://hanzo.id"
+# at build time — the runtime App CR env never reaches the browser. Where IAM is
+# asked (api.hanzo.ai) and where people sign in (hanzo.ai) are src/lib/iam.ts.
 ARG NEXT_PUBLIC_IAM_CLIENT_ID="hanzo-analytics"
 ARG NEXT_PUBLIC_IAM_ORG="hanzo"
-ARG NEXT_PUBLIC_IAM_PROVIDER_NAME="Hanzo"
 
 ENV BASE_PATH=$BASE_PATH
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NEXT_PUBLIC_APP_NAME=$NEXT_PUBLIC_APP_NAME
-ENV NEXT_PUBLIC_IAM_URL=$NEXT_PUBLIC_IAM_URL
 ENV NEXT_PUBLIC_IAM_CLIENT_ID=$NEXT_PUBLIC_IAM_CLIENT_ID
 ENV NEXT_PUBLIC_IAM_ORG=$NEXT_PUBLIC_IAM_ORG
-ENV NEXT_PUBLIC_IAM_PROVIDER_NAME=$NEXT_PUBLIC_IAM_PROVIDER_NAME
 ENV DATABASE_URL="postgresql://user:pass@localhost:5432/dummy"
 
 RUN npm run build-docker

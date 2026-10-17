@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/analytics",
-  "version": "3.1.2",
+  "version": "3.1.27",
   "description": "Privacy-focused web analytics for the Hanzo ecosystem.",
   "author": "Hanzo AI, Inc. <eng@hanzo.ai>",
   "license": "MIT",
@@ -176,7 +176,6 @@
     "stylelint-config-prettier": "catalog:",
     "stylelint-config-recommended": "catalog:",
     "tar": "catalog:",
-    "ts-jest": "catalog:",
     "ts-node": "catalog:",
     "tsup": "catalog:",
     "tsx": "catalog:",

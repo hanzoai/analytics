@@ -17,7 +17,7 @@ ignoredBuiltDependencies:
   - sharp
 minimumReleaseAgeExclude:
   - '@hanzo/logo@1.0.23'
-  - '@hanzo/iam@0.21.24'
+  - '@hanzo/iam@0.21.32'
   - '@hanzo/ui@8.27.31'
   - '@hanzogui/*'
   - '@hanzo/dashboard@0.2.1'
@@ -37,7 +37,7 @@ catalog:
   '@hanzo/dashboard': '^0.2.1'
   '@hanzo/design': '0.5.21'
   '@hanzo/gui': '8.3.5'
-  '@hanzo/iam': '0.21.24'
+  '@hanzo/iam': '0.21.32'
   '@hanzo/logo': '1.0.23'
   '@hanzo/ui': '8.27.31'
   '@hanzogui/shell': '^8.3.20'
@@ -135,7 +135,6 @@ catalog:
   'stylelint-config-recommended': '^18.0.0'
   'tar': '^7.5.22'
   'thenby': '^1.4.1'
-  'ts-jest': '^29.4.12'
   'ts-node': '^10.9.2'
   'tsup': '^8.5.1'
   'tsx': '^4.23.12'

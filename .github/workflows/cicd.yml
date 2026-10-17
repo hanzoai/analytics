@@ -1,0 +1,17 @@
+# The one caller. hanzoai/* repos build on the GitHub plane's org runners, and the
+# reusable lives at hanzoai/ci/.github/workflows/build.yml. All config is in
+# /hanzo.yml. Images build at the door in-cluster (mode: delegate): the runner
+# has the docker CLI and no daemon.
+name: CI/CD
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  cicd:
+    uses: hanzoai/ci/.github/workflows/build.yml@v2
+    with:
+      mode: delegate
+    secrets:
+      KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+      KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}

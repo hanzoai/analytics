@@ -2,6 +2,7 @@ import { validateToken } from '@hanzo/iam';
 import debug from 'debug';
 import { ROLE_PERMISSIONS, ROLES, SHARE_TOKEN_HEADER } from '@/lib/constants';
 import { secret, uuid } from '@/lib/crypto';
+import { IAM_API, IAM_CLIENT_ID, IAM_ISSUER, IAM_JWKS } from '@/lib/iam';
 import { ensureIamOrgTeam } from '@/lib/iam-org';
 import { parseToken } from '@/lib/jwt';
 import { ensureArray } from '@/lib/utils';
@@ -11,26 +12,13 @@ import { getUser } from '@/queries/prisma/user';
 const log = debug('hanzo:analytics:auth');
 
 /**
- * Hanzo IAM (hanzo.id) is the single source of authentication. Every API
- * request carries an IAM-issued bearer access token; we verify it here via the
- * IAM JWKS/OIDC public keys (`validateToken`) — no local password store, no
- * local session minting. The verified IAM identity resolves to (or provisions)
- * the analytics user record that the rest of the app's team/website scoping
- * keys off.
- */
-const IAM_SERVER_URL =
-  process.env.HANZO_IAM_URL ||
-  process.env.NEXT_PUBLIC_IAM_URL ||
-  process.env.IAM_URL ||
-  'https://iam.hanzo.ai';
-
-const IAM_CLIENT_ID =
-  process.env.HANZO_IAM_CLIENT_ID ||
-  process.env.NEXT_PUBLIC_IAM_CLIENT_ID ||
-  process.env.IAM_CLIENT_ID ||
-  'hanzo-analytics';
-
-/**
+ * Hanzo IAM is the single source of authentication. Every API request carries
+ * an IAM-issued bearer access token; we verify it here against IAM's signing
+ * keys (`validateToken`, keys read from api.hanzo.ai, issuer checked as the
+ * `iss` tokens name) — no local password store, no local session minting. The
+ * verified IAM identity resolves to (or provisions) the analytics user record
+ * that the rest of the app's team/website scoping keys off.
+ *
  * The IAM apps whose tokens this API accepts: its own, and the first-party
  * surfaces that mount its views with the viewer's own bearer (the platform
  * console, by brand). IAM_AUDIENCES names them; the token's owner and org still
@@ -57,7 +45,8 @@ export function getBearerToken(request: Request) {
 async function resolveIamUser(result: {
   email?: string;
   name?: string;
-  owner: string;
+  /** The home org, from the signed `orgs` claim. */
+  org: string;
   claims: Record<string, unknown>;
 }) {
   const email =
@@ -89,7 +78,7 @@ async function resolveIamUser(result: {
 
     // Assign the user to its IAM org's team on first provision.
     const orgSlug =
-      result.owner ||
+      result.org ||
       (result.claims.owner as string) ||
       (result.claims.org as string) ||
       (result.claims.organization as string) ||
@@ -118,7 +107,9 @@ export async function checkAuth(request: Request) {
 
   if (token) {
     const result = await validateToken(token, {
-      serverUrl: IAM_SERVER_URL,
+      serverUrl: IAM_API,
+      issuer: IAM_ISSUER,
+      jwksUri: IAM_JWKS,
       clientId: IAM_CLIENT_ID,
       audience: IAM_AUDIENCES,
     });

@@ -16,8 +16,10 @@ export default {
 
   testMatch: ['**/__tests__/**/*.+(ts|tsx|js)', '**/?(*.)+(spec|test).+(ts|tsx|js)'],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(ts|tsx)$': '<rootDir>/jest.transform.cjs',
+    '/node_modules/.*/uuid/.+\\.js$': '<rootDir>/jest.transform.cjs',
   },
+  transformIgnorePatterns: ['/node_modules/(?!(\\.pnpm/uuid@[^/]+/node_modules/)?uuid/)'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },

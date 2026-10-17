@@ -1,7 +1,7 @@
 /**
  * IAM Organization → Analytics Team mapping.
  *
- * When a user logs in via Hanzo IAM (hanzo.id), the `owner` claim identifies
+ * When a user logs in via Hanzo IAM, the `owner` claim identifies
  * which organization they belong to (e.g. "hanzo", "lux", "zoo").
  *
  * This module maps IAM orgs to Umami "Teams":

@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { IntlProvider } from 'react-intl';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { useLocale } from '@/components/hooks';
+import { iamConfig } from '@/lib/iam';
 import 'chartjs-adapter-date-fns';
 
 const client = new QueryClient({
@@ -20,15 +21,6 @@ const client = new QueryClient({
     },
   },
 });
-
-const iamConfig = {
-  serverUrl: process.env.NEXT_PUBLIC_IAM_URL || 'https://iam.hanzo.ai',
-  clientId: process.env.NEXT_PUBLIC_IAM_CLIENT_ID || 'hanzo-analytics',
-  orgName: process.env.NEXT_PUBLIC_IAM_ORG || 'hanzo',
-  organization: process.env.NEXT_PUBLIC_IAM_ORG || 'hanzo',
-  redirectUri: (typeof window !== 'undefined' ? window.location.origin : '') + '/auth/callback',
-  scope: 'openid profile email',
-};
 
 function MessagesProvider({ children }) {
   const { locale, messages, dir } = useLocale();
@@ -74,7 +66,7 @@ export function Providers({ children }) {
   }
 
   return (
-    <IamProvider config={iamConfig}>
+    <IamProvider config={iamConfig(window.location.origin)}>
       {/* @hanzo/gui draws the sign-in and the shared analytics views; the rest of
           the app keeps react-zen. One provider for both, here. */}
       <GuiProvider config={gui} defaultTheme="dark">

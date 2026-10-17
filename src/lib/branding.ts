@@ -23,26 +23,4 @@ export const branding = {
 
   /** URL the logo links to. */
   logoHref: env('LOGO_HREF') || '/',
-
-  /** IAM / OAuth provider name shown on the SSO button (e.g. "Hanzo", "Acme Corp"). */
-  iamProviderName: process.env.NEXT_PUBLIC_IAM_PROVIDER_NAME || process.env.IAM_PROVIDER_NAME || '',
-
-  /** IAM authorize base URL (e.g. https://hanzo.id). Empty = IAM login disabled. */
-  iamUrl:
-    process.env.HANZO_IAM_URL ||
-    process.env.NEXT_PUBLIC_IAM_URL ||
-    process.env.NEXT_PUBLIC_HANZO_IAM_URL ||
-    '',
-
-  /** IAM OAuth client ID. */
-  iamClientId:
-    process.env.HANZO_IAM_CLIENT_ID ||
-    process.env.NEXT_PUBLIC_IAM_CLIENT_ID ||
-    process.env.NEXT_PUBLIC_HANZO_IAM_CLIENT_ID ||
-    '',
 } as const;
-
-/** Whether IAM single-sign-on is configured. */
-export function isIAMEnabled(): boolean {
-  return !!(branding.iamUrl && branding.iamClientId);
-}

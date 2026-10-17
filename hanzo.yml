@@ -1,0 +1,24 @@
+# hanzoai/analytics — Hanzo Analytics (analytics.hanzo.ai), read by the hanzoai/ci
+# reusable (.github/workflows/build.yml) and by platform.hanzo.ai.
+#
+# BUILD ONLY. The image is built at the door in-cluster (the caller's
+# `mode: delegate`), one BuildKit Job per architecture. Rolling it onto the
+# cluster is a pin in hanzoai/universe (charts/app/values/hanzo/analytics.yaml),
+# which cd.hanzo.ai reconciles.
+#
+# The version is package.json's: imgver publishes it when it is ahead of the
+# registry, else the registry's highest plus a patch.
+images:
+  - name: analytics
+    context: .
+    dockerfile: Dockerfile
+    repo: ghcr.io/hanzoai/analytics
+
+# Offline gates, run before the image is published.
+test:
+  - name: unit
+    run: |
+      set -e
+      pnpm install --frozen-lockfile
+      pnpm build-db-client
+      pnpm test

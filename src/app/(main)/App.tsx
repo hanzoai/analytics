@@ -2,16 +2,18 @@
 import { useIam } from '@hanzo/iam/react';
 import { Column, Grid, Loading, Row } from '@hanzo/react-zen';
 import Script from 'next/script';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { MobileNav } from '@/app/(main)/MobileNav';
 import { SideNav } from '@/app/(main)/SideNav';
 import { useConfig, useLoginQuery, useNavigation } from '@/components/hooks';
 import { LAST_TEAM_CONFIG } from '@/lib/constants';
+import { leaveForSignin, stashReturnTo } from '@/lib/iam';
 import { removeItem, setItem } from '@/lib/storage';
 import { UpdateNotice } from './UpdateNotice';
 
 export function App({ children }) {
-  const { isAuthenticated, isLoading: iamLoading } = useIam();
+  const { sdk, isAuthenticated, isLoading: iamLoading } = useIam();
+  const leaving = useRef(false);
   const { user, isLoading } = useLoginQuery();
   const config = useConfig();
   const { pathname, teamId } = useNavigation();
@@ -24,17 +26,18 @@ export function App({ children }) {
     }
   }, [teamId]);
 
-  // Wait for the IAM SDK to restore any stored session before deciding.
-  if (iamLoading) {
-    return <Loading placement="absolute" />;
-  }
+  // No verified IAM session once the stored one has been read: remember the page
+  // asked for, then sign in on hanzo.ai with this app's own request.
+  useEffect(() => {
+    if (iamLoading || isAuthenticated || leaving.current) return;
+    leaving.current = true;
+    stashReturnTo(window.location.pathname + window.location.search);
+    void leaveForSignin(sdk, 'login');
+  }, [iamLoading, isAuthenticated, sdk]);
 
-  // No verified IAM session — send the user to the single login path.
-  if (!isAuthenticated) {
-    window.location.href = config?.cloudMode
-      ? `${process.env.cloudUrl}/login`
-      : `${process.env.basePath || ''}/login`;
-    return null;
+  // Wait for the IAM SDK to restore any stored session, or for the page to leave.
+  if (iamLoading || !isAuthenticated) {
+    return <Loading placement="absolute" />;
   }
 
   if (isLoading || !config) {

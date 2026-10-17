@@ -8,13 +8,54 @@ Privacy-focused web analytics for the Hanzo ecosystem. Multi-tenant IAM integrat
 ## Tech Stack
 - **Language**: TypeScript (Next.js)
 - **Database**: PostgreSQL (Prisma ORM), Hanzo Datastore (`hanzoai/datastore`)
-- **Auth**: Hanzo IAM (hanzo.id) OIDC SSO
+- **Auth**: Hanzo IAM (OIDC + PKCE); people sign in on hanzo.ai
 
 ## Build & Run
 ```bash
 pnpm install && pnpm build
-pnpm test
+pnpm build-db-client && pnpm test
 ```
+
+`pnpm test` is jest through `jest.transform.cjs` (esbuild): ts-jest needs
+TypeScript's JavaScript compiler API, which TypeScript 7 does not expose, so every
+suite failed before it ran. The transform also hoists `jest.mock`, shims
+`import.meta.url` for the generated prisma client, and carries ESM-only uuid.
+
+## Release
+
+`hanzo.yml` + `.github/workflows/cicd.yml` (the hanzoai/ci reusable, `mode:
+delegate`): a push to main runs the unit gate and has the door build
+`ghcr.io/hanzoai/analytics:<package.json version>` in-cluster, both architectures.
+Build only: the pin in hanzoai/universe `charts/app/values/hanzo/analytics.yaml`
+is moved by hand, and Hanzo CD (`hanzo-analytics`, manual sync) reconciles it.
+Before 2026-10-16 the only workflow was a buildx+qemu `deploy.yml` on a repo
+with GitHub Actions disabled, so nothing built; v3.1.22-v3.1.26 were built and
+pinned by hand. Bump `version` in package.json to name a release.
+
+## Sign-in
+
+**Hanzo signs in on hanzo.ai, and nothing here calls or links hanzo.id.**
+`src/lib/iam.ts` is the whole of it. A signed-out visit to any page (`App.tsx`)
+stashes the path and leaves for `https://hanzo.ai/login` carrying THIS app's own
+authorize request, built by `@hanzo/iam` (`sdk.getSigninUrl()`): client
+`hanzo-analytics`, callback `<origin>/auth/callback` (registered on the IAM app),
+a fresh state and S256 challenge whose verifier stays in this origin's storage.
+`/login` and `/signup` draw nothing and leave the same way (`/signup` goes to
+hanzo.ai/signup). hanzo.ai's page finishes the request (@hanzo/iam
+`asked`/`ask`): "Continue as <email>" for a person signed in there, its own
+sign-in otherwise. IAM mints the code for this client and callback;
+`/auth/callback` exchanges it and returns to the stashed path (`takeReturnTo`,
+same-origin paths only, never a sign-in page).
+
+The browser asks IAM at `https://api.hanzo.ai` and nowhere else: discovery
+(`serverUrl`), and token, refresh, userinfo and revocation (`proxyBaseUrl`; this
+host does not route `/v1/iam`, and api.hanzo.ai answers CORS for it). The
+server verifies bearers against `api.hanzo.ai/v1/iam/.well-known/jwks` with the
+issuer pinned to `https://hanzo.id`, the `iss` tokens name, which is never
+fetched. `/logout` revokes both tokens at api.hanzo.ai and lands on `/login`,
+which offers hanzo.ai's "Continue as" rather than signing anyone back in.
+`src/lib/__tests__/signin.test.ts` holds the address, the config, the return
+path and the absence of hanzo.id from the source.
 
 ## Multi-Tenant Architecture
 - IAM OIDC login extracts `owner` claim (org slug) from JWT
@@ -90,13 +131,13 @@ so every Hanzo property reported **zero** errors for as long as both copies exis
 The envelope + scrub code merged into the canonical package in `@hanzo/event@0.3.2`.
 
 ## Key Integration Points
-- **IAM auth**: `src/app/auth/callback` (redirect_uri `/auth/callback`) + `src/app/v1/auth/verify/route.ts`
+- **IAM auth**: `src/lib/iam.ts`, `src/app/auth/callback` (redirect_uri `/auth/callback`) + `src/app/v1/auth/verify/route.ts`
 - **Branding**: `src/lib/branding.ts` -- runtime env-based white-label config
 - **Commerce billing**: `src/lib/commerce.ts` + `src/app/v1/cron/billing/route.ts` -- usage metering to Commerce `/v1/billing/usage` (inert: COMMERCE_API_URL is unset in prod, and the payload is not the shape commerce's RecordUsage binds)
 
 ## K8s Environment Variables (deployment.yaml)
 - `DATABASE_URL`, `APP_SECRET`, `KV_URL` -- from KMS via `analytics-secrets`
-- `IAM_URL`, `IAM_CLIENT_ID`, `IAM_CLIENT_SECRET` -- Hanzo IAM OIDC
+- `NEXT_PUBLIC_IAM_CLIENT_ID`, `NEXT_PUBLIC_IAM_ORG` -- the IAM client (build-time); where IAM is asked is `src/lib/iam.ts`, not env
 - `COMMERCE_API_URL`, `COMMERCE_TOKEN` -- billing metering
 - `DATASTORE_URL` -- Hanzo Datastore connection (optional)
 - `ALLOWED_ORIGINS` -- CORS whitelist for tracker scripts

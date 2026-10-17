@@ -1,40 +1,30 @@
 'use client';
 import { useIam } from '@hanzo/iam/react';
 import { Loading } from '@hanzo/react-zen';
-import { SignIn } from '@hanzo/ui/auth';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import type { BrandingProps } from './LoginPage';
+import { useEffect, useRef } from 'react';
+import { leaveForSignin, takeReturnTo } from '@/lib/iam';
 
 /**
- * IAM's sign-in drawn on this page: the credential posts to this origin's
- * /v1/iam routes, IAM returns a PKCE-bound code, and /auth/callback finishes.
- * SignIn is built from @hanzo/gui components; the app mounts the one GuiProvider
- * (src/app/Providers.tsx).
+ * No card is drawn here: Hanzo signs in on hanzo.ai. Once the stored session has
+ * settled as nobody, the page leaves with this app's own request (`leaveForSignin`);
+ * someone already signed in goes on to the page they asked for.
  */
-export function LoginForm({ branding }: { branding: BrandingProps }) {
+export function LoginForm({ mode = 'login' }: { mode?: 'login' | 'signup' }) {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useIam();
+  const { sdk, isAuthenticated, isLoading } = useIam();
+  const left = useRef(false);
 
-  // Already signed in — bounce to the dashboard.
   useEffect(() => {
+    if (isLoading) return;
     if (isAuthenticated) {
-      router.push('/');
+      router.replace(takeReturnTo());
+      return;
     }
-  }, [isAuthenticated, router]);
+    if (left.current) return;
+    left.current = true;
+    void leaveForSignin(sdk, mode);
+  }, [isAuthenticated, isLoading, mode, router, sdk]);
 
-  if (isLoading || isAuthenticated) {
-    return <Loading placement="absolute" />;
-  }
-
-  return (
-    <SignIn
-      mode="login"
-      site={branding.name}
-      callbackPath="/auth/callback"
-      signupPath="https://hanzo.ai/signup"
-      termsPath="https://hanzo.ai/terms"
-      privacyPath="https://hanzo.ai/privacy"
-    />
-  );
+  return <Loading placement="absolute" />;
 }
