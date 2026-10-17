@@ -12,7 +12,7 @@ export function LogoutPage() {
 
   useEffect(() => {
     // Revoke both tokens at IAM (api.hanzo.ai), clear the session and the
-    // cached user, then land on /login, which offers hanzo.ai's "Continue as".
+    // cached user, then land on /login?from=logout, which waits to be asked.
     setUser(null);
     void signOut();
   }, [signOut]);

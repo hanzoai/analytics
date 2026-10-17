@@ -52,8 +52,10 @@ The browser asks IAM at `https://api.hanzo.ai` and nowhere else: discovery
 host does not route `/v1/iam`, and api.hanzo.ai answers CORS for it). The
 server verifies bearers against `api.hanzo.ai/v1/iam/.well-known/jwks` with the
 issuer pinned to `https://hanzo.id`, the `iss` tokens name, which is never
-fetched. `/logout` revokes both tokens at api.hanzo.ai and lands on `/login`,
-which offers hanzo.ai's "Continue as" rather than signing anyone back in.
+fetched. `/logout` revokes both tokens at api.hanzo.ai and lands on
+`/login?from=logout`, which draws "You are signed out" and a Sign in button and
+waits: hanzo.ai answers a request whose callback is a *.hanzo.ai host from its own
+session on arrival, so leaving at once would sign the person straight back in.
 `src/lib/__tests__/signin.test.ts` holds the address, the config, the return
 path and the absence of hanzo.id from the source.
 
