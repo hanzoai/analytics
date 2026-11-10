@@ -25,11 +25,17 @@ const log = debug('hanzo:analytics:auth');
  * decide what it may read.
  */
 const IAM_AUDIENCES = [
-  IAM_CLIENT_ID,
-  ...(process.env.IAM_AUDIENCES || '')
-    .split(',')
-    .map(s => s.trim())
-    .filter(Boolean),
+  ...new Set([
+    IAM_CLIENT_ID,
+    'hanzo-app',
+    'hanzo-ai',
+    'hanzo-console',
+    'hanzo-team',
+    ...(process.env.IAM_AUDIENCES || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean),
+  ]),
 ];
 
 export function getBearerToken(request: Request) {

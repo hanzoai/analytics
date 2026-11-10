@@ -19,8 +19,8 @@
 // source; only config LOADING is decoupled from it.
 
 import 'dotenv/config';
-import pkg from './package.json' with { type: 'json' };
 import withGui from '@hanzo/ui/next';
+import pkg from './package.json' with { type: 'json' };
 
 const TRACKER_SCRIPT = '/script.js';
 
@@ -31,7 +31,8 @@ const collectApiEndpoint = process.env.COLLECT_API_ENDPOINT || '';
 const corsMaxAge = process.env.CORS_MAX_AGE || '';
 const defaultLocale = process.env.DEFAULT_LOCALE || '';
 const forceSSL = process.env.FORCE_SSL || '';
-const frameAncestors = process.env.ALLOWED_FRAME_URLS || '';
+const frameAncestors =
+  process.env.ALLOWED_FRAME_URLS || 'https://hanzo.ai https://hanzo.app https://hanzo.team';
 const trackerScriptName = process.env.TRACKER_SCRIPT_NAME || '';
 const trackerScriptURL = process.env.TRACKER_SCRIPT_URL || '';
 
@@ -188,42 +189,45 @@ if (cloudMode) {
 // The login renders @hanzo/ui's SignIn, which draws through @hanzo/gui; withGui
 // is the one place a Next host learns to build that graph for the web.
 /** @type {import('next').NextConfig} */
-export default withGui({
-  reactStrictMode: false,
-  env: {
+export default withGui(
+  {
+    reactStrictMode: false,
+    env: {
+      basePath,
+      cloudMode,
+      cloudUrl,
+      currentVersion: pkg.version,
+      defaultLocale,
+    },
     basePath,
-    cloudMode,
-    cloudUrl,
-    currentVersion: pkg.version,
-    defaultLocale,
+    output: 'standalone',
+    // The shared analytics views ship as TypeScript source.
+    transpilePackages: ['@hanzo/dashboard'],
+    eslint: {
+      ignoreDuringBuilds: true,
+    },
+    typescript: {
+      ignoreBuildErrors: true,
+    },
+    async headers() {
+      return headers;
+    },
+    async rewrites() {
+      return [
+        ...rewrites,
+        {
+          source: '/telemetry.js',
+          destination: '/v1/scripts/telemetry',
+        },
+        {
+          source: '/teams/:teamId/:path*',
+          destination: '/:path*',
+        },
+      ];
+    },
+    async redirects() {
+      return [...redirects];
+    },
   },
-  basePath,
-  output: 'standalone',
-  // The shared analytics views ship as TypeScript source.
-  transpilePackages: ['@hanzo/dashboard'],
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  async headers() {
-    return headers;
-  },
-  async rewrites() {
-    return [
-      ...rewrites,
-      {
-        source: '/telemetry.js',
-        destination: '/v1/scripts/telemetry',
-      },
-      {
-        source: '/teams/:teamId/:path*',
-        destination: '/:path*',
-      },
-    ];
-  },
-  async redirects() {
-    return [...redirects];
-  },
-}, import.meta.dirname);
+  import.meta.dirname,
+);

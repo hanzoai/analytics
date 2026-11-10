@@ -1,12 +1,13 @@
 'use client';
 import { useIam } from '@hanzo/iam/react';
-import { Column, Grid, Loading, Row } from '@hanzo/react-zen';
+import { Button, Column, Grid, Heading, Loading, Row, Text } from '@hanzo/react-zen';
 import Script from 'next/script';
 import { useEffect, useRef } from 'react';
 import { MobileNav } from '@/app/(main)/MobileNav';
 import { SideNav } from '@/app/(main)/SideNav';
 import { useConfig, useLoginQuery, useNavigation } from '@/components/hooks';
 import { LAST_TEAM_CONFIG } from '@/lib/constants';
+import { isFramed } from '@/lib/embed';
 import { leaveForSignin, stashReturnTo } from '@/lib/iam';
 import { removeItem, setItem } from '@/lib/storage';
 import { UpdateNotice } from './UpdateNotice';
@@ -17,6 +18,7 @@ export function App({ children }) {
   const { user, isLoading } = useLoginQuery();
   const config = useConfig();
   const { pathname, teamId } = useNavigation();
+  const framed = isFramed();
 
   useEffect(() => {
     if (teamId) {
@@ -26,18 +28,48 @@ export function App({ children }) {
     }
   }, [teamId]);
 
-  // No verified IAM session once the stored one has been read: remember the page
-  // asked for, then sign in on hanzo.ai with this app's own request.
+  // No verified IAM session once the stored one has been read: on a top-level
+  // visit, remember the page asked for and sign in on hanzo.ai with this app's
+  // own request. Inside an iframe (`hanzo.app/apps/analytics`), never navigate
+  // the frame itself to `hanzo.ai/login` (`X-Frame-Options: DENY`).
   useEffect(() => {
-    if (iamLoading || isAuthenticated || leaving.current) return;
+    if (iamLoading || isAuthenticated || framed || leaving.current) return;
     leaving.current = true;
     stashReturnTo(window.location.pathname + window.location.search);
     void leaveForSignin(sdk, 'login');
-  }, [iamLoading, isAuthenticated, sdk]);
+  }, [framed, iamLoading, isAuthenticated, sdk]);
 
-  // Wait for the IAM SDK to restore any stored session, or for the page to leave.
-  if (iamLoading || !isAuthenticated) {
+  if (iamLoading) {
     return <Loading placement="absolute" />;
+  }
+
+  if (!isAuthenticated) {
+    if (!framed) {
+      return <Loading placement="absolute" />;
+    }
+    return (
+      <Column
+        role="region"
+        aria-label="Sign in required"
+        alignItems="center"
+        justifyContent="center"
+        gap="4"
+        height="100vh"
+        padding="6"
+      >
+        <Heading>Sign in to Hanzo Analytics</Heading>
+        <Text>Sign in with your Hanzo account to view your analytics.</Text>
+        <Button
+          variant="primary"
+          onPress={() => {
+            stashReturnTo(window.location.pathname + window.location.search);
+            void leaveForSignin(sdk, 'login');
+          }}
+        >
+          Sign in
+        </Button>
+      </Column>
+    );
   }
 
   if (isLoading || !config) {

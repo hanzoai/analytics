@@ -84,10 +84,32 @@ export function takeReturnTo(): string {
 /**
  * Leave for the sign-in site with this app's own request. `replace`, so Back
  * does not land on a page that only leaves again.
+ *
+ * When embedded in a workspace iframe (`window.self !== window.top`), never
+ * navigate the iframe itself to `hanzo.ai/login` (`X-Frame-Options: DENY`).
+ * Instead navigate the top window (or open a new tab on a user gesture).
  */
 export async function leaveForSignin(
   sdk: { getSigninUrl(): Promise<string> },
   mode: 'login' | 'signup',
 ): Promise<void> {
-  window.location.replace(signinAddress(SIGNIN, mode, await sdk.getSigninUrl()));
+  const to = signinAddress(SIGNIN, mode, await sdk.getSigninUrl());
+  let framed = false;
+  try {
+    framed = typeof window !== 'undefined' && window.self !== window.top;
+  } catch {
+    framed = true;
+  }
+  if (framed) {
+    const opened = window.open(to, '_top') || window.open(to, '_blank', 'noopener,noreferrer');
+    if (!opened && window.top) {
+      try {
+        window.top.location.href = to;
+      } catch {
+        // cross-origin top navigation blocked without user gesture
+      }
+    }
+    return;
+  }
+  window.location.replace(to);
 }

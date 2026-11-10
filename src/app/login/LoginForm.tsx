@@ -3,18 +3,22 @@ import { useIam } from '@hanzo/iam/react';
 import { Button, Column, Heading, Loading, Text } from '@hanzo/react-zen';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
+import { isFramed } from '@/lib/embed';
 import { leaveForSignin, takeReturnTo } from '@/lib/iam';
 
 /**
  * No form is drawn here: Hanzo signs in on hanzo.ai. Once the stored session has
  * settled as nobody, the page leaves with this app's own request (`leaveForSignin`);
  * someone already signed in goes on to the page they asked for. The page a
- * sign-out lands on (`?from=logout`) waits to be asked instead: hanzo.ai keeps its
- * own session, and leaving at once would sign the person straight back in.
+ * sign-out lands on (`?from=logout`) or an embedded workspace frame (`?embed=1`)
+ * waits for a click instead: hanzo.ai keeps its own session (and sends
+ * `X-Frame-Options: DENY`), so leaving automatically would sign a logged-out
+ * person back in or fail inside an iframe.
  */
 export function LoginForm({ mode = 'login' }: { mode?: 'login' | 'signup' }) {
   const router = useRouter();
   const out = useSearchParams().get('from') === 'logout';
+  const framed = isFramed();
   const { sdk, isAuthenticated, isLoading } = useIam();
   const left = useRef(false);
 
@@ -24,17 +28,27 @@ export function LoginForm({ mode = 'login' }: { mode?: 'login' | 'signup' }) {
       router.replace(takeReturnTo());
       return;
     }
-    if (out || left.current) return;
+    if (out || framed || left.current) return;
     left.current = true;
     void leaveForSignin(sdk, mode);
-  }, [isAuthenticated, isLoading, mode, out, router, sdk]);
+  }, [framed, isAuthenticated, isLoading, mode, out, router, sdk]);
 
-  if (!out || isLoading || isAuthenticated) return <Loading placement="absolute" />;
+  if ((!out && !framed) || isLoading || isAuthenticated) return <Loading placement="absolute" />;
   return (
-    <Column role="region" aria-label="Signed out" alignItems="center" gap="4" paddingTop="12">
-      <Heading>You are signed out</Heading>
-      <Text>Sign in again on hanzo.ai to come back.</Text>
-      <Button variant="primary" onPress={() => void leaveForSignin(sdk, 'login')}>
+    <Column
+      role="region"
+      aria-label={out ? 'Signed out' : 'Sign in required'}
+      alignItems="center"
+      gap="4"
+      paddingTop="12"
+    >
+      <Heading>{out ? 'You are signed out' : 'Sign in to Hanzo Analytics'}</Heading>
+      <Text>
+        {out
+          ? 'Sign in again on hanzo.ai to come back.'
+          : 'Sign in with your Hanzo account to view your analytics.'}
+      </Text>
+      <Button variant="primary" onPress={() => void leaveForSignin(sdk, mode)}>
         Sign in
       </Button>
     </Column>
