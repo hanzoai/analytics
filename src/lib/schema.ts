@@ -152,7 +152,7 @@ export const journeyReportSchema = z.object({
   parameters: z.object({
     startDate: z.coerce.date(),
     endDate: z.coerce.date(),
-    steps: z.coerce.number().min(2).max(7),
+    steps: z.coerce.number().int().min(2).max(7),
     startStep: z.string().optional(),
     endStep: z.string().optional(),
   }),
