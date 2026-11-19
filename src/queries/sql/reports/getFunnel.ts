@@ -240,8 +240,9 @@ const formatResults = (steps: { type: string; value: string }[]) => (results: un
     const visitors = Number(results[i]?.count) || 0;
     const previous = Number(results[i - 1]?.count) || 0;
     const dropped = previous > 0 ? previous - visitors : 0;
-    const dropoff = 1 - visitors / previous;
-    const remaining = visitors / Number(results[0].count);
+    const entrants = Number(results[0]?.count) || 0;
+    const dropoff = previous > 0 ? dropped / previous : 0;
+    const remaining = entrants > 0 ? visitors / entrants : 0;
 
     return {
       ...step,
