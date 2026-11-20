@@ -1,11 +1,10 @@
-import { unsafeUniformIntDistribution } from 'pure-rand/distribution/uniformInt';
-import { xoroshiro128plus } from 'pure-rand/generator/xoroshiro128plus';
+import prand from 'pure-rand';
 
 const seed = Date.now() ^ (Math.random() * 0x100000000);
-const rng = xoroshiro128plus(seed);
+const rng = prand.xoroshiro128plus(seed);
 
 export function random(min: number, max: number) {
-  return unsafeUniformIntDistribution(min, max, rng);
+  return prand.unsafeUniformIntDistribution(min, max, rng);
 }
 
 export function getRandomChars(
