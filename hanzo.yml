@@ -13,6 +13,9 @@ images:
     context: .
     dockerfile: Dockerfile
     repo: ghcr.io/hanzoai/analytics
+    # Every cluster that runs this is amd64. The arm64 leg never completed (no arm64
+    # builder), so the semver tag, which waits for both, was never applied.
+    platforms: [linux/amd64]
 
 # Offline gates, run before the image is published.
 test:
