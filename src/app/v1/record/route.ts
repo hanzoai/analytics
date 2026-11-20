@@ -5,6 +5,7 @@ import { secret } from '@/lib/crypto';
 import { getClientInfo, hasBlockedIp } from '@/lib/detect';
 import { parseToken } from '@/lib/jwt';
 import { fetchAccount, fetchTeam } from '@/lib/load';
+import { sanitizeReplayChunkBeforeStorage } from '@/lib/privacy';
 import { parseRequest } from '@/lib/request';
 import { badRequest, forbidden, json, serverError } from '@/lib/response';
 import { getWebsite } from '@/queries/prisma';
@@ -19,7 +20,11 @@ const schema = z.object({
   type: z.literal('record'),
   payload: z.object({
     website: z.uuid(),
-    events: z.array(z.any()).max(200),
+    events: z.array(z.any()).max(5000),
+    url: z.string().max(2048).optional(),
+    chunkIndex: z.coerce.number().int().min(0).optional(),
+    startedAt: z.coerce.number().int().optional(),
+    endedAt: z.coerce.number().int().optional(),
     timestamp: z.coerce.number().int().optional(),
   }),
 });
@@ -32,14 +37,27 @@ export async function POST(request: Request) {
       return error();
     }
 
-    const { website: websiteId, events, timestamp } = body.payload;
+    const {
+      website: websiteId,
+      events,
+      url,
+      chunkIndex: payloadChunkIndex,
+      startedAt: payloadStartedAt,
+      endedAt: payloadEndedAt,
+      timestamp,
+    } = body.payload;
 
     if (!events?.length) {
       return json({ ok: true });
     }
 
-    // Parse cache token to get session info
-    const cacheHeader = request.headers.get('x-umami-cache');
+    const sanitized = sanitizeReplayChunkBeforeStorage(events, url);
+    if (sanitized.dropped) {
+      return json({ ok: true, dropped: true, reason: sanitized.reason });
+    }
+
+    // Parse cache token to get session info (prefer x-cache-hint, fallback to legacy x-umami-cache)
+    const cacheHeader = request.headers.get('x-cache-hint') || request.headers.get('x-umami-cache');
 
     if (!cacheHeader) {
       return badRequest({ message: 'Missing session token.' });
@@ -87,28 +105,30 @@ export async function POST(request: Request) {
       return forbidden();
     }
 
-    // Compute timestamps from events
-    const eventTimestamps = events
+    // Compute timestamps from sanitized events
+    const eventTimestamps = sanitized.events
       .map((e: any) => Number(e?.timestamp))
       .filter((t: number) => Number.isFinite(t) && t > 0);
 
     const fallbackMs = (timestamp || Math.floor(Date.now() / 1000)) * 1000;
-    const minTimestamp = eventTimestamps.length ? Math.min(...eventTimestamps) : fallbackMs;
-    const maxTimestamp = eventTimestamps.length ? Math.max(...eventTimestamps) : fallbackMs;
+    const minTimestamp =
+      payloadStartedAt ?? (eventTimestamps.length ? Math.min(...eventTimestamps) : fallbackMs);
+    const maxTimestamp =
+      payloadEndedAt ?? (eventTimestamps.length ? Math.max(...eventTimestamps) : fallbackMs);
 
     const startedAt = new Date(minTimestamp);
     const endedAt = new Date(maxTimestamp);
 
-    // Use timestamp-based chunk index for ordering
-    const chunkIndex = timestamp || Math.floor(Date.now() / 1000);
+    // Prefer monotonic chunkIndex from recorder, fallback to timestamp
+    const chunkIndex = payloadChunkIndex ?? timestamp ?? Math.floor(Date.now() / 1000);
 
     await saveRecording({
       websiteId,
       sessionId,
       visitId,
       chunkIndex,
-      events,
-      eventCount: events.length,
+      events: sanitized.events,
+      eventCount: sanitized.events.length,
       startedAt,
       endedAt,
     });

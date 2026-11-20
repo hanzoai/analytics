@@ -1,7 +1,7 @@
 import { record } from 'rrweb';
 
 (window => {
-  const { document } = window;
+  const { document, location, history } = window;
   const { currentScript } = document;
   if (!currentScript) return;
 
@@ -18,6 +18,56 @@ import { record } from 'rrweb';
 
   if (!website) return;
 
+  // Privacy-first pre-capture route exclusion (enforced BEFORE serialization/transmission)
+  const EXCLUDED_ROUTES = [
+    /^\/auth\/callback(?:\/|$)/i,
+    /^\/oauth\/callback(?:\/|$)/i,
+    /^\/login\/callback(?:\/|$)/i,
+    /^\/pay\/confirm(?:\/|$)/i,
+    /^\/pay\/card(?:\/|$)/i,
+    /^\/checkout\/payment(?:\/|$)/i,
+  ];
+
+  const SENSITIVE_TEXT_SELECTOR =
+    '[data-hanzo-mask], [data-conversation-body], .conversation-body, [data-secret]';
+
+  const SENSITIVE_INPUT_PATTERN =
+    /(password|passcode|passwd|card|cc[-_]?num|cc[-_]?exp|cc[-_]?csc|credit[-_]?card|cardnumber|\bpan\b|cvv|cvc|csc|security[-_]?code|iban|routing|bank[-_]?account|account[-_]?num|swift|bic|secret|api[-_]?key|apikey|access[-_]?key|private[-_]?key|client[-_]?secret|auth[-_]?token|bearer)/i;
+
+  const MASKED = '********';
+
+  const isExcludedRoute = rawUrl => {
+    try {
+      const parsed = new URL(rawUrl || location.href, location.origin || 'https://hanzo.ai');
+      const pathname = parsed.pathname.replace(/\/{2,}/g, '/').replace(/\/$/, '') || '/';
+      return EXCLUDED_ROUTES.some(re => re.test(pathname));
+    } catch {
+      return false;
+    }
+  };
+
+  const isSensitiveElement = el => {
+    if (!el || typeof el !== 'object') return false;
+    try {
+      if (typeof el.closest === 'function' && el.closest(SENSITIVE_TEXT_SELECTOR)) {
+        return true;
+      }
+    } catch {}
+    const type = (el.type || el.getAttribute?.('type') || '').toLowerCase();
+    if (type === 'password') return true;
+    const fields = [
+      el.name,
+      el.id,
+      el.getAttribute?.('autocomplete'),
+      el.getAttribute?.('placeholder'),
+      el.getAttribute?.('aria-label'),
+      el.getAttribute?.('data-testid'),
+      el.getAttribute?.('data-control-id'),
+      typeof el.className === 'string' ? el.className : '',
+    ].filter(Boolean);
+    return fields.some(f => SENSITIVE_INPUT_PATTERN.test(String(f)));
+  };
+
   // Sample rate check
   if (sampleRate < 1 && Math.random() > sampleRate) return;
 
@@ -33,15 +83,15 @@ import { record } from 'rrweb';
   let flushTimer = null;
   let startTime = null;
   let stopped = false;
+  let routePaused = isExcludedRoute(location.href);
 
-  // The tracker publishes itself as window.hanzo — the upstream `umami` global was
-  // renamed in the white-label and this file was never updated, so every lookup here
-  // resolved undefined and the recorder waited out its 50 attempts and gave up.
   const tracker = () => window.hanzo;
 
   let chunkIndex = 0;
 
   const sendEvents = (events, useKeepalive = false) => {
+    if (routePaused || isExcludedRoute(location.href)) return;
+
     const session = tracker()?.getSession?.();
     if (!session?.cache) return;
 
@@ -50,9 +100,8 @@ import { record } from 'rrweb';
       type: 'record',
       payload: {
         website,
+        url: location.pathname,
         events,
-        // chunkIndex orders the chunks of ONE recording; the player stitches on it,
-        // so it must be monotonic per page and is never derived from arrival order.
         chunkIndex: chunkIndex++,
         startedAt: startTime,
         endedAt: now,
@@ -60,7 +109,6 @@ import { record } from 'rrweb';
       },
     });
 
-    // keepalive has a 64KB body limit — only use it for small payloads on unload
     const keepalive = useKeepalive && body.length < 60000;
 
     return fetch(endpoint, {
@@ -69,9 +117,7 @@ import { record } from 'rrweb';
       body,
       headers: {
         'Content-Type': 'application/json',
-        // Must match what /v1/send reads. This said x-umami-cache, which the route
-        // never looks at, so even a recorder that started would have been treated as
-        // sessionless and dropped.
+        // Must match what /v1/send and /v1/record read.
         'x-cache-hint': session.cache,
       },
       credentials: 'omit',
@@ -84,6 +130,7 @@ import { record } from 'rrweb';
     const events = eventBuffer;
     eventBuffer = [];
 
+    if (routePaused || isExcludedRoute(location.href)) return;
     sendEvents(events, useKeepalive);
   };
 
@@ -101,23 +148,76 @@ import { record } from 'rrweb';
   };
 
   const getMaskConfig = level => {
-    switch (level) {
-      case 'strict':
-        return {
-          maskAllInputs: true,
-          maskTextSelector: '*',
-        };
-      default: // moderate
-        return {
-          maskAllInputs: true,
-        };
+    const baseTextSelector = level === 'strict' ? '*' : SENSITIVE_TEXT_SELECTOR;
+    return {
+      maskAllInputs: true,
+      maskTextSelector: baseTextSelector,
+      maskInputOptions: {
+        password: true,
+        text: true,
+        textarea: true,
+        email: true,
+        tel: true,
+        number: true,
+        search: true,
+        url: true,
+        select: true,
+      },
+      maskInputFn: (value, element) => {
+        if (!value) return value;
+        if (isSensitiveElement(element)) return MASKED;
+        return MASKED;
+      },
+      maskTextFn: (text, element) => {
+        if (!text) return text;
+        if (level === 'strict' || isSensitiveElement(element)) return MASKED;
+        return text;
+      },
+    };
+  };
+
+  const syncRoutePolicy = () => {
+    const excluded = isExcludedRoute(location.href);
+    if (excluded) {
+      routePaused = true;
+      eventBuffer = [];
+      if (stopFn) {
+        stopFn();
+        stopFn = null;
+      }
+      return;
+    }
+
+    if (routePaused && !excluded && !stopped) {
+      routePaused = false;
+      if (!stopFn) {
+        waitForSession();
+      }
     }
   };
 
-  // The recorder cannot start until the tracker has a session: replay chunks are keyed
-  // to session + visit, and a chunk sent before the first pageview has nothing to
-  // attach to. Poll for it rather than racing script order.
+  const watchRouteTransitions = () => {
+    if (history && typeof history.pushState === 'function') {
+      const origPush = history.pushState;
+      history.pushState = (...args) => {
+        const res = origPush.apply(history, args);
+        syncRoutePolicy();
+        return res;
+      };
+    }
+    if (history && typeof history.replaceState === 'function') {
+      const origReplace = history.replaceState;
+      history.replaceState = (...args) => {
+        const res = origReplace.apply(history, args);
+        syncRoutePolicy();
+        return res;
+      };
+    }
+    window.addEventListener('popstate', syncRoutePolicy);
+  };
+
   const waitForSession = (attempts = 0) => {
+    if (stopped || isExcludedRoute(location.href)) return;
     if (attempts > 50) return;
 
     const session = tracker()?.getSession?.();
@@ -129,13 +229,18 @@ import { record } from 'rrweb';
   };
 
   const beginRecording = () => {
+    if (stopped || stopFn || isExcludedRoute(location.href)) return;
+    routePaused = false;
     startTime = Date.now();
 
     const maskConfig = getMaskConfig(maskLevel);
 
     stopFn = record({
       emit(event) {
-        if (stopped) return;
+        if (stopped || routePaused || isExcludedRoute(location.href)) {
+          eventBuffer = [];
+          return;
+        }
 
         if (Date.now() - startTime > maxDuration) {
           stop();
@@ -174,6 +279,8 @@ import { record } from 'rrweb';
 
     window.addEventListener('beforeunload', () => flush(true));
   };
+
+  watchRouteTransitions();
 
   if (document.readyState === 'complete') {
     waitForSession();

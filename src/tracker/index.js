@@ -29,7 +29,151 @@
   const excludeHash = attr(`${_data}exclude-hash`) === _true;
   const domain = attr(`${_data}domains`) || '';
   const credentials = attr(`${_data}fetch-credentials`) || 'omit';
-  const astEnabled = attr(`${_data}ast`) !== _false;
+  const astEnabled = attr(`${_data}ast`) === _true;
+  const heatmapsEnabled = attr(`${_data}heatmaps`) !== _false;
+  const release = attr(`${_data}release`) || 'unknown';
+
+  const EXCLUDED_UX_ROUTES = [
+    /^\/auth\/callback(?:\/|$)/i,
+    /^\/oauth\/callback(?:\/|$)/i,
+    /^\/login\/callback(?:\/|$)/i,
+    /^\/pay\/confirm(?:\/|$)/i,
+    /^\/pay\/card(?:\/|$)/i,
+    /^\/checkout\/payment(?:\/|$)/i,
+  ];
+  const HANZO_ROOT_DOMAINS = ['hanzo.ai', 'hanzo.app', 'hanzo.bot', 'hanzo.team'];
+  const SENSITIVE_MASK_SELECTOR =
+    'input[type="password"], [data-hanzo-mask], [data-conversation-body], .conversation-body, [data-secret]';
+  const SENSITIVE_FIELD_RE =
+    /(password|passcode|card|cc[-_]?num|cc[-_]?exp|cc[-_]?csc|cvv|cvc|csc|iban|secret|api[-_]?key|apikey|token)/i;
+
+  const isExcludedUxRoute = rawUrl => {
+    try {
+      const parsed = new URL(rawUrl || location.href, location.href);
+      const p = parsed.pathname.replace(/\/{2,}/g, '/').replace(/\/$/, '') || '/';
+      return EXCLUDED_UX_ROUTES.some(re => re.test(p));
+    } catch {
+      return false;
+    }
+  };
+
+  const isHanzoHost = hostStr => {
+    const h = String(hostStr || '').toLowerCase();
+    return HANZO_ROOT_DOMAINS.some(root => h === root || h.endsWith(`.${root}`));
+  };
+
+  const normalizeRouteTemplate = rawUrl => {
+    try {
+      const parsed = new URL(rawUrl || location.href, location.href);
+      const segs = parsed.pathname.split('/').filter(Boolean);
+      const out = [];
+      for (let i = 0; i < segs.length; i++) {
+        const s = segs[i];
+        const prev = i > 0 ? segs[i - 1].toLowerCase() : '';
+        const prev2 = i > 1 ? segs[i - 2].toLowerCase() : '';
+        if (prev2 === 'pay' && prev === 'confirm') out.push(':method');
+        else if (
+          (prev2 === 'pay' && prev === 'card') ||
+          (prev2 === 'checkout' && prev === 'payment')
+        )
+          out.push(':id');
+        else if (
+          (prev === 'dev' || prev === 'projects') &&
+          !['new', 'create', 'settings'].includes(s.toLowerCase())
+        )
+          out.push(':project');
+        else if (
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s) ||
+          /^\d+$/.test(s)
+        )
+          out.push(':id');
+        else out.push(s);
+      }
+      return out.length ? `/${out.join('/')}` : '/';
+    } catch {
+      return '/';
+    }
+  };
+
+  const getViewportBucket = () => {
+    const w = window.innerWidth || width || 1280;
+    if (w < 768) return 'mobile';
+    if (w < 1024) return 'tablet';
+    return 'desktop';
+  };
+
+  const genId = prefix =>
+    `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+
+  const loadCrossDomainIdentity = () => {
+    let hzAid;
+    let hzSid;
+    let visitorId;
+    try {
+      const params = new URL(location.href).searchParams;
+      hzAid = params.get('hz_aid') || undefined;
+      hzSid = params.get('hz_sid') || undefined;
+      visitorId = params.get('visitor_id') || undefined;
+    } catch {}
+    try {
+      hzAid = hzAid || localStorage?.getItem('hanzo.hz_aid') || genId('hza');
+      hzSid = hzSid || window.sessionStorage?.getItem('hanzo.hz_sid') || genId('hzs');
+      visitorId = visitorId || localStorage?.getItem('hanzo.visitor_id') || hzAid;
+      localStorage?.setItem('hanzo.hz_aid', hzAid);
+      localStorage?.setItem('hanzo.visitor_id', visitorId);
+      window.sessionStorage?.setItem('hanzo.hz_sid', hzSid);
+    } catch {
+      hzAid = hzAid || genId('hza');
+      hzSid = hzSid || genId('hzs');
+      visitorId = visitorId || hzAid;
+    }
+    return { hz_aid: hzAid, hz_sid: hzSid, visitor_id: visitorId };
+  };
+
+  const crossDomainIdentity = loadCrossDomainIdentity();
+
+  const decorateCrossDomainHref = targetHref => {
+    try {
+      const u = new URL(targetHref, location.href);
+      if (!isHanzoHost(u.hostname) || u.hostname === hostname) return targetHref;
+      if (!u.searchParams.has('hz_aid')) u.searchParams.set('hz_aid', crossDomainIdentity.hz_aid);
+      if (!u.searchParams.has('hz_sid')) u.searchParams.set('hz_sid', crossDomainIdentity.hz_sid);
+      if (!u.searchParams.has('visitor_id'))
+        u.searchParams.set('visitor_id', crossDomainIdentity.visitor_id);
+      return u.toString();
+    } catch {
+      return targetHref;
+    }
+  };
+
+  const resolveControlId = el => {
+    if (!el || typeof el.getAttribute !== 'function') return null;
+    try {
+      if (el.closest?.(SENSITIVE_MASK_SELECTOR)) return null;
+    } catch {}
+    const fieldHint = [el.type, el.name, el.id, el.getAttribute('autocomplete')]
+      .filter(Boolean)
+      .join(' ');
+    if (SENSITIVE_FIELD_RE.test(fieldHint)) return null;
+    const direct =
+      el.getAttribute('data-control-id') ||
+      el.getAttribute('data-testid') ||
+      el.getAttribute('data-hanzo-control') ||
+      el.getAttribute('data-hanzo-event');
+    if (direct) return direct.slice(0, 160);
+    const tag = (el.tagName || '').toLowerCase();
+    const role = (el.getAttribute('role') || '').toLowerCase();
+    if (!['button', 'a', 'summary'].includes(tag) && !['button', 'link', 'tab'].includes(role)) {
+      return null;
+    }
+    const label = el.getAttribute('aria-label') || el.id || (el.textContent || '').trim();
+    const slug = String(label || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 64);
+    return slug ? `${role || tag}:${slug}` : null;
+  };
 
   // Third-party analytics provider keys (unified tracking)
   const gaId = attr(`${_data}ga-id`);
@@ -187,7 +331,7 @@
 
     // Hanzo Insights — load Insights-compatible SDK on demand
     if (insightsKey) {
-      // biome-ignore lint: vendored Insights snippet — minified third-party code
+      // biome-ignore-start lint: vendored Insights snippet — minified third-party code
       !(function (t, e) {
         var o, n, p, r;
         e.__SV ||
@@ -231,6 +375,7 @@
           }),
           (e.__SV = 1));
       })(document, window.insights || []);
+      // biome-ignore-end lint: vendored Insights snippet — minified third-party code
       window.insights.init(insightsKey, {
         api_host: insightsHost,
         person_profiles: 'identified_only',
@@ -322,6 +467,9 @@
     referrer: currentRef,
     tag,
     id: identity ? identity : undefined,
+    hz_aid: crossDomainIdentity.hz_aid,
+    hz_sid: crossDomainIdentity.hz_sid,
+    visitor_id: crossDomainIdentity.visitor_id,
   });
 
   const hasDoNotTrack = () => {
@@ -332,7 +480,7 @@
   /* AST / Structured Data Collection */
 
   const collectAST = () => {
-    if (!astEnabled) return;
+    if (!astEnabled || isExcludedUxRoute(currentUrl)) return;
 
     const ast = {
       '@context': 'https://schema.org',
@@ -420,19 +568,22 @@
   /* Element interaction tracking */
 
   const trackElement = async (el, eventName) => {
-    if (trackingDisabled()) return;
+    if (trackingDisabled() || isExcludedUxRoute(currentUrl)) return;
+    const controlId = resolveControlId(el);
+    if (!controlId) return;
     try {
       await fetch(`${host.replace(/\/$/, '')}/v1/element`, {
         keepalive: true,
         method: 'POST',
         body: JSON.stringify({
           website,
+          hostname,
           url: currentUrl,
-          elementId: el.id || '',
+          route_template: normalizeRouteTemplate(currentUrl),
+          release,
+          viewport: getViewportBucket(),
+          control_id: controlId,
           elementType: el.tagName.toLowerCase(),
-          elementSelector: el.className ? `.${el.className.split(' ')[0]}` : '',
-          elementText: (el.textContent || '').trim().substring(0, 200),
-          elementHref: el.href || '',
           event: eventName || '',
         }),
         headers: { 'Content-Type': 'application/json' },
@@ -489,7 +640,26 @@
     };
     const onClick = async e => {
       const el = e.target;
-      const parentElement = el.closest('a,button');
+      const parentElement = el.closest?.(
+        'a,button,[data-control-id],[data-testid],[role="button"]',
+      );
+
+      const anchor = el.closest?.('a[href]');
+      if (anchor?.href) {
+        const decorated = decorateCrossDomainHref(anchor.href);
+        if (decorated !== anchor.href) {
+          anchor.setAttribute('href', decorated);
+        }
+      }
+
+      if (heatmapsEnabled && !isExcludedUxRoute(currentUrl)) {
+        const controlTarget = parentElement || el;
+        const controlId = resolveControlId(controlTarget);
+        if (controlId) {
+          trackElement(controlTarget, 'heatmap_click');
+        }
+      }
+
       if (!parentElement) return trackEventElement(el);
 
       const { href, target } = parentElement;
@@ -499,6 +669,7 @@
         return trackEventElement(parentElement);
       }
       if (parentElement.tagName === 'A' && href) {
+        const decoratedHref = decorateCrossDomainHref(href);
         const external =
           target === '_blank' ||
           e.ctrlKey ||
@@ -508,7 +679,7 @@
         if (!external) e.preventDefault();
         return trackEventElement(parentElement).then(() => {
           if (!external) {
-            (target === '_top' ? top.location : location).href = href;
+            (target === '_top' ? top.location : location).href = decoratedHref;
           }
         });
       }

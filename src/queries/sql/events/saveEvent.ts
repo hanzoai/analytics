@@ -2,6 +2,7 @@ import { EVENT_NAME_LENGTH, PAGE_TITLE_LENGTH, URL_LENGTH } from '@/lib/constant
 import { uuid } from '@/lib/crypto';
 import datastore from '@/lib/datastore';
 import { DATASTORE, PRISMA, runQuery } from '@/lib/db';
+import { isConfirmedServerPaymentEvent } from '@/lib/funnel';
 import kafka from '@/lib/kafka';
 import prisma from '@/lib/prisma';
 import { saveEventData } from './saveEventData';
@@ -139,7 +140,7 @@ async function relationalQuery({
 
     const { revenue, currency } = eventData;
 
-    if (revenue > 0 && currency) {
+    if (revenue > 0 && currency && isConfirmedServerPaymentEvent(eventName, eventData)) {
       await saveRevenue({
         websiteId,
         sessionId,

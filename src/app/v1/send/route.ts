@@ -6,8 +6,11 @@ import { COLLECTION_TYPE, EVENT_TYPE } from '@/lib/constants';
 import { hash, secret, uuid } from '@/lib/crypto';
 import datastore from '@/lib/datastore';
 import { getClientInfo, hasBlockedIp } from '@/lib/detect';
+import { enforceServerPaymentTrustBoundary, isTrustedServerEventRequest } from '@/lib/funnel';
+import { extractCrossDomainIdentity, resolveCanonicalVisitorId } from '@/lib/identity';
 import { createToken, parseToken } from '@/lib/jwt';
 import { fetchWebsite } from '@/lib/load';
+import { isUxCaptureExcludedRoute, sanitizeReplayChunkBeforeStorage } from '@/lib/privacy';
 import { parseRequest } from '@/lib/request';
 import { badRequest, forbidden, json, serverError } from '@/lib/response';
 import { anyObjectParam, urlOrPathParam } from '@/lib/schema';
@@ -41,6 +44,9 @@ const schema = z.object({
       userAgent: z.string().optional(),
       timestamp: z.coerce.number().int().optional(),
       id: z.string().optional(),
+      hz_aid: z.string().max(128).optional(),
+      hz_sid: z.string().max(128).optional(),
+      visitor_id: z.string().max(128).optional(),
       browser: z.string().optional(),
       os: z.string().optional(),
       device: z.string().optional(),
@@ -92,11 +98,25 @@ export async function POST(request: Request) {
       tag,
       timestamp,
       id,
+      hz_aid,
+      hz_sid,
+      visitor_id,
       events,
       chunkIndex,
       startedAt,
       endedAt,
     } = payload;
+
+    const crossDomainIdentity = extractCrossDomainIdentity(url, {
+      hz_aid: hz_aid ?? data?.hz_aid,
+      hz_sid: hz_sid ?? data?.hz_sid,
+      visitor_id: visitor_id ?? data?.visitor_id,
+    });
+    const canonicalVisitorId = resolveCanonicalVisitorId({
+      distinctId: id,
+      visitor_id: crossDomainIdentity.visitor_id,
+      hz_aid: crossDomainIdentity.hz_aid,
+    });
 
     const sourceId = websiteId || pixelId || linkId;
 
@@ -155,7 +175,9 @@ export async function POST(request: Request) {
     const sessionSalt = hash(startOfMonth(createdAt).toUTCString());
     const visitSalt = hash(startOfHour(createdAt).toUTCString());
 
-    const sessionId = id ? uuid(sourceId, id) : uuid(sourceId, ip, userAgent, sessionSalt);
+    const sessionId = canonicalVisitorId
+      ? uuid(sourceId, canonicalVisitorId)
+      : uuid(sourceId, ip, userAgent, sessionSalt);
 
     // Create a session if not found
     if (!datastore.enabled && !cache?.sessionId) {
@@ -170,7 +192,7 @@ export async function POST(request: Request) {
         country,
         region,
         city,
-        distinctId: id,
+        distinctId: canonicalVisitorId,
         createdAt,
       });
     }
@@ -233,6 +255,32 @@ export async function POST(request: Request) {
             ? EVENT_TYPE.customEvent
             : EVENT_TYPE.pageView;
 
+      // Drop UX heatmap events originating from excluded sensitive routes
+      const isUxHeatmapEvent =
+        name === '$$heatmap' || name === '$$heatmap_aggregate' || name === 'heatmap_click';
+      if (isUxHeatmapEvent && isUxCaptureExcludedRoute(urlPath)) {
+        const token = createToken({ websiteId, sessionId, visitId, iat }, secret());
+        return json({ cache: token, sessionId, visitId, dropped: true, reason: 'excluded_route' });
+      }
+
+      // Enforce confirmed server-side payment trust boundary
+      const isServerAuthenticated = isTrustedServerEventRequest(request);
+      const safeEventData = enforceServerPaymentTrustBoundary(name, data, isServerAuthenticated);
+      const enrichedEventData =
+        safeEventData ||
+        crossDomainIdentity.hz_aid ||
+        crossDomainIdentity.hz_sid ||
+        crossDomainIdentity.visitor_id
+          ? {
+              ...(safeEventData || {}),
+              ...(crossDomainIdentity.hz_aid ? { hz_aid: crossDomainIdentity.hz_aid } : {}),
+              ...(crossDomainIdentity.hz_sid ? { hz_sid: crossDomainIdentity.hz_sid } : {}),
+              ...(crossDomainIdentity.visitor_id
+                ? { visitor_id: crossDomainIdentity.visitor_id }
+                : {}),
+            }
+          : undefined;
+
       await saveEvent({
         websiteId: sourceId,
         sessionId,
@@ -250,7 +298,7 @@ export async function POST(request: Request) {
         referrerDomain,
 
         // Session
-        distinctId: id,
+        distinctId: canonicalVisitorId,
         browser,
         os,
         device,
@@ -262,7 +310,7 @@ export async function POST(request: Request) {
 
         // Events
         eventName: name,
-        eventData: data,
+        eventData: enrichedEventData,
         tag,
 
         // UTM
@@ -280,7 +328,6 @@ export async function POST(request: Request) {
         lifatid,
         twclid,
       });
-
     } else if (type === COLLECTION_TYPE.identify) {
       if (data) {
         await saveSessionData({
@@ -292,29 +339,22 @@ export async function POST(request: Request) {
         });
       }
     } else if (type === COLLECTION_TYPE.record) {
-      // Session-replay chunk. sessionId/visitId are already resolved above from the
-      // same cache token every other type uses, which is the reason this rides the
-      // shared door: a chunk is only meaningful against the session the tracker
-      // established, and that resolution exists here and nowhere else.
-      //
-      // An empty batch is a no-op, not an error — the recorder flushes on unload and
-      // may race an already-drained buffer. Storing it would create a chunk the player
-      // has to skip, and 4xx-ing it would make a healthy client look broken.
+      // Enforce pre-storage route exclusion & DOM scrubbing defense-in-depth so
+      // sensitive routes (/auth/callback, /pay/confirm/*, etc.) are never persisted.
       if (events?.length) {
-        await saveRecording({
-          websiteId,
-          sessionId,
-          visitId,
-          chunkIndex: chunkIndex ?? 0,
-          events,
-          eventCount: events.length,
-          // The recorder's own clock bounds the chunk, because these are the times the
-          // events actually happened; server receipt is later by the flush interval and
-          // by the network, and using it would stretch every chunk and make the
-          // player's timeline drift from the recording.
-          startedAt: startedAt ? new Date(startedAt) : createdAt,
-          endedAt: endedAt ? new Date(endedAt) : createdAt,
-        });
+        const sanitized = sanitizeReplayChunkBeforeStorage(events, url);
+        if (!sanitized.dropped && sanitized.events.length) {
+          await saveRecording({
+            websiteId,
+            sessionId,
+            visitId,
+            chunkIndex: chunkIndex ?? 0,
+            events: sanitized.events,
+            eventCount: sanitized.events.length,
+            startedAt: startedAt ? new Date(startedAt) : createdAt,
+            endedAt: endedAt ? new Date(endedAt) : createdAt,
+          });
+        }
       }
     }
 
