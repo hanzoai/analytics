@@ -29,7 +29,7 @@
   const excludeHash = attr(`${_data}exclude-hash`) === _true;
   const domain = attr(`${_data}domains`) || '';
   const credentials = attr(`${_data}fetch-credentials`) || 'omit';
-  const astEnabled = attr(`${_data}ast`) === _true;
+  const astEnabled = attr(`${_data}ast`) !== _false;
   const heatmapsEnabled = attr(`${_data}heatmaps`) !== _false;
   const release = attr(`${_data}release`) || 'unknown';
 
@@ -173,6 +173,45 @@
       .replace(/^-+|-+$/g, '')
       .slice(0, 64);
     return slug ? `${role || tag}:${slug}` : null;
+  };
+
+  const resolveComponentPath = el => {
+    if (!el || typeof el.getAttribute !== 'function') return '';
+    try {
+      if (el.closest?.(SENSITIVE_MASK_SELECTOR)) return '';
+    } catch {}
+    const parts = [];
+    let cur = el;
+    let depth = 0;
+    while (cur && cur.nodeType === 1 && depth < 6) {
+      const comp =
+        cur.getAttribute('data-component') ||
+        cur.getAttribute('data-slot') ||
+        cur.getAttribute('data-section') ||
+        cur.getAttribute('data-control-id') ||
+        cur.getAttribute('data-testid');
+      const tag = (cur.tagName || '').toLowerCase();
+      if (comp) {
+        parts.unshift(`${tag}[${String(comp).slice(0, 48)}]`);
+      } else if (['header', 'nav', 'main', 'section', 'aside', 'footer', 'form', 'dialog'].includes(tag)) {
+        const label = cur.getAttribute('aria-label') || cur.id;
+        parts.unshift(label ? `${tag}[${String(label).slice(0, 32)}]` : tag);
+      }
+      cur = cur.parentElement;
+      depth += 1;
+    }
+    return parts.join(' > ').slice(0, 240);
+  };
+
+  const nextJourneyStep = () => {
+    try {
+      const prev = Number(window.sessionStorage?.getItem('hanzo.journey_step') || '0') || 0;
+      const next = prev + 1;
+      window.sessionStorage?.setItem('hanzo.journey_step', String(next));
+      return next;
+    } catch {
+      return 1;
+    }
   };
 
   // Third-party analytics provider keys (unified tracking)
@@ -571,6 +610,8 @@
     if (trackingDisabled() || isExcludedUxRoute(currentUrl)) return;
     const controlId = resolveControlId(el);
     if (!controlId) return;
+    const componentPath = resolveComponentPath(el);
+    const stepIndex = nextJourneyStep();
     try {
       await fetch(`${host.replace(/\/$/, '')}/v1/element`, {
         keepalive: true,
@@ -583,6 +624,10 @@
           release,
           viewport: getViewportBucket(),
           control_id: controlId,
+          component_path: componentPath || undefined,
+          step_index: stepIndex,
+          hz_aid: crossDomainIdentity.hz_aid,
+          hz_sid: crossDomainIdentity.hz_sid,
           elementType: el.tagName.toLowerCase(),
           event: eventName || '',
         }),
