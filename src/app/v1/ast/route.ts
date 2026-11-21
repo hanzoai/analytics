@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { normalizeRouteTemplate } from '@/lib/funnel';
 import { isHeatmapEligibleRoute } from '@/lib/heatmap';
+import { diffAstSnapshots } from '@/lib/journeys';
 import { badRequest, json } from '@/lib/response';
 
 const astSectionSchema = z.object({
@@ -22,6 +23,10 @@ const astSectionSchema = z.object({
 });
 
 const astPayloadSchema = z.object({
+  release: z.string().max(120).optional(),
+  route_template: z.string().max(500).optional(),
+  viewport: z.string().max(32).optional(),
+  previous: z.object({ sections: z.array(astSectionSchema).max(100).optional() }).optional(),
   '@context': z.string().optional(),
   '@type': z.string().optional(),
   url: z.string().max(2000).optional(),
@@ -63,10 +68,27 @@ export async function POST(request: Request) {
     }
   }
 
-  return json({
+  const routeTemplate = normalizeRouteTemplate(data.url || '/');
+  const result: Record<string, any> = {
     ok: true,
     hostname,
-    route_template: normalizeRouteTemplate(data.url || '/'),
+    route_template: routeTemplate,
     sections: data.sections?.length ?? 0,
-  });
+  };
+  if (data.release) result.release = data.release;
+  if (data.previous) {
+    const diff = diffAstSnapshots(data.previous, { sections: data.sections });
+    result.diff = {
+      ...diff,
+      summary: {
+        sections_added: diff.sections.added.length,
+        sections_removed: diff.sections.removed.length,
+        sections_changed: diff.sections.changed.length,
+        controls_added: diff.controls.added.length,
+        controls_removed: diff.controls.removed.length,
+        controls_changed: diff.controls.changed.length,
+      },
+    };
+  }
+  return json(result);
 }

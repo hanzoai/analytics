@@ -193,7 +193,9 @@
       const tag = (cur.tagName || '').toLowerCase();
       if (comp) {
         parts.unshift(`${tag}[${String(comp).slice(0, 48)}]`);
-      } else if (['header', 'nav', 'main', 'section', 'aside', 'footer', 'form', 'dialog'].includes(tag)) {
+      } else if (
+        ['header', 'nav', 'main', 'section', 'aside', 'footer', 'form', 'dialog'].includes(tag)
+      ) {
         const label = cur.getAttribute('aria-label') || cur.id;
         parts.unshift(label ? `${tag}[${String(label).slice(0, 32)}]` : tag);
       }
@@ -530,6 +532,10 @@
       },
       sections: [],
       url: currentUrl,
+      hostname,
+      release,
+      route_template: normalizeRouteTemplate(currentUrl),
+      viewport: getViewportBucket(),
     };
 
     // Collect JSON-LD structured data from the page
@@ -563,6 +569,8 @@
           type: el.tagName.toLowerCase(),
           text: (el.textContent || '').trim().substring(0, 100),
           href: el.href || '',
+          control_id: resolveControlId(el) || undefined,
+          component_path: resolveComponentPath(el) || undefined,
         });
       });
 
@@ -666,6 +674,60 @@
     history.replaceState = hook(history, 'replaceState', handlePush);
   };
 
+  /* Rage clicks: >=3 clicks within 1000ms on the same control */
+  const rageClicks = {};
+  const detectRageClick = (el, controlId) => {
+    if (trackingDisabled() || isExcludedUxRoute(currentUrl) || !controlId) return;
+    const now = Date.now();
+    const rec = rageClicks[controlId] || { times: [], fired: 0 };
+    rec.times = rec.times.filter(t => now - t <= 1000);
+    rec.times.push(now);
+    rageClicks[controlId] = rec;
+    if (rec.times.length >= 3 && now - rec.fired > 1000) {
+      rec.fired = now;
+      rec.times = [];
+      track('rage_click', {
+        control_id: controlId,
+        component_path: resolveComponentPath(el) || undefined,
+        route_template: normalizeRouteTemplate(currentUrl),
+        release,
+        step_index: nextJourneyStep(),
+      });
+    }
+  };
+
+  /* Scroll depth milestones */
+  const scrollSeen = {};
+  let scrollUrl = '';
+  const handleScrollDepth = () => {
+    if (!heatmapsEnabled) return;
+    const onScroll = () => {
+      if (trackingDisabled() || isExcludedUxRoute(currentUrl)) return;
+      if (scrollUrl !== currentUrl) {
+        scrollUrl = currentUrl;
+        for (const k in scrollSeen) delete scrollSeen[k];
+      }
+      const doc = document.documentElement;
+      const total = Math.max(doc.scrollHeight - window.innerHeight, 1);
+      const depth = Math.min(
+        100,
+        Math.round(((window.scrollY || doc.scrollTop || 0) / total) * 100),
+      );
+      [25, 50, 75, 100].forEach(m => {
+        if (depth >= m && !scrollSeen[m]) {
+          scrollSeen[m] = true;
+          track('scroll_depth', {
+            depth: m,
+            route_template: normalizeRouteTemplate(currentUrl),
+            release,
+            viewport: getViewportBucket(),
+          });
+        }
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+  };
+
   const handleClicks = () => {
     const trackEventElement = async el => {
       const eventName = el.getAttribute(eventNameAttribute);
@@ -702,6 +764,7 @@
         const controlId = resolveControlId(controlTarget);
         if (controlId) {
           trackElement(controlTarget, 'heatmap_click');
+          detectRageClick(controlTarget, controlId);
         }
       }
 
@@ -836,6 +899,7 @@
       track();
       handlePathChanges();
       handleClicks();
+      handleScrollDepth();
       // Collect AST after page is ready
       setTimeout(collectAST, 100);
       setTimeout(handleSections, 500);
