@@ -1,5 +1,10 @@
 packages:
   - '**'
+networkConcurrency: 4
+fetchRetries: 6
+fetchRetryMintimeout: 5000
+fetchRetryMaxtimeout: 60000
+fetchTimeout: 120000
 # Transcribed from the onlyBuiltDependencies / ignoredBuiltDependencies lists
 # below, which say the same thing in the keys pnpm read before 11.
 allowBuilds:
