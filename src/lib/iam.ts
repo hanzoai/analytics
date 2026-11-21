@@ -24,6 +24,12 @@ export const IAM_API = 'https://api.hanzo.ai';
 /** The issuer IAM's tokens name. Checked, never fetched. */
 export const IAM_ISSUER = 'https://hanzo.id';
 
+/**
+ * The issuers a token may name while the platform moves from hanzo.id to hanzo.ai: each
+ * matched exactly, so an organization's own issuer (https://hanzo.ai/<org>) is never one.
+ */
+export const IAM_ISSUERS = [IAM_ISSUER, 'https://hanzo.ai'];
+
 /** IAM's signing keys, read from the API host. */
 export const IAM_JWKS = `${IAM_API}/v1/iam/.well-known/jwks`;
 
