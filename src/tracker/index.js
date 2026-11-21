@@ -510,7 +510,7 @@
       });
     }
     const ev = {
-      messageId: genId('err'),
+      messageId: errData.$insert_id || genId('err'),
       type: 'error',
       timestamp: new Date().toISOString(),
       distinctId: identity || crossDomainIdentity.visitor_id || crossDomainIdentity.hz_aid,
@@ -962,13 +962,43 @@
     errorWindowTimes.push(now);
 
     const breadcrumbs = formatBreadcrumbs();
+    const handled = errorSource === 'console_error' || errorSource === 'ui_error_message';
+    const eventId = genId('err');
+    const exceptionEntry = {
+      type: cls,
+      value: msg,
+      mechanism: { handled, synthetic: false },
+      ...(resolvedFile
+        ? {
+            stacktrace: {
+              type: 'raw',
+              frames: [
+                {
+                  filename: resolvedFile,
+                  function: frame.fn ? String(frame.fn).slice(0, 120) : '',
+                  lineno: resolvedLine || 0,
+                  colno: resolvedCol || 0,
+                  in_app: true,
+                },
+              ],
+            },
+          }
+        : {}),
+    };
     track('$exception', {
+      $insert_id: eventId,
       fingerprint,
+      $exception_fingerprint: fingerprint,
       error_class: cls,
       error_source: errorSource || 'window_error',
       message: msg,
       $exception_type: cls,
       $exception_message: msg,
+      $exception_level: 'error',
+      $exception_handled: handled,
+      $exception_types: [cls],
+      ...(msg ? { $exception_values: [msg] } : {}),
+      $exception_list: [exceptionEntry],
       file: resolvedFile || undefined,
       line: resolvedLine || undefined,
       column: resolvedCol || undefined,
@@ -979,6 +1009,7 @@
       route_template: routeTemplate,
       hostname,
       release,
+      $release: release,
       session_id: crossDomainIdentity.hz_sid,
       $session_id: crossDomainIdentity.hz_sid,
       visitor_id: crossDomainIdentity.visitor_id,

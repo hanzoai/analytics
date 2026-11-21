@@ -763,6 +763,19 @@ describe('tracker error autocapture and safety guards', () => {
       'data-event-host': 'https://api.hanzo.ai',
     });
     expect(skUnderscoreCalls).toHaveLength(0);
+
+    // 4. $exception payload includes Insights-native $exception_list & shares $insert_id with /v1/event messageId
+    expect(pkCalls[0].body.batch[0].messageId).toMatch(/^err_/);
+  });
+
+  test('emits Insights-native $exception_list, $exception_fingerprint, and shared $insert_id', () => {
+    const src = readFileSync(join(process.cwd(), 'src/tracker/index.js'), 'utf8');
+    expect(src).toContain('$exception_list: [exceptionEntry]');
+    expect(src).toContain('$exception_fingerprint: fingerprint');
+    expect(src).toContain("$exception_level: 'error'");
+    expect(src).toContain("messageId: errData.$insert_id || genId('err')");
+    const nextCfg = readFileSync(join(process.cwd(), 'next.config.mjs'), 'utf8');
+    expect(nextCfg).toContain('max-age=300, stale-while-revalidate=60');
   });
 });
 
