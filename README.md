@@ -6,6 +6,8 @@
 
 <h1 align="center">Hanzo Analytics</h1>
 
+[![Open in Hanzo](https://hanzo.app/badges/open-in-hanzo.svg)](https://hanzo.app/dev/open?repo=github.com/hanzoai/analytics&ref=main&action=open) [![Edit with Hanzo](https://hanzo.app/badges/edit-with-hanzo.svg)](https://hanzo.app/dev/open?repo=github.com/hanzoai/analytics&ref=main&action=edit) [![Deploy with Hanzo](https://hanzo.app/badges/deploy-with-hanzo.svg)](https://hanzo.app/dev/open?repo=github.com/hanzoai/analytics&ref=main&action=deploy)
+
 <p align="center">
   <i>Analytics is a simple, fast, privacy-focused alternative to Google Analytics.</i>
 </p>
