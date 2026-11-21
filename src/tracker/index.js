@@ -31,6 +31,9 @@
   const credentials = attr(`${_data}fetch-credentials`) || 'omit';
   const astEnabled = attr(`${_data}ast`) !== _false;
   const heatmapsEnabled = attr(`${_data}heatmaps`) !== _false;
+  const errorsEnabled = attr(`${_data}errors`) !== _false;
+  const consoleErrorsEnabled = attr(`${_data}console-errors`) !== _false;
+  const uiErrorsEnabled = attr(`${_data}ui-errors`) !== _false;
   const release = attr(`${_data}release`) || 'unknown';
 
   const EXCLUDED_UX_ROUTES = [
@@ -229,6 +232,12 @@
   // Hanzo Insights (behavioral analytics + feature flags)
   const insightsKey = attr(`${_data}insights-key`);
   const insightsHost = attr(`${_data}insights-host`) || 'https://insights.hanzo.ai';
+
+  // Hanzo Cloud Event Plane bridge (/v1/event -> event.error -> Sentinel / AutoFix)
+  const eventKey = (attr(`${_data}event-key`) || '').trim();
+  const eventHost = (attr(`${_data}event-host`) || 'https://api.hanzo.ai').replace(/\/$/, '');
+  const eventProduct = (attr(`${_data}product`) || '').trim();
+  const eventEnv = (attr(`${_data}environment`) || '').trim();
 
   const domains = domain.split(',').map(n => n.trim());
   const host =
@@ -482,6 +491,68 @@
     if (insightsKey && window.insights) {
       window.insights.capture(name, data || {});
     }
+    if (name === '$exception' && data) {
+      forwardErrorToEventPlane(data);
+    }
+  };
+
+  const forwardErrorToEventPlane = errData => {
+    if (!eventKey || /^sk[-_]/i.test(eventKey)) return;
+    const param = eventKey.startsWith('pk-') ? 'ingest_key' : 'api_key';
+    const wire = `${eventHost}/v1/event?${param}=${encodeURIComponent(eventKey)}`;
+    const frames = [];
+    if (errData.file) {
+      frames.push({
+        function: errData.function || '',
+        file: errData.file,
+        line: Number(errData.line) || 0,
+        column: Number(errData.column) || 0,
+      });
+    }
+    const ev = {
+      messageId: genId('err'),
+      type: 'error',
+      timestamp: new Date().toISOString(),
+      distinctId: identity || crossDomainIdentity.visitor_id || crossDomainIdentity.hz_aid,
+      anonymousId: crossDomainIdentity.hz_aid,
+      sessionId: errData.session_id || crossDomainIdentity.hz_sid,
+      url: currentUrl,
+      path: errData.route_template || normalizeRouteTemplate(currentUrl),
+      site: hostname || undefined,
+      release: release && release !== 'unknown' ? release : undefined,
+      environment: eventEnv || undefined,
+      product: eventProduct || undefined,
+      level: 'error',
+      library: '@hanzo/analytics',
+      error: {
+        type: errData.error_class || 'Error',
+        message: errData.message || '',
+        stack: errData.stack || '',
+        handled: false,
+        ...(frames.length ? { frames } : {}),
+      },
+      properties: {
+        hostname,
+        route_template: errData.route_template,
+        error_source: errData.error_source,
+        component_path: errData.component_path,
+        control_id: errData.control_id,
+        breadcrumbs: errData.breadcrumbs,
+        session_id: errData.session_id || crossDomainIdentity.hz_sid,
+        step_index: errData.step_index,
+      },
+    };
+    try {
+      Promise.resolve(
+        fetch(wire, {
+          method: 'POST',
+          keepalive: true,
+          credentials: 'omit',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ batch: [ev] }),
+        }),
+      ).catch(() => {});
+    } catch {}
   };
 
   /* Helper functions */
@@ -654,6 +725,7 @@
     currentUrl = normalize(new URL(url, location.href).toString());
 
     if (currentUrl !== currentRef) {
+      pushBreadcrumb('route', normalizeRouteTemplate(currentUrl));
       setTimeout(() => {
         track();
         collectAST();
@@ -676,8 +748,14 @@
 
   /* Rage clicks: >=3 clicks within 1000ms on the same control */
   const rageClicks = {};
+  let rageUrl = '';
+  let lastInteraction = { component_path: '', control_id: '', at: 0 };
   const detectRageClick = (el, controlId) => {
     if (trackingDisabled() || isExcludedUxRoute(currentUrl) || !controlId) return;
+    if (rageUrl !== currentUrl) {
+      rageUrl = currentUrl;
+      for (const k in rageClicks) delete rageClicks[k];
+    }
     const now = Date.now();
     const rec = rageClicks[controlId] || { times: [], fired: 0 };
     rec.times = rec.times.filter(t => now - t <= 1000);
@@ -696,23 +774,25 @@
     }
   };
 
-  /* Scroll depth milestones */
+  /* Scroll depth milestones (rAF-throttled + handles short non-scrollable pages) */
   const scrollSeen = {};
   let scrollUrl = '';
   const handleScrollDepth = () => {
     if (!heatmapsEnabled) return;
-    const onScroll = () => {
+    let rafPending = false;
+    const measureScroll = () => {
+      rafPending = false;
       if (trackingDisabled() || isExcludedUxRoute(currentUrl)) return;
       if (scrollUrl !== currentUrl) {
         scrollUrl = currentUrl;
         for (const k in scrollSeen) delete scrollSeen[k];
       }
       const doc = document.documentElement;
-      const total = Math.max(doc.scrollHeight - window.innerHeight, 1);
-      const depth = Math.min(
-        100,
-        Math.round(((window.scrollY || doc.scrollTop || 0) / total) * 100),
-      );
+      const scrollable = doc.scrollHeight - window.innerHeight;
+      const depth =
+        scrollable <= 0
+          ? 100
+          : Math.min(100, Math.round(((window.scrollY || doc.scrollTop || 0) / scrollable) * 100));
       [25, 50, 75, 100].forEach(m => {
         if (depth >= m && !scrollSeen[m]) {
           scrollSeen[m] = true;
@@ -725,7 +805,336 @@
         }
       });
     };
+    const onScroll = () => {
+      if (rafPending) return;
+      rafPending = true;
+      if (typeof window.requestAnimationFrame === 'function') {
+        window.requestAnimationFrame(measureScroll);
+      } else {
+        setTimeout(measureScroll, 150);
+      }
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
+    // Evaluate short non-scrollable pages once after layout settles
+    setTimeout(() => {
+      const doc = document.documentElement;
+      if (doc && doc.scrollHeight - window.innerHeight <= 0) {
+        measureScroll();
+      }
+    }, 400);
+  };
+
+  /* Client error & error-message autocapture with session breadcrumbs, component attribution, dedupe, redaction & rate limit */
+  const errorDedupe = {};
+  const errorWindowTimes = [];
+  const sessionBreadcrumbs = [];
+  const MAX_BREADCRUMBS = 8;
+  const UI_ERROR_SELECTOR =
+    '[role="alert"], [data-hanzo-error], [data-error-message], [aria-live="assertive"]';
+  const UI_ERROR_KEYWORD_RE =
+    /(error|failed|failure|invalid|unable|denied|declined|rejected|expired|timeout|timed out|exception|unauthorized|forbidden|unavailable|not found|something went wrong|could not|cannot|5\d\d|4\d\d)/i;
+  const UI_NON_ERROR_VARIANT_RE = /^(success|info|ok|positive|neutral)$/i;
+  const UI_ERROR_VARIANT_RE = /^(error|danger|destructive|critical|fail|failed)$/i;
+  const UI_SUCCESS_PHRASE_RE =
+    /\b(saved successfully|updated successfully|created successfully|copied to clipboard|welcome back)\b/i;
+  const SECRET_VALUE_RE =
+    /(?:bearer\s+|sk-|pk-|hz_)[a-zA-Z0-9._-]+|eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/gi;
+  const URL_QUERY_RE = /(https?:\/\/[^\s)?:]+)[?#][^\s)]+/gi;
+  const scrubErrorText = (raw, maxLen) =>
+    String(raw || '')
+      .replace(URL_QUERY_RE, '$1')
+      .replace(SECRET_VALUE_RE, '[redacted]')
+      .slice(0, maxLen);
+  const pushBreadcrumb = (kind, label) => {
+    if (!label || isExcludedUxRoute(currentUrl)) return;
+    sessionBreadcrumbs.push(`${kind}:${scrubErrorText(label, 80)}`);
+    if (sessionBreadcrumbs.length > MAX_BREADCRUMBS) {
+      sessionBreadcrumbs.shift();
+    }
+  };
+  const formatBreadcrumbs = () =>
+    sessionBreadcrumbs.length ? sessionBreadcrumbs.join(' -> ').slice(0, 400) : '';
+  const normalizeMessageKey = msg =>
+    String(msg || '')
+      .toLowerCase()
+      .replace(/[0-9a-f]{8,}|\d+/g, '#')
+      .replace(/[^a-z0-9#]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 64) || 'unknown';
+  const stripFileQuery = raw => {
+    const s = String(raw || '');
+    const q = s.search(/[?#]/);
+    return (q >= 0 ? s.slice(0, q) : s).slice(0, 300);
+  };
+  const parseFirstStackFrame = stack => {
+    if (!stack) return {};
+    const lines = String(stack)
+      .split('\n')
+      .map(l => l.trim())
+      .filter(Boolean);
+    let fallback = null;
+    for (let i = 0; i < lines.length; i++) {
+      // V8/Chrome: "at fn (url:line:col)" or "at url:line:col"
+      let m = lines[i].match(
+        /(?:at\s+(?:([^\s(]+)\s+)?\(?)?(https?:\/\/[^\s)]+|\/[^\s)]+):(\d+):(\d+)\)?/,
+      );
+      let fn = m ? m[1] || '' : '';
+      // Firefox/Safari: "fn@url:line:col"
+      if (!m) {
+        m = lines[i].match(/^([^@\s]*)@(https?:\/\/[^\s)]+|\/[^\s)]+):(\d+):(\d+)$/);
+        if (m) fn = m[1] || '';
+      }
+      if (!m) continue;
+      const candidate = {
+        fn,
+        file: stripFileQuery(m[2] || ''),
+        line: Number(m[3]) || 0,
+        column: Number(m[4]) || 0,
+      };
+      if (!fallback) fallback = candidate;
+      const lf = candidate.file.toLowerCase();
+      if (!lf.includes('node_modules') && !lf.includes('webpack/runtime')) {
+        return candidate;
+      }
+    }
+    return fallback || {};
+  };
+  const pruneErrorDedupe = now => {
+    const keys = Object.keys(errorDedupe);
+    for (let i = 0; i < keys.length; i++) {
+      if (now - errorDedupe[keys[i]] >= 30000) delete errorDedupe[keys[i]];
+    }
+    const remaining = Object.keys(errorDedupe);
+    if (remaining.length > 100) {
+      remaining.sort((a, b) => errorDedupe[a] - errorDedupe[b]);
+      for (let i = 0; i < remaining.length - 100; i++) {
+        delete errorDedupe[remaining[i]];
+      }
+    }
+  };
+  const captureClientError = (
+    errorClass,
+    rawMessage,
+    file,
+    line,
+    column,
+    stack,
+    errorSource = 'window_error',
+    sourceEl = null,
+  ) => {
+    if (!errorsEnabled || trackingDisabled() || isExcludedUxRoute(currentUrl)) return;
+    const now = Date.now();
+    // Cap at 10 error events per rolling 60s window
+    while (errorWindowTimes.length && now - errorWindowTimes[0] > 60000) {
+      errorWindowTimes.shift();
+    }
+    if (errorWindowTimes.length >= 10) return;
+
+    const frame = stack ? parseFirstStackFrame(stack) : {};
+    const rawFile = stripFileQuery(file || '');
+    const isVendorFile = f => {
+      const lf = String(f || '').toLowerCase();
+      return !lf || lf.includes('node_modules') || lf.includes('webpack/runtime');
+    };
+    const useParsedFrame = Boolean(frame.file) && isVendorFile(rawFile);
+    const resolvedFile = useParsedFrame ? frame.file : rawFile || frame.file || '';
+    const resolvedLine = Number(useParsedFrame ? frame.line : line || frame.line || 0);
+    const resolvedCol = Number(useParsedFrame ? frame.column : column || frame.column || 0);
+    const cls = String(errorClass || 'Error').slice(0, 120);
+    const msg = scrubErrorText(rawMessage, 300);
+    if (!msg && !resolvedFile) return;
+    const safeStack = stack
+      ? scrubErrorText(String(stack).split('\n').slice(0, 8).join('\n'), 1200)
+      : undefined;
+    const routeTemplate = normalizeRouteTemplate(currentUrl);
+    const recentInteraction = now - lastInteraction.at <= 5000 ? lastInteraction : null;
+    const sourceCompPath = sourceEl ? resolveComponentPath(sourceEl) : '';
+    const sourceControlId = sourceEl ? resolveControlId(sourceEl) : null;
+    const fingerprint =
+      resolvedFile || resolvedLine
+        ? `${cls}:${resolvedFile}:${resolvedLine}:${routeTemplate}`
+        : `${cls}:${normalizeMessageKey(msg)}:${routeTemplate}`;
+
+    // Deduplicate identical fingerprints within 30s (bounded map)
+    pruneErrorDedupe(now);
+    if (errorDedupe[fingerprint] && now - errorDedupe[fingerprint] < 30000) return;
+    errorDedupe[fingerprint] = now;
+    errorWindowTimes.push(now);
+
+    const breadcrumbs = formatBreadcrumbs();
+    track('$exception', {
+      fingerprint,
+      error_class: cls,
+      error_source: errorSource || 'window_error',
+      message: msg,
+      $exception_type: cls,
+      $exception_message: msg,
+      file: resolvedFile || undefined,
+      line: resolvedLine || undefined,
+      column: resolvedCol || undefined,
+      function: frame.fn ? String(frame.fn).slice(0, 120) : undefined,
+      stack: safeStack,
+      component_path: sourceCompPath || recentInteraction?.component_path || undefined,
+      control_id: sourceControlId || recentInteraction?.control_id || undefined,
+      route_template: routeTemplate,
+      hostname,
+      release,
+      session_id: crossDomainIdentity.hz_sid,
+      $session_id: crossDomainIdentity.hz_sid,
+      visitor_id: crossDomainIdentity.visitor_id,
+      breadcrumbs: breadcrumbs || undefined,
+      step_index: nextJourneyStep(),
+    });
+  };
+  const inspectUiErrorElement = el => {
+    if (el?.nodeType !== 1) return;
+    try {
+      if (el.closest?.(SENSITIVE_MASK_SELECTOR)) return;
+    } catch {}
+    const explicitAttr =
+      el.hasAttribute('data-hanzo-error') || el.hasAttribute('data-error-message');
+    const variant =
+      el.getAttribute('data-variant') ||
+      el.getAttribute('data-type') ||
+      el.getAttribute('data-status') ||
+      el.getAttribute('data-severity') ||
+      el.getAttribute('data-intent') ||
+      '';
+    if (!explicitAttr && UI_NON_ERROR_VARIANT_RE.test(variant.trim())) return;
+    const errorVariant =
+      UI_ERROR_VARIANT_RE.test(variant.trim()) || el.getAttribute('aria-invalid') === 'true';
+    const raw = (el.getAttribute('data-error-message') || el.textContent || '').trim();
+    if (raw.length < 3) return;
+    if (!explicitAttr && !errorVariant) {
+      if (UI_SUCCESS_PHRASE_RE.test(raw) || !UI_ERROR_KEYWORD_RE.test(raw)) return;
+    }
+    captureClientError('UIErrorMessage', raw, '', 0, 0, '', 'ui_error_message', el);
+  };
+  const handleErrors = () => {
+    if (!errorsEnabled) return;
+    window.addEventListener('error', event => {
+      const err = event?.error;
+      // Skip opaque cross-origin "Script error." with no error object or source location
+      if (!err && !event?.filename && !event?.lineno) return;
+      captureClientError(
+        err?.name || 'Error',
+        err?.message || event?.message || 'Script error',
+        event?.filename || '',
+        event?.lineno || 0,
+        event?.colno || 0,
+        err?.stack || '',
+        'window_error',
+      );
+    });
+    window.addEventListener('unhandledrejection', event => {
+      const reason = event?.reason;
+      const isErr = reason && typeof reason === 'object';
+      captureClientError(
+        isErr && reason.name ? reason.name : 'UnhandledRejection',
+        isErr && reason.message ? reason.message : String(reason || 'Unhandled promise rejection'),
+        '',
+        0,
+        0,
+        isErr && reason.stack ? reason.stack : '',
+        'unhandled_rejection',
+      );
+    });
+    if (
+      consoleErrorsEnabled &&
+      typeof console !== 'undefined' &&
+      typeof console.error === 'function'
+    ) {
+      const origConsoleError = console.error.bind(console);
+      let inConsoleError = false;
+      console.error = (...args) => {
+        origConsoleError(...args);
+        if (inConsoleError || !args.length) return;
+        inConsoleError = true;
+        try {
+          const errObj = args.find(
+            a => a && typeof a === 'object' && (a instanceof Error || typeof a.stack === 'string'),
+          );
+          const text = args
+            .map(a => {
+              if (a instanceof Error) return a.message || a.name;
+              if (typeof a === 'string') return a;
+              if (typeof a === 'number' || typeof a === 'boolean') return String(a);
+              return '';
+            })
+            .filter(Boolean)
+            .join(' ')
+            .trim();
+          if (errObj || text.length >= 3) {
+            captureClientError(
+              errObj?.name || 'ConsoleError',
+              text || errObj?.message || '',
+              '',
+              0,
+              0,
+              errObj?.stack || '',
+              'console_error',
+            );
+          }
+        } catch {
+          // never break console.error
+        } finally {
+          inConsoleError = false;
+        }
+      };
+    }
+    if (uiErrorsEnabled && typeof MutationObserver !== 'undefined' && document.body) {
+      const uiObserver = new MutationObserver(mutations => {
+        if (trackingDisabled() || isExcludedUxRoute(currentUrl)) return;
+        let checked = 0;
+        for (let i = 0; i < mutations.length && checked < 5; i++) {
+          const m = mutations[i];
+          if (m.type === 'characterData') {
+            const parent = m.target?.parentElement?.closest?.(UI_ERROR_SELECTOR);
+            if (parent) {
+              inspectUiErrorElement(parent);
+              checked++;
+            }
+            continue;
+          }
+          if (m.type === 'attributes') {
+            if (m.target?.nodeType === 1 && m.target.matches?.(UI_ERROR_SELECTOR)) {
+              inspectUiErrorElement(m.target);
+              checked++;
+            }
+            continue;
+          }
+          if (m.target?.nodeType === 1) {
+            const container = m.target.closest?.(UI_ERROR_SELECTOR);
+            if (container) {
+              inspectUiErrorElement(container);
+              checked++;
+              continue;
+            }
+          }
+          for (let j = 0; j < m.addedNodes.length && checked < 5; j++) {
+            const node = m.addedNodes[j];
+            if (node?.nodeType !== 1) continue;
+            if (node.matches?.(UI_ERROR_SELECTOR)) {
+              inspectUiErrorElement(node);
+              checked++;
+            } else if (typeof node.querySelectorAll === 'function') {
+              const found = node.querySelectorAll(UI_ERROR_SELECTOR);
+              for (let k = 0; k < found.length && checked < 5; k++) {
+                inspectUiErrorElement(found[k]);
+                checked++;
+              }
+            }
+          }
+        }
+      });
+      uiObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ['data-error-message', 'data-hanzo-error'],
+      });
+    }
   };
 
   const handleClicks = () => {
@@ -762,6 +1171,15 @@
       if (heatmapsEnabled && !isExcludedUxRoute(currentUrl)) {
         const controlTarget = parentElement || el;
         const controlId = resolveControlId(controlTarget);
+        const componentPath = resolveComponentPath(controlTarget);
+        if (controlId || componentPath) {
+          lastInteraction = {
+            component_path: componentPath || '',
+            control_id: controlId || '',
+            at: Date.now(),
+          };
+          pushBreadcrumb('click', controlId || componentPath);
+        }
         if (controlId) {
           trackElement(controlTarget, 'heatmap_click');
           detectRageClick(controlTarget, controlId);
@@ -895,11 +1313,13 @@
   const init = () => {
     if (!initialized) {
       initialized = true;
+      pushBreadcrumb('route', normalizeRouteTemplate(currentUrl));
       initProviders();
       track();
       handlePathChanges();
       handleClicks();
       handleScrollDepth();
+      handleErrors();
       // Collect AST after page is ready
       setTimeout(collectAST, 100);
       setTimeout(handleSections, 500);

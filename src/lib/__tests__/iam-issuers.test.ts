@@ -6,7 +6,6 @@ import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { validateToken } from '@hanzo/iam';
 import { exportJWK, generateKeyPair, SignJWT } from 'jose';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { IAM_ISSUERS } from '../iam';
 
 let server: Server;
@@ -54,7 +53,12 @@ describe('the issuers analytics accepts', () => {
   });
 
   it('refuse an organization issuer and lookalikes', async () => {
-    for (const iss of ['https://hanzo.ai/acme', 'https://hanzo.ai/', 'https://hanzo.ai.evil.test', 'http://hanzo.ai']) {
+    for (const iss of [
+      'https://hanzo.ai/acme',
+      'https://hanzo.ai/',
+      'https://hanzo.ai.evil.test',
+      'http://hanzo.ai',
+    ]) {
       expect(await check(iss)).toEqual({ ok: false, reason: 'iam_issuer_invalid' });
     }
   });

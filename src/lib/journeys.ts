@@ -166,16 +166,21 @@ export function computeEffortAnalysis(steps: JourneyStep[], funnelSteps: string[
       if (!hits.length) continue;
       users += 1;
       if (hits.length > 1) revisits += 1;
-      const first = hits[0];
+      let target = hits[0];
       let from: number | undefined;
       if (idx === 0) from = list[0].step_index;
       else {
-        const prev = list.filter(
-          s => s.step === funnelSteps[idx - 1] && s.step_index <= first.step_index,
-        );
-        if (prev.length) from = prev[0].step_index;
+        const firstPrev = list.find(s => s.step === funnelSteps[idx - 1]);
+        if (firstPrev) {
+          const hitAfterPrev = hits.find(h => h.step_index >= firstPrev.step_index);
+          if (hitAfterPrev) target = hitAfterPrev;
+          const prev = list.filter(
+            s => s.step === funnelSteps[idx - 1] && s.step_index <= target.step_index,
+          );
+          if (prev.length) from = prev[prev.length - 1].step_index;
+        }
       }
-      if (from !== undefined) deltas.push(first.step_index - from);
+      if (from !== undefined) deltas.push(target.step_index - from);
       for (const h of hits) if (typeof h.dwell_ms === 'number') dwells.push(h.dwell_ms);
     }
     return {
@@ -315,4 +320,339 @@ export function diffAstSnapshots(
     if (touched) diff.sections.changed.push(sk);
   }
   return diff;
+}
+
+/* ---------------- Deep Intelligence: Release Compare, Rage Clicks, Error Attribution ---------------- */
+
+export interface ReleaseComparison {
+  release_a: string;
+  release_b: string;
+  target_event: string;
+  sessions_a: number;
+  sessions_b: number;
+  rate_a_pct: number;
+  rate_b_pct: number;
+  delta_pct: number;
+  regression: boolean;
+}
+
+export function compareReleases(
+  sessions: SessionRecord[],
+  targetEvent: string,
+  releaseA: string,
+  releaseB: string,
+): ReleaseComparison {
+  const a = sessions.filter(s => s.release === releaseA);
+  const b = sessions.filter(s => s.release === releaseB);
+  const convA = a.filter(s => s.events.includes(targetEvent)).length;
+  const convB = b.filter(s => s.events.includes(targetEvent)).length;
+  const rateA = pct(convA, a.length);
+  const rateB = pct(convB, b.length);
+  const delta = round(rateB - rateA, 2);
+  return {
+    release_a: releaseA,
+    release_b: releaseB,
+    target_event: targetEvent,
+    sessions_a: a.length,
+    sessions_b: b.length,
+    rate_a_pct: rateA,
+    rate_b_pct: rateB,
+    delta_pct: delta,
+    regression: a.length > 0 && b.length > 0 && delta <= -5,
+  };
+}
+
+export interface RageClickEvent {
+  session_id: string;
+  control_id: string;
+  component_path?: string;
+  route_template?: string;
+  release?: string;
+}
+
+export interface RageClickAlert {
+  control_id: string;
+  component_path?: string;
+  route_template?: string;
+  release?: string;
+  events: number;
+  sessions: number;
+  severity: 'high' | 'medium' | 'low';
+}
+
+export function computeRageClickAlerts(events: RageClickEvent[], limit = 20): RageClickAlert[] {
+  const groups = new Map<
+    string,
+    {
+      control_id: string;
+      component_path?: string;
+      route_template?: string;
+      release?: string;
+      events: number;
+      sessions: Set<string>;
+    }
+  >();
+  for (const e of events) {
+    if (!e.control_id) continue;
+    const key = `${e.control_id}|${e.route_template || ''}|${e.release || ''}`;
+    const g = groups.get(key) ?? {
+      control_id: e.control_id,
+      component_path: e.component_path,
+      route_template: e.route_template,
+      release: e.release,
+      events: 0,
+      sessions: new Set<string>(),
+    };
+    g.events += 1;
+    if (e.session_id) g.sessions.add(e.session_id);
+    if (!g.component_path && e.component_path) g.component_path = e.component_path;
+    groups.set(key, g);
+  }
+  return [...groups.values()]
+    .map(g => {
+      const sessions = g.sessions.size;
+      const severity: RageClickAlert['severity'] =
+        sessions >= 10 || g.events >= 25
+          ? 'high'
+          : sessions >= 3 || g.events >= 8
+            ? 'medium'
+            : 'low';
+      return {
+        control_id: g.control_id,
+        component_path: g.component_path,
+        route_template: g.route_template,
+        release: g.release,
+        events: g.events,
+        sessions,
+        severity,
+      };
+    })
+    .sort(
+      (a, b) =>
+        b.sessions - a.sessions || b.events - a.events || a.control_id.localeCompare(b.control_id),
+    )
+    .slice(0, limit);
+}
+
+export interface CapturedErrorEvent {
+  fingerprint?: string;
+  error_class?: string;
+  error_source?: string;
+  message?: string;
+  file?: string;
+  line?: number;
+  column?: number;
+  component_path?: string;
+  control_id?: string;
+  route_template?: string;
+  hostname?: string;
+  release?: string;
+  session_id?: string;
+  breadcrumbs?: string;
+}
+
+export interface AttributedError {
+  fingerprint: string;
+  project: string;
+  repo: string;
+  component: string;
+  component_path?: string;
+  control_id?: string;
+  file?: string;
+  line?: number;
+  column?: number;
+  route_template?: string;
+  release?: string;
+  error_class: string;
+  error_source?: string;
+  message: string;
+  session_id?: string;
+  breadcrumbs?: string;
+}
+
+export interface SessionErrorIssue {
+  fingerprint: string;
+  project: string;
+  repo: string;
+  component: string;
+  component_path?: string;
+  control_id?: string;
+  file?: string;
+  line?: number;
+  route_template?: string;
+  release?: string;
+  error_class: string;
+  error_sources: string[];
+  message: string;
+  occurrences: number;
+  session_count: number;
+  sessions: string[];
+  latest_breadcrumbs?: string;
+}
+
+const HOST_REPO_MAP: Record<string, [string, string]> = {
+  'insights.hanzo.ai': ['insights', 'hanzoai/insights'],
+  'analytics.hanzo.ai': ['analytics', 'hanzoai/analytics'],
+  'hanzo.ai': ['ai', 'hanzo-apps/ai'],
+  'docs.hanzo.ai': ['docs', 'hanzo-docs/docs'],
+  'app.hanzo.ai': ['app', 'hanzo-inc/app'],
+  'hanzo.app': ['app', 'hanzo-inc/app'],
+  'api.hanzo.ai': ['cloud', 'hanzo-inc/cloud'],
+  'platform.hanzo.ai': ['platform', 'hanzo-inc/platform'],
+  'console.hanzo.ai': ['platform', 'hanzo-inc/platform'],
+  'hanzo.bot': ['bot', 'hanzo-inc/bot'],
+};
+
+function normalizeErrorFile(raw?: string): { file?: string; inferredHost?: string } {
+  if (!raw) return {};
+  let s = raw.trim();
+  const qIdx = s.search(/[?#]/);
+  if (qIdx >= 0) s = s.slice(0, qIdx);
+  let inferredHost: string | undefined;
+  if (/^https?:\/\//i.test(s)) {
+    try {
+      const u = new URL(s);
+      inferredHost = u.hostname.toLowerCase();
+      s = u.pathname.replace(/^\/+/, '');
+    } catch {
+      // keep raw without query
+    }
+  }
+  for (const prefix of [
+    'webpack-internal:///./',
+    'webpack-internal:///',
+    'webpack://_N_E/./',
+    'webpack://_N_E/',
+    'webpack:///./',
+    'webpack:///',
+    'app:///./',
+    'app:///',
+    'file://',
+  ]) {
+    if (s.startsWith(prefix)) s = s.slice(prefix.length);
+  }
+  s = s.replace(/^\.\//, '');
+  return { file: s || undefined, inferredHost };
+}
+
+export function attributeErrorEvent(err: CapturedErrorEvent): AttributedError {
+  const { file: normalizedFile, inferredHost } = normalizeErrorFile(err.file);
+  const host = (err.hostname || inferredHost || '').toLowerCase();
+  let [project, repo] = HOST_REPO_MAP[host] ?? [host || 'unknown', ''];
+  if (!repo && normalizedFile) {
+    const lf = normalizedFile.toLowerCase();
+    if (lf.startsWith('products/') || lf.startsWith('frontend/src/scenes/')) {
+      [project, repo] = ['insights', 'hanzoai/insights'];
+    } else if (lf.startsWith('src/tracker/') || lf.startsWith('src/app/v1/journeys')) {
+      [project, repo] = ['analytics', 'hanzoai/analytics'];
+    } else if (lf.startsWith('apps/o11y/') || lf.startsWith('apps/event/')) {
+      [project, repo] = ['cloud', 'hanzo-inc/cloud'];
+    }
+  }
+  let component = '';
+  if (err.component_path) {
+    const leaf = err.component_path.split('>').pop()?.trim() || '';
+    const match = leaf.match(/\[([^\]]+)\]/);
+    component = match ? match[1] : leaf;
+  }
+  if (!component && normalizedFile) {
+    const base = normalizedFile.split('/').pop() || '';
+    const stem = base.split('.')[0] || '';
+    if (stem && !['index', 'page', 'route', 'main'].includes(stem)) component = stem;
+  }
+  const errorClass = err.error_class || 'Error';
+  const message = (err.message || '').slice(0, 300);
+  const msgKey =
+    message
+      .toLowerCase()
+      .replace(/[0-9a-f]{8,}|\d+/g, '#')
+      .replace(/[^a-z0-9#]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 64) || 'unknown';
+  const fingerprint =
+    err.fingerprint ||
+    (normalizedFile || err.line
+      ? `${errorClass}:${normalizedFile || err.route_template || 'unknown'}:${err.line || 0}:${component || 'app'}`
+      : `${errorClass}:${msgKey}:${err.route_template || component || 'app'}`);
+  return {
+    fingerprint,
+    project,
+    repo,
+    component: component || project,
+    component_path: err.component_path,
+    control_id: err.control_id,
+    file: normalizedFile,
+    line: err.line,
+    column: err.column,
+    route_template: err.route_template,
+    release: err.release,
+    error_class: errorClass,
+    error_source: err.error_source,
+    message,
+    session_id: err.session_id,
+    breadcrumbs: err.breadcrumbs ? err.breadcrumbs.slice(0, 400) : undefined,
+  };
+}
+
+export function groupSessionErrors(errors: CapturedErrorEvent[], limit = 100): SessionErrorIssue[] {
+  const groups = new Map<
+    string,
+    {
+      base: AttributedError;
+      occurrences: number;
+      sessions: Set<string>;
+      sources: Set<string>;
+      latestBreadcrumbs?: string;
+    }
+  >();
+  for (const raw of errors) {
+    const attr = attributeErrorEvent(raw);
+    const key = `${attr.repo || attr.project}::${attr.fingerprint}::${attr.release || ''}`;
+    const existing = groups.get(key);
+    if (!existing) {
+      const sessions = new Set<string>();
+      if (attr.session_id) sessions.add(attr.session_id);
+      const sources = new Set<string>();
+      if (attr.error_source) sources.add(attr.error_source);
+      groups.set(key, {
+        base: attr,
+        occurrences: 1,
+        sessions,
+        sources,
+        latestBreadcrumbs: attr.breadcrumbs,
+      });
+    } else {
+      existing.occurrences += 1;
+      if (attr.session_id) existing.sessions.add(attr.session_id);
+      if (attr.error_source) existing.sources.add(attr.error_source);
+      if (attr.breadcrumbs) existing.latestBreadcrumbs = attr.breadcrumbs;
+    }
+  }
+  return [...groups.values()]
+    .map(g => ({
+      fingerprint: g.base.fingerprint,
+      project: g.base.project,
+      repo: g.base.repo,
+      component: g.base.component,
+      component_path: g.base.component_path,
+      control_id: g.base.control_id,
+      file: g.base.file,
+      line: g.base.line,
+      route_template: g.base.route_template,
+      release: g.base.release,
+      error_class: g.base.error_class,
+      error_sources: [...g.sources].sort(),
+      message: g.base.message,
+      occurrences: g.occurrences,
+      session_count: g.sessions.size,
+      sessions: [...g.sessions].slice(0, 50),
+      latest_breadcrumbs: g.latestBreadcrumbs,
+    }))
+    .sort(
+      (a, b) =>
+        b.session_count - a.session_count ||
+        b.occurrences - a.occurrences ||
+        a.fingerprint.localeCompare(b.fingerprint),
+    )
+    .slice(0, limit);
 }
