@@ -2,7 +2,7 @@ import { validateToken } from '@hanzo/iam';
 import debug from 'debug';
 import { ROLE_PERMISSIONS, ROLES, SHARE_TOKEN_HEADER } from '@/lib/constants';
 import { secret, uuid } from '@/lib/crypto';
-import { IAM_API, IAM_CLIENT_ID, IAM_ISSUER, IAM_JWKS } from '@/lib/iam';
+import { IAM_API, IAM_CLIENT_ID, IAM_ISSUERS, IAM_JWKS } from '@/lib/iam';
 import { ensureIamOrgTeam } from '@/lib/iam-org';
 import { parseToken } from '@/lib/jwt';
 import { ensureArray } from '@/lib/utils';
@@ -114,7 +114,7 @@ export async function checkAuth(request: Request) {
   if (token) {
     const result = await validateToken(token, {
       serverUrl: IAM_API,
-      issuer: IAM_ISSUER,
+      issuer: IAM_ISSUERS,
       jwksUri: IAM_JWKS,
       clientId: IAM_CLIENT_ID,
       audience: IAM_AUDIENCES,
